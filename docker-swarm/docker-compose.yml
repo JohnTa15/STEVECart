@@ -1,0 +1,151 @@
+services:
+  redis-master:
+    image: redis:latest
+    container_name: redis-master
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+
+  redis_rep1:
+    image: redis:latest
+    container_name: redis_rep1
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_rep1_data:/data
+    command: ["redis-server", "--appendonly", "yes", "--replicaof", "redis-master", "6379"]
+    depends_on:
+      - redis-master
+
+  redis_rep2:
+    image: redis:latest
+    container_name: redis_rep2
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis_rep2_data:/data
+    command: ["redis-server", "--appendonly", "yes", "--replicaof", "redis-master", "6379"]
+    depends_on:
+      - redis-master
+
+  redis_sentinel1:
+    image: redis:latest
+    container_name: redis_sentinel
+    ports:
+      - "26379:26379"
+    command: ["redis-sentinel", "/etc/redis/sentinel.conf"]
+    volumes:
+      - ./redis/sentinel.conf:/etc/redis/sentinel.conf
+    depends_on:
+      - redis-master
+
+  redis_sentinel2:
+    image: redis:latest
+    container_name: redis_sentinel2
+    ports:
+      - "26380:26379"
+    command: ["redis-sentinel", "/etc/redis/sentinel.conf"]
+    volumes:
+      - ./redis/sentinel.conf:/etc/redis/sentinel.conf
+    depends_on:
+      - redis-master
+
+  redis_sentinel3:
+    image: redis:latest
+    container_name: redis_sentinel3
+    ports:
+      - "26381:26379"
+    command: ["redis-sentinel", "/etc/redis/sentinel.conf"]
+    volumes:
+      - ./redis/sentinel.conf:/etc/redis/sentinel.conf
+    depends_on:
+      - redis-master
+
+  influxdb:
+    image: influxdb:2.7.12 
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    command: ["influxdb", "serve", "--node-id=1", "--object-store=file", "--data-dir=/var/lib/influxdb/data"]
+    volumes:
+      - influxdb_data:/var/lib/influxdb
+      - influxdb_logs:/var/log/influxdb
+    depends_on:
+      - redis-master
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=adminUNIWA
+      - DOCKER_INFLUXDB_INIT_BUCKET=sensors
+      - DOCKER_INFLUXDB_INIT_ORG=UNIWA
+
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mqtt_eclipse
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto:/etc/mosquitto
+      - ./mosquitto/log:/mosquitto/log
+      - ./mosquitto/config/mosquitto.conf:/etc/mosquitto/mosquitto.conf
+    depends_on:
+      - influxdb
+      - redis-master
+
+  redis_exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: redis_exporter
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis-master:6379
+      - REDIS_EXPORTER_SENTINEL_ADDRS=redis_sentinel:26379,redis_sentinel2:26379,redis_sentinel3:26379
+    depends_on:
+      - redis-master
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+    depends_on:
+      - redis_exporter 
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=adminUNIWA
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_LOG_LEVEL=debug
+    volumes:
+      - ./grafana/grafana-entrypoint.sh:/grafana-entrypoint.sh
+    entrypoint: ["/bin/sh", "-c", "chmod +x /grafana/grafana-entrypoint.sh && /grafana/grafana-entrypoint.sh"]
+    depends_on:
+      - influxdb
+      - prometheus
+
+volumes:
+    redis_data:
+    redis_rep1_data:
+    redis_rep2_data:
+    influxdb_data: 
+    influxdb_logs:
+    grafana_data:
+
+# configs:
+#   # redis_sentinel_config:
+#   #   file: ./redis/sentinel.conf
+#   # mosquitto_config:
+#   #   file: ./mosquitto/config/mosquitto.conf
+#   prometheus_config:
+#     file: ./prometheus/prometheus.yml
