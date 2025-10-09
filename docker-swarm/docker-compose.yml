@@ -3,10 +3,25 @@ services:
     image: redis:latest
     container_name: redis-master
     ports:
-      - "6379:6379"
+      - "6378:6379"
     volumes:
       - redis_data:/data
-    command: ["redis-server", "--appendonly", "yes"]
+    environment:
+      - REDIS_PASSWORD=adminUNIWA
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "adminUNIWA"]
+
+  redis_rep0:
+    image: redis:latest
+    container_name: redis_rep0
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_rep0_data:/data
+    environment:
+      - REDIS_PASSWORD=adminUNIWA
+    command: ["redis-server", "--appendonly", "yes", "--replicaof", "redis-master", "6378", "--masterauth", "adminUNIWA", "--requirepass", "adminUNIWA"]
+    depends_on:
+      - redis-master
 
   redis_rep1:
     image: redis:latest
@@ -15,24 +30,26 @@ services:
       - "6380:6379"
     volumes:
       - redis_rep1_data:/data
-    command: ["redis-server", "--appendonly", "yes", "--replicaof", "redis-master", "6379"]
+    environment:
+      - REDIS_PASSWORD=adminUNIWA
+    command: ["redis-server", "--appendonly", "yes", "--replicaof", "redis-master", "6378", "--masterauth", "adminUNIWA", "--requirepass", "adminUNIWA"]
     depends_on:
       - redis-master
 
-  redis_rep2:
+  redis_sentinel0:
     image: redis:latest
-    container_name: redis_rep2
+    container_name: redis_sentinel
     ports:
-      - "6381:6379"
+      - "26378:26379"
+    command: ["redis-sentinel", "/etc/redis/sentinel.conf"]
     volumes:
-      - redis_rep2_data:/data
-    command: ["redis-server", "--appendonly", "yes", "--replicaof", "redis-master", "6379"]
+      - ./redis/sentinel.conf:/etc/redis/sentinel.conf
     depends_on:
       - redis-master
 
   redis_sentinel1:
     image: redis:latest
-    container_name: redis_sentinel
+    container_name: redis_sentinel1
     ports:
       - "26379:26379"
     command: ["redis-sentinel", "/etc/redis/sentinel.conf"]
@@ -52,26 +69,15 @@ services:
     depends_on:
       - redis-master
 
-  redis_sentinel3:
-    image: redis:latest
-    container_name: redis_sentinel3
-    ports:
-      - "26381:26379"
-    command: ["redis-sentinel", "/etc/redis/sentinel.conf"]
-    volumes:
-      - ./redis/sentinel.conf:/etc/redis/sentinel.conf
-    depends_on:
-      - redis-master
-
   influxdb:
     image: influxdb:2.7.12 
     container_name: influxdb
     ports:
-      - "8086:8086"
-    command: ["influxdb", "serve", "--node-id=1", "--object-store=file", "--data-dir=/var/lib/influxdb/data"]
+      - "8085:8086"
+    # command: ["influxdb", "serve", "--node-id=0", "--object-store=file", "--data-dir=/var/lib/influxdb/data"]
     volumes:
-      - influxdb_data:/var/lib/influxdb
-      - influxdb_logs:/var/log/influxdb
+      - ./influxdb/influxdb_data:/var/lib/influxdb
+      - ./influxdb/influxdb_logs:/var/log/influxdb
     depends_on:
       - redis-master
     environment:
@@ -83,14 +89,17 @@ services:
 
   mosquitto:
     image: eclipse-mosquitto:latest
-    container_name: mqtt_eclipse
+    container_name: mqtt
     ports:
       - "1883:1883"
-      - "9001:9001"
+      - "9000:9001"
     volumes:
-      - ./mosquitto:/etc/mosquitto
+      - ./mosquitto/config:/mosquitto/config
       - ./mosquitto/log:/mosquitto/log
-      - ./mosquitto/config/mosquitto.conf:/etc/mosquitto/mosquitto.conf
+      - ./mosquitto/data:/mosquitto/data
+      # - ./mosquitto/passwd:/etc/passwd
+    stdin_open: true
+    tty: true
     depends_on:
       - influxdb
       - redis-master
@@ -99,10 +108,10 @@ services:
     image: oliver006/redis_exporter:latest
     container_name: redis_exporter
     ports:
-      - "9121:9121"
+      - "9120:9121"
     environment:
-      - REDIS_ADDR=redis-master:6379
-      - REDIS_EXPORTER_SENTINEL_ADDRS=redis_sentinel:26379,redis_sentinel2:26379,redis_sentinel3:26379
+      - REDIS_ADDR=redis-master:6378
+      - REDIS_EXPORTER_SENTINEL_ADDRS=redis_sentinel:26378,redis_sentinel2:26379,redis_sentinel3:26379
     depends_on:
       - redis-master
 
@@ -110,7 +119,7 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     ports:
-      - "9090:9090"
+      - "9089:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
 
@@ -120,7 +129,7 @@ services:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
-      - "3000:3000"
+      - "2999:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=adminUNIWA
@@ -128,16 +137,31 @@ services:
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
       - GF_LOG_LEVEL=debug
     volumes:
-      - ./grafana/grafana-entrypoint.sh:/grafana-entrypoint.sh
+      - ./grafana/grafana-entrypoint.sh:/grafana/grafana-entrypoint.sh
     entrypoint: ["/bin/sh", "-c", "chmod +x /grafana/grafana-entrypoint.sh && /grafana/grafana-entrypoint.sh"]
     depends_on:
       - influxdb
       - prometheus
 
+  telegraf:
+    image: telegraf:latest
+    container_name: telegraf
+    volumes:
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    ports:
+      - "8092:8092/udp"
+      - "8094:8094"
+      - "8125:8125/udp"
+    depends_on:
+      - influxdb
+      - redis-master
+      - mosquitto
+
+
 volumes:
     redis_data:
+    redis_rep0_data:
     redis_rep1_data:
-    redis_rep2_data:
     influxdb_data: 
     influxdb_logs:
     grafana_data:
