@@ -74,7 +74,6 @@ services:
     container_name: influxdb
     ports:
       - "8085:8086"
-    # command: ["influxdb", "serve", "--node-id=0", "--object-store=file", "--data-dir=/var/lib/influxdb/data"]
     volumes:
       - ./influxdb/influxdb_data:/var/lib/influxdb
       - ./influxdb/influxdb_logs:/var/log/influxdb
@@ -97,7 +96,6 @@ services:
       - ./mosquitto/config:/mosquitto/config
       - ./mosquitto/log:/mosquitto/log
       - ./mosquitto/data:/mosquitto/data
-      # - ./mosquitto/passwd:/etc/passwd
     stdin_open: true
     tty: true
     depends_on:
@@ -136,9 +134,9 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
       - GF_LOG_LEVEL=debug
-    volumes:
-      - ./grafana/grafana-entrypoint.sh:/grafana/grafana-entrypoint.sh
-    entrypoint: ["/bin/sh", "-c", "chmod +x /grafana/grafana-entrypoint.sh && /grafana/grafana-entrypoint.sh"]
+    # volumes:
+    #   - ./grafana/grafana-entrypoint.sh:/grafana/grafana-entrypoint.sh
+    # entrypoint: ["/bin/sh", "-c", "chmod +x /grafana/grafana-entrypoint.sh && /grafana/grafana-entrypoint.sh"]
     depends_on:
       - influxdb
       - prometheus
@@ -156,6 +154,31 @@ services:
       - influxdb
       - redis-master
       - mosquitto
+    
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/steve-cart:/etc/nginx/sites-available/steve-cart
+      - ./nginx/letsencrypt:/etc/letsencrypt
+    depends_on:
+      - grafana
+      - prometheus
+      - influxdb
+      - mosquitto
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./nginx/steve-cart:/etc/nginx/sites-available/steve-cart
+      - ./nginx/letsencrypt:/etc/letsencrypt
+      - ./certbot/entrypoint.sh:/entrypoint.sh
+    # entrypoint: "/entrypoint.sh"
+    depends_on:
+      - nginx
 
 
 volumes:
@@ -165,11 +188,3 @@ volumes:
     influxdb_data: 
     influxdb_logs:
     grafana_data:
-
-# configs:
-#   # redis_sentinel_config:
-#   #   file: ./redis/sentinel.conf
-#   # mosquitto_config:
-#   #   file: ./mosquitto/config/mosquitto.conf
-#   prometheus_config:
-#     file: ./prometheus/prometheus.yml
