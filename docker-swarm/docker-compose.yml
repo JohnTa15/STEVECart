@@ -1,90 +1,90 @@
 services:
-  redis-master:
-    image: redis:latest
-    container_name: redis-master
-    ports:
-      - "6378:6379"
-    volumes:
-      - redis_data:/data
-    environment:
-      - REDIS_PASSWORD=adminUNIWA
-    command: ["redis-server", "--appendonly", "yes", "--requirepass", "adminUNIWA"]
+  # redis-master:
+  #   image: redis:latest
+  #   container_name: redis-master
+  #   ports:
+  #     - "6378:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   environment:
+  #     - REDIS_PASSWORD=adminUNIWA
+  #   command: ["redis-server", "--appendonly", "yes", "--requirepass", "adminUNIWA"]
 
-  redis_rep0:
-    image: redis:latest
-    container_name: redis_rep0
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_rep0_data:/data
-    environment:
-      - REDIS_PASSWORD=adminUNIWA
-    command: ["redis-server", "--appendonly", "yes", "--replicaof", "redis-master", "6378", "--masterauth", "adminUNIWA", "--requirepass", "adminUNIWA"]
-    depends_on:
-      - redis-master
+  # redis_rep0:
+  #   image: redis:latest
+  #   container_name: redis_rep0
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_rep0_data:/data
+  #   environment:
+  #     - REDIS_PASSWORD=adminUNIWA
+  #   command: ["redis-server", "--appendonly", "yes", "--replicaof", "redis-master", "6378", "--masterauth", "adminUNIWA", "--requirepass", "adminUNIWA"]
+  #   depends_on:
+  #     - redis-master
 
-  redis_rep1:
-    image: redis:latest
-    container_name: redis_rep1
-    ports:
-      - "6380:6379"
-    volumes:
-      - redis_rep1_data:/data
-    environment:
-      - REDIS_PASSWORD=adminUNIWA
-    command: ["redis-server", "--appendonly", "yes", "--replicaof", "redis-master", "6378", "--masterauth", "adminUNIWA", "--requirepass", "adminUNIWA"]
-    depends_on:
-      - redis-master
+  # redis_rep1:
+  #   image: redis:latest
+  #   container_name: redis_rep1
+  #   ports:
+  #     - "6380:6379"
+  #   volumes:
+  #     - redis_rep1_data:/data
+  #   environment:
+  #     - REDIS_PASSWORD=adminUNIWA
+  #   command: ["redis-server", "--appendonly", "yes", "--replicaof", "redis-master", "6378", "--masterauth", "adminUNIWA", "--requirepass", "adminUNIWA"]
+  #   depends_on:
+  #     - redis-master
 
-  redis_sentinel0:
-    image: redis:latest
-    container_name: redis_sentinel
-    ports:
-      - "26378:26379"
-    command: ["redis-sentinel", "/etc/redis/sentinel.conf"]
-    volumes:
-      - ./redis/sentinel.conf:/etc/redis/sentinel.conf
-    depends_on:
-      - redis-master
+  # redis_sentinel0:
+  #   image: redis:latest
+  #   container_name: redis_sentinel
+  #   ports:
+  #     - "26378:26379"
+  #   command: ["redis-sentinel", "/etc/redis/sentinel.conf"]
+  #   volumes:
+  #     - ./redis/sentinel.conf:/etc/redis/sentinel.conf
+  #   depends_on:
+  #     - redis-master
 
-  redis_sentinel1:
-    image: redis:latest
-    container_name: redis_sentinel1
-    ports:
-      - "26379:26379"
-    command: ["redis-sentinel", "/etc/redis/sentinel.conf"]
-    volumes:
-      - ./redis/sentinel.conf:/etc/redis/sentinel.conf
-    depends_on:
-      - redis-master
+  # redis_sentinel1:
+  #   image: redis:latest
+  #   container_name: redis_sentinel1
+  #   ports:
+  #     - "26379:26379"
+  #   command: ["redis-sentinel", "/etc/redis/sentinel.conf"]
+  #   volumes:
+  #     - ./redis/sentinel.conf:/etc/redis/sentinel.conf
+  #   depends_on:
+  #     - redis-master
 
-  redis_sentinel2:
-    image: redis:latest
-    container_name: redis_sentinel2
-    ports:
-      - "26380:26379"
-    command: ["redis-sentinel", "/etc/redis/sentinel.conf"]
-    volumes:
-      - ./redis/sentinel.conf:/etc/redis/sentinel.conf
-    depends_on:
-      - redis-master
+  # redis_sentinel2:
+  #   image: redis:latest
+  #   container_name: redis_sentinel2
+  #   ports:
+  #     - "26380:26379"
+  #   command: ["redis-sentinel", "/etc/redis/sentinel.conf"]
+  #   volumes:
+  #     - ./redis/sentinel.conf:/etc/redis/sentinel.conf
+  #   depends_on:
+  #     - redis-master
 
-  influxdb:
-    image: influxdb:2.7.12 
-    container_name: influxdb
-    ports:
-      - "8085:8086"
-    volumes:
-      - ./influxdb/influxdb_data:/var/lib/influxdb
-      - ./influxdb/influxdb_logs:/var/log/influxdb
-    depends_on:
-      - redis-master
-    environment:
-      - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=admin
-      - DOCKER_INFLUXDB_INIT_PASSWORD=adminUNIWA
-      - DOCKER_INFLUXDB_INIT_BUCKET=sensors
-      - DOCKER_INFLUXDB_INIT_ORG=UNIWA
+  # influxdb:
+    # image: influxdb:2.7.12 
+    # container_name: influxdb
+    # ports:
+      # - "8085:8086"
+    # volumes:
+      # - ./influxdb/influxdb_data:/var/lib/influxdb
+      # - ./influxdb/influxdb_logs:/var/log/influxdb
+    # depends_on:
+      # - redis-master
+    # environment:
+      # - DOCKER_INFLUXDB_INIT_MODE=setup
+      # - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      # - DOCKER_INFLUXDB_INIT_PASSWORD=adminUNIWA
+      # - DOCKER_INFLUXDB_INIT_BUCKET=sensors
+      # - DOCKER_INFLUXDB_INIT_ORG=UNIWA
 
   mosquitto:
     image: eclipse-mosquitto:latest
@@ -96,50 +96,10 @@ services:
       - ./mosquitto/config:/mosquitto/config
       - ./mosquitto/log:/mosquitto/log
       - ./mosquitto/data:/mosquitto/data
+
     stdin_open: true
     tty: true
     depends_on:
-      - influxdb
-      - redis-master
-
-  redis_exporter:
-    image: oliver006/redis_exporter:latest
-    container_name: redis_exporter
-    ports:
-      - "9120:9121"
-    environment:
-      - REDIS_ADDR=redis-master:6378
-      - REDIS_EXPORTER_SENTINEL_ADDRS=redis_sentinel:26378,redis_sentinel2:26379,redis_sentinel3:26379
-    depends_on:
-      - redis-master
-
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    ports:
-      - "9089:9090"
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-
-    depends_on:
-      - redis_exporter 
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    ports:
-      - "2999:3000"
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=adminUNIWA
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
-      - GF_LOG_LEVEL=debug
-    # volumes:
-    #   - ./grafana/grafana-entrypoint.sh:/grafana/grafana-entrypoint.sh
-    # entrypoint: ["/bin/sh", "-c", "chmod +x /grafana/grafana-entrypoint.sh && /grafana/grafana-entrypoint.sh"]
-    depends_on:
-      - influxdb
-      - prometheus
 
   telegraf:
     image: telegraf:latest
@@ -151,35 +111,82 @@ services:
       - "8094:8094"
       - "8125:8125/udp"
     depends_on:
-      - influxdb
-      - redis-master
       - mosquitto
-    
-  nginx:
-    image: nginx:latest
-    container_name: nginx
+
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    environment:
+      - MYSQL_ROOT_PASSWORD=adminUNIWA
+      - MYSQL_DATABASE=supermarket_db
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=adminUNIWA
     ports:
-      - "8080:80"
+      - "3307:3306"
     volumes:
-      - ./nginx/steve-cart:/etc/nginx/sites-available/steve-cart
-      - ./nginx/letsencrypt:/etc/letsencrypt
-    depends_on:
-      - grafana
-      - prometheus
-      - influxdb
-      - mosquitto
+      - ./mariadb/data:/var/lib/mysql
 
-  certbot:
-    image: certbot/certbot
-    container_name: certbot
-    volumes:
-      - ./nginx/steve-cart:/etc/nginx/sites-available/steve-cart
-      - ./nginx/letsencrypt:/etc/letsencrypt
-      - ./certbot/entrypoint.sh:/entrypoint.sh
-    # entrypoint: "/entrypoint.sh"
+  alpine:
+    image: alpine:latest
+    container_name: alpine
+    stdin_open: true
+    tty: true
     depends_on:
-      - nginx
+      - mariadb
+      - telegraf
+    volumes: 
+      - ./alpine:/STEVE-CART
+    working_dir: /STEVE-CART
+    entrypoint: ["./entrypoint.sh"]
+    ports:
+      - 5000:5000
+    
+  # nginx:
+  #   image: nginx:latest
+  #   container_name: nginx
+  #   ports:
+  #     - "8080:80"
+  #   volumes:
+  #     - ./nginx/steve-cart:/etc/nginx/sites-available/steve-cart
+  #     - ./nginx/letsencrypt:/etc/letsencrypt
+  #   depends_on:
+  #     - grafana
+  #     - prometheus
+  #     - influxdb
+  #     - mosquitto
 
+  # certbot:
+  #   image: certbot/certbot
+  #   container_name: certbot
+  #   volumes:
+  #     - ./nginx/steve-cart:/etc/nginx/sites-available/steve-cart
+  #     - ./nginx/letsencrypt:/etc/letsencrypt
+  #     - ./certbot/entrypoint.sh:/entrypoint.sh
+  #   # entrypoint: "/entrypoint.sh"
+  #   depends_on:
+  #     - nginx
+
+  # redis_exporter:
+    # image: oliver006/redis_exporter:latest
+    # container_name: redis_exporter
+    # ports:
+      # - "9120:9121"
+    # environment:
+      # - REDIS_ADDR=redis-master:6378
+      # - REDIS_EXPORTER_SENTINEL_ADDRS=redis_sentinel:26378,redis_sentinel2:26379,redis_sentinel3:26379
+    # depends_on:
+      # - redis-master
+
+  # prometheus:
+    # image: prom/prometheus:latest
+    # container_name: prometheus
+    # ports:
+      # - "9089:9090"
+    # volumes:
+      # - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+    # depends_on:
+      # - redis_exporter 
 
 volumes:
     redis_data:

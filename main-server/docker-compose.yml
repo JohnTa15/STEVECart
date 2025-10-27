@@ -1,0 +1,30 @@
+services:
+    influxdb:
+        image: influxdb:2.7.12 
+        container_name: influxdb
+        ports:
+          - "8085:8086"
+        volumes:
+          - ./influxdb/influxdb_data:/var/lib/influxdb
+          - ./influxdb/influxdb_logs:/var/log/influxdb
+        depends_on:
+          - redis-master
+        environment:
+          - DOCKER_INFLUXDB_INIT_MODE=setup
+          - DOCKER_INFLUXDB_INIT_USERNAME=admin
+          - DOCKER_INFLUXDB_INIT_PASSWORD=adminUNIWA
+          - DOCKER_INFLUXDB_INIT_BUCKET=sensors
+          - DOCKER_INFLUXDB_INIT_ORG=UNIWA
+    mariadb:
+        image: mariadb:latest
+        container_name: mariadb
+        ports:
+          - "3306:3306"
+        volumes:
+          - ./mariadb/mariadb_data:/var/lib/mysql
+        environment:
+          - MYSQL_ROOT_PASSWORD=adminUNIWA
+          - MYSQL_DATABASE=uniwa_db
+          - MYSQL_USER=uniwa_user
+          - MYSQL_PASSWORD=adminUNIWA
+        command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
