@@ -140,32 +140,7 @@ services:
     entrypoint: ["./entrypoint.sh"]
     ports:
       - 5000:5000
-    
-  # nginx:
-  #   image: nginx:latest
-  #   container_name: nginx
-  #   ports:
-  #     - "8080:80"
-  #   volumes:
-  #     - ./nginx/steve-cart:/etc/nginx/sites-available/steve-cart
-  #     - ./nginx/letsencrypt:/etc/letsencrypt
-  #   depends_on:
-  #     - grafana
-  #     - prometheus
-  #     - influxdb
-  #     - mosquitto
-
-  # certbot:
-  #   image: certbot/certbot
-  #   container_name: certbot
-  #   volumes:
-  #     - ./nginx/steve-cart:/etc/nginx/sites-available/steve-cart
-  #     - ./nginx/letsencrypt:/etc/letsencrypt
-  #     - ./certbot/entrypoint.sh:/entrypoint.sh
-  #   # entrypoint: "/entrypoint.sh"
-  #   depends_on:
-  #     - nginx
-
+      
   # redis_exporter:
     # image: oliver006/redis_exporter:latest
     # container_name: redis_exporter
