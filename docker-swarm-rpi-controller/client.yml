@@ -1,0 +1,140 @@
+services:
+  # redis-master:
+  #   image: redis:latest
+  #   container_name: redis-master
+  #   ports:
+  #     - "6378:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   environment:
+  #     - REDIS_PASSWORD=adminUNIWA
+  #   command: ["redis-server", "--appendonly", "yes", "--requirepass", "adminUNIWA"]
+
+  # redis_rep0:
+  #   image: redis:latest
+  #   container_name: redis_rep0
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_rep0_data:/data
+  #   environment:
+  #     - REDIS_PASSWORD=adminUNIWA
+  #   command: ["redis-server", "--appendonly", "yes", "--replicaof", "redis-master", "6378", "--masterauth", "adminUNIWA", "--requirepass", "adminUNIWA"]
+  #   depends_on:
+  #     - redis-master
+
+  # redis_rep1:
+  #   image: redis:latest
+  #   container_name: redis_rep1
+  #   ports:
+  #     - "6380:6379"
+  #   volumes:
+  #     - redis_rep1_data:/data
+  #   environment:
+  #     - REDIS_PASSWORD=adminUNIWA
+  #   command: ["redis-server", "--appendonly", "yes", "--replicaof", "redis-master", "6378", "--masterauth", "adminUNIWA", "--requirepass", "adminUNIWA"]
+  #   depends_on:
+  #     - redis-master
+
+  # redis_sentinel0:
+  #   image: redis:latest
+  #   container_name: redis_sentinel
+  #   ports:
+  #     - "26378:26379"
+  #   command: ["redis-sentinel", "/etc/redis/sentinel.conf"]
+  #   volumes:
+  #     - ./redis/sentinel.conf:/etc/redis/sentinel.conf
+  #   depends_on:
+  #     - redis-master
+
+  # redis_sentinel1:
+  #   image: redis:latest
+  #   container_name: redis_sentinel1
+  #   ports:
+  #     - "26379:26379"
+  #   command: ["redis-sentinel", "/etc/redis/sentinel.conf"]
+  #   volumes:
+  #     - ./redis/sentinel.conf:/etc/redis/sentinel.conf
+  #   depends_on:
+  #     - redis-master
+
+  # redis_sentinel2:
+  #   image: redis:latest
+  #   container_name: redis_sentinel2
+  #   ports:
+  #     - "26380:26379"
+  #   command: ["redis-sentinel", "/etc/redis/sentinel.conf"]
+  #   volumes:
+  #     - ./redis/sentinel.conf:/etc/redis/sentinel.conf
+  #   depends_on:
+  #     - redis-master
+
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mqtt
+    ports:
+      - "1883:1883"
+      - "9000:9001"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/log:/mosquitto/log
+      - ./mosquitto/data:/mosquitto/data
+
+    stdin_open: true
+    tty: true
+
+  telegraf:
+    image: telegraf:latest
+    container_name: telegraf
+    volumes:
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    ports:
+      - "8092:8092/udp"
+      - "8094:8094"
+      - "8125:8125/udp"
+    depends_on:
+      - mosquitto
+
+  alpine:
+    image: alpine:latest
+    container_name: alpine
+    stdin_open: true
+    tty: true
+    depends_on:
+      - telegraf
+    volumes: 
+      - ./alpine/entrypoint.sh:/STEVE-CART/entrypoint.sh
+    working_dir: /STEVE-CART
+    command: "chmod +x /STEVE-CART/entrypoint.sh"
+    entrypoint: ["sh", "/STEVE-CART/entrypoint.sh"]
+    ports:
+      - 5000:5000
+    
+  # redis_exporter:
+    # image: oliver006/redis_exporter:latest
+    # container_name: redis_exporter
+    # ports:
+      # - "9120:9121"
+    # environment:
+      # - REDIS_ADDR=redis-master:6378
+      # - REDIS_EXPORTER_SENTINEL_ADDRS=redis_sentinel:26378,redis_sentinel2:26379,redis_sentinel3:26379
+    # depends_on:
+      # - redis-master
+
+  # prometheus:
+    # image: prom/prometheus:latest
+    # container_name: prometheus
+    # ports:
+      # - "9089:9090"
+    # volumes:
+      # - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+    # depends_on:
+      # - redis_exporter 
+
+volumes:
+    redis_data:
+    redis_rep0_data:
+    redis_rep1_data:
+    influxdb_data: 
+    influxdb_logs:
