@@ -1,2 +1,2 @@
-S.T.E.V.E. – Smart Telemetry & Environmental Vision Engine
+S.T.E.V.E. – Smart Telemetry Edge Virtualized Engine
 > New ERA of carts coming. 
