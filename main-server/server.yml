@@ -20,9 +20,8 @@ services:
           - "3306:3306"
         volumes:
           - ./mariadb/mariadb_data:/var/lib/mysql
+          - ./mariadb/init.sql:/db/init.sql
+        entrypoint: ["docker-entrypoint.sh", "--init-file", "/db/init.sql"]
         environment:
-          - MYSQL_ROOT_PASSWORD=adminUNIWA
-          - MYSQL_DATABASE=uniwa_db
-          - MYSQL_USER=uniwa_user
-          - MYSQL_PASSWORD=adminUNIWA
+          - MYSQL_DATABASE=supermarket_db
         command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci

@@ -79,7 +79,6 @@ services:
       - ./mosquitto/config:/mosquitto/config
       - ./mosquitto/log:/mosquitto/log
       - ./mosquitto/data:/mosquitto/data
-
     stdin_open: true
     tty: true
 
