@@ -5,6 +5,13 @@ const message = ref('Hello {{user}}, this is S.T.E.V.E Display. The smart cart a
 const time = ref('')
 const date = ref('')
 
+const sen_bool_1 = ref('Active')
+const sen_bool_2 = ref('Active')
+const sen_bool_3 = ref('Inactive')
+const sen_bool_4 = ref('Active')
+const sen_bool_5 = ref('Inactive')
+
+
 let timer = null
 
 function updateTime() {
@@ -52,9 +59,15 @@ onUnmounted(() => {
         <div class="bg-white/10 rounded-xl p-4 hover:bg-white/20 transition">
           <div class="relative">Search Bar
             <input class="w-full bg-transparent placeholder:text-slate-500 rounded-4xl transition duration-300"
-            placeholder="Search here for products here"/>
+              placeholder="Search here for products here" />
           </div>
-          <p class="text-xl font-semibold">Recent bought products</p>
+          <div class="bg-white/10 rounded-xl p-4 hover:bg-white/20 transition">
+            <ul class="text-xl font-semibold">Recent bought products
+              <li>Product 1</li>
+              <li>Product 2</li>
+              <li>Product 3</li>
+            </ul>
+          </div>
         </div>
         <div class="bg-white/10 rounded-xl p-4 hover:bg-white/20 transition">
           <p class="text-xl font-semibold">Minimap
@@ -68,8 +81,20 @@ onUnmounted(() => {
           <p class="text-xl font-semibold">Total Weight</p>
           <p class="text-xl font-semibold">Total Price</p>
         </div>
+        <div class="absolute inset-y-0 right-0 w-16">
+          <ul class="bg-white/10 rounded-xl p-4 hover:bg-white/20 transition space-y-1">
+            <p class="text-xl font-semibold">Sensors tests </p>
+            <li>Proximity sensor: {{ sen_bool_1 }}</li>
+            <li>Camera sensors: {{ sen_bool_2 }}</li>
+            <li>Ultrasonic sensor: {{ sen_bool_3 }}</li>
+            <li>Speaker sensor: {{ sen_bool_4 }}</li>
+            <li>NFC sensor: {{ sen_bool_5 }}</li>
+            <li>GPS sensor: {{ sen_bool_6 }}</li>
+          </ul>
+        </div>
       </div>
     </header>
+    <p>Test version!</p>
   </div>
 </template>
 

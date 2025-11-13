@@ -8,6 +8,7 @@ FLUSH PRIVILEGES;
 CREATE TABLE IF NOT EXISTS products (
 	id INT AUTO_INCREMENT PRIMARY KEY,
 	product_name VARCHAR(255),
+	product_category VARCHAR(100),
 	product_added_date DATETIME,
 	product_description VARCHAR(255),
 	pcs INT,
@@ -30,7 +31,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 --event_time when user connected with the specific cart
-CREATE TABLE IF NOT EXISTS user_cart_products (
+CREATE TABLE IF NOT EXISTS cart_operator (
 	id INT AUTO_INCREMENT PRIMARY KEY,
 	user_id INT,
 	cart_id INT,
@@ -40,7 +41,7 @@ CREATE TABLE IF NOT EXISTS user_cart_products (
 );
 
 --items that user bought
-CREATE TABLE IF NOT EXISTS user_cart_items(
+CREATE TABLE IF NOT EXISTS operator_cart_items(
 	id INT AUTO_INCREMENT PRIMARY KEY,
 	user_cart_id INT,
 	product_id INT,
