@@ -1,0 +1,74 @@
+@startuml SmartCart
+actor User as user
+
+' -------------------------------------------------------------
+' CLOUD SERVER SIDE
+' -------------------------------------------------------------
+
+package "Cloud Server" #LightGreen{
+    component "Golang API\n(Backend)" as GO
+    component "Redis Server\n(Session/Cache)" as redis
+    database "MariaDB\n- Products\n- User Data\n- Cart Info\n- Operators\n- Preferences\n- Purchase Stats\n- Minimap Map Data" as MariaDB
+    database "InfluxDB\n(Sensor Time-Series)\n- Weight\n- Ultrasonic\n- Light\n- GPS\n- Camera Events" as InfluxDB
+}
+
+' -------------------------------------------------------------
+' SMART CART HARDWARE + SOFTWARE
+' -------------------------------------------------------------
+
+package "Smart Cart" #Orange{
+
+    component "Vue.js + Vite UI\n(Display)" as vue
+    component "MQTT Broker\n(Sensor Stream)" as mqtt
+    component "Telegraf\n(Metrics Collector)" as telegraf
+
+    package Sensors #Grey{
+        component "Ultrasonic Sensor\n(Obstacle Detection)" as ultrasonic
+        component "Light Sensor\n(Backup Mode Trigger)" as lux
+        component "Weight Sensor\n(Load Cell)" as weight
+        component "NFC/RFID Reader\n(Product Scan / Card Payment)" as nfc
+        component "AI Camera\n(Object Recognition)" as camera
+        component "GPS Module\n(Cart Location / Minimap)" as gps
+    }
+}
+
+ultrasonic --> mqtt : distance data
+lux --> mqtt : light level data
+weight --> mqtt : weight data
+nfc --> mqtt : product/card scan
+camera --> mqtt : detection events
+gps --> mqtt : sending coordinates data
+
+mqtt --> telegraf : forward sensor telemetry
+telegraf --> InfluxDB : time-series writes
+
+InfluxDB -d-> GO : backend reads & processes sensor data
+
+user -u-> GO : Login / Signup (stats, preferences)
+user -u-> vue : Interacts with UI
+user -u-> nfc : Scan product or card for payment
+
+vue -d-> GO : Search product / minimap requests
+vue --> user : cart UI updates
+
+GO --> MariaDB : get product info / location
+GO -l-> vue : UI update
+GO -l-> vue : display mismatch warning
+GO -l-> vue : enable emergency mode UI
+GO --> MariaDB : update cart items
+GO --> MariaDB : purchase/refund product
+GO --> MariaDB : update user preferences
+GO --> MariaDB : update purchase statistics
+
+
+
+legend right
+  **Docker Swarm Deployment**
+  | Service           | Replicas |
+  | Golang API        | 2        |
+  | MariaDB Cluster   | 3        |
+  | InfluxDB Cluster  | 2        |
+  | Redis             | 3        |
+  | Redis Sentinel    | 3        |
+end legend
+@enduml

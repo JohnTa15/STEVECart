@@ -1,0 +1,83 @@
+services:
+  golang:
+    image: golang:latest
+    build: ./golang_backend
+    ports:
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: host
+    networks:
+      - smart_cart_network
+      - sensors_network
+    entrypoint: ["/app/docker-entrypoint.sh"]
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+
+  influxdb:
+    image: influxdb:2.7.12
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+      - influxdb_logs:/var/log/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=adminUNIWA
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=adminUNIWAsuper
+      - DOCKER_INFLUXDB_INIT_ORG=UNIWA
+      - DOCKER_INFLUXDB_INIT_BUCKET=sensors
+    networks:
+      - sensors_network
+    deploy:
+      replicas: 1
+
+  mariadb:
+    image: mariadb:latest
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./mariadb/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootUNIWA
+      MYSQL_DATABASE: supermarket_db
+      MYSQL_USER: uniwa_admin
+      MYSQL_PASSWORD: adminUNIWA
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - smart_cart_network
+    deploy:
+      replicas: 1
+
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    networks:
+      - sensors_network 
+    deploy:
+      replicas: 2
+
+networks:
+  smart_cart_network:
+    driver: overlay
+    attachable: true
+  sensors_network:
+    driver: overlay
+    attachable: true
+
+volumes:
+  mariadb_data:
+  influxdb_data:
+  influxdb_logs:

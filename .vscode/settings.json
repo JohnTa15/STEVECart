@@ -1,3 +1,4 @@
 {
-    "liveServer.settings.multiRootWorkspaceName": "SmartCart"
+    "liveServer.settings.multiRootWorkspaceName": "SmartCart",
+    "java.compile.nullAnalysis.mode": "automatic"
 }
