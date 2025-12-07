@@ -1,22 +1,25 @@
 services:
-  golang:
-    image: golang:latest
-    build: ./golang_backend
-    ports:
-      - target: 8080
-        published: 8080
-        protocol: tcp
-        mode: host
-    networks:
-      - smart_cart_network
-      - sensors_network
-    entrypoint: ["/app/docker-entrypoint.sh"]
-    deploy:
-      replicas: 3
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 5
+  # golang:
+  #   image: golang:latest
+  #   build: /app
+  #   command: air
+  #   ports:
+  #     - target: 8080
+  #       published: 8080
+  #       protocol: tcp
+  #       mode: host
+  #   networks:
+  #     - smart_cart_network
+  #     - sensors_network
+  #   volumes:
+  #     - ./steve-api/:/app
+  #   # entrypoint: ["/app/docker-entrypoint.sh"]
+  #   deploy:
+  #     replicas: 3
+  #     restart_policy:
+  #       condition: on-failure
+  #       delay: 5s
+  #       max_attempts: 5
 
   influxdb:
     image: influxdb:2.7.12
@@ -58,7 +61,7 @@ services:
   mosquitto:
     image: eclipse-mosquitto:latest
     ports:
-      - "1883:1883"
+      - "1884:1883"
       - "9001:9001"
     volumes:
       - ./mosquitto/config:/mosquitto/config
@@ -81,3 +84,13 @@ volumes:
   mariadb_data:
   influxdb_data:
   influxdb_logs:
+
+
+# Leave Swarm if needed (already in Swarm)
+# docker stack deploy -c server.yml smartcart
+
+# Check services
+# docker stack services smartcart
+
+# Remove stack
+# docker stack rm smartcart

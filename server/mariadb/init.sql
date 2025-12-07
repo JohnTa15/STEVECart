@@ -6,7 +6,7 @@ USE supermarket_db;
 
 --product info
 CREATE TABLE IF NOT EXISTS products (
-	id LONG AUTO_INCREMENT PRIMARY KEY,
+	id BIGINT AUTO_INCREMENT PRIMARY KEY,
 	product_name VARCHAR(255),
 	product_category VARCHAR(100),
 	product_added_date DATETIME,
@@ -18,24 +18,32 @@ CREATE TABLE IF NOT EXISTS products (
 
 --cart info
 CREATE TABLE IF NOT EXISTS carts (
-	id LONG AUTO_INCREMENT PRIMARY KEY,
+	id BIGINT AUTO_INCREMENT PRIMARY KEY,
 	active BOOLEAN
 	,fw_version VARCHAR(20)
 );
 
 --user account
 CREATE TABLE IF NOT EXISTS users (
-	id LONG AUTO_INCREMENT PRIMARY KEY,
+	id BIGINT AUTO_INCREMENT PRIMARY KEY,
 	email VARCHAR(255) UNIQUE,
 	password_hash TEXT,
 	user_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS shelves (
+	id BIGINT AUTO_INCREMENT PRIMARY KEY,
+	product_id BIGINT,
+	pcs int --pcs for each product in a shelve
+	sub_shelve_quantity int--how much sub shelves a shelve have
+	FOREIGN KEY (product_id) REFERENCES products(id)
+)
+
 --event_time when user connected with the specific cart
 CREATE TABLE IF NOT EXISTS cart_operator (
-	id LONG AUTO_INCREMENT PRIMARY KEY,
-	user_id LONG,
-	cart_id LONG,
+	id BIGINT AUTO_INCREMENT PRIMARY KEY,
+	user_id BIGINT,
+	cart_id BIGINT,
 	event_time DATETIME DEFAULT CURRENT_TIMESTAMP,
 	FOREIGN KEY (user_id) REFERENCES users(id),
 	FOREIGN KEY (cart_id) REFERENCES carts(id)
@@ -43,10 +51,19 @@ CREATE TABLE IF NOT EXISTS cart_operator (
 
 --items that user bought
 CREATE TABLE IF NOT EXISTS operator_cart_items(
-	id LONG AUTO_INCREMENT PRIMARY KEY,
-	user_cart_id LONG,
-	product_id LONG,
+	id BIGINT AUTO_INCREMENT PRIMARY KEY,
+	user_cart_id BIGINT,
+	product_id BIGINT,
 	quantity INT DEFAULT 1,
-	FOREIGN KEY (user_cart_id) REFERENCES user_cart(id),
+	FOREIGN KEY (user_cart_id) REFERENCES cart_operator(id),
 	FOREIGN KEY (product_id) REFERENCES products(id)
 );
+
+--items from each sector
+CREATE TABLE IF NOT EXISTS sector(
+	id BIGINT AUTO_INCREMENT PRIMARY KEY,
+	shelve_id BIGINT,
+	product_id BIGINT,
+	FOREIGN KEY(product_id) REFERENCES products(id),
+	FOREIGN KEY(shelve_id) REFERENCES shelves(id)
+)
