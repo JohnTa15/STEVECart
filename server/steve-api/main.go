@@ -2,8 +2,7 @@ package main
 
 import (
 	"net/http"
-	"steve-api/initializers"
-	"steve-api/models"
+	"steve-api/controllers"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,15 +34,7 @@ import (
 
 func main() {
 	r := gin.Default()
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "maou",
-		})
-	})
-	r.Run(":8089")
-	// DB := initializeDB() //mariaDB initialization
-	// fmt.Printf("Connected to :", DB)
-	// initialize_InfluxDB() //influxDB initialization
+	r.GET("/", controllers.PostsCreate)
 }
 
 //https://www.emqx.com/en/blog/how-to-use-mqtt-in-golang

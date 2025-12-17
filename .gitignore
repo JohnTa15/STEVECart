@@ -1,0 +1,11 @@
+# Dependencies
+node_modules/
+
+# Database Data (Add all data folders shown in your logs)
+server/percona_cluster/percona_data/
+server/percona_cluster/percona_2_data/
+server/percona_cluster/percona_3_data/
+
+# System files
+*.sock
+*.pid
