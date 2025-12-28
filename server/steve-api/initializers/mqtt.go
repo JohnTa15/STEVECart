@@ -32,7 +32,7 @@ func ConnectMQTT(){
   opts.OnConnect = connectHandler
   opts.OnConnectLost = connectLostHandler
   client := mqtt.NewClient(opts)
-  if token := client.Connect(); token.wait() && token.Error() != nil
+  if token := client.Connect(); token.wait() && token.Error() != nil{
     panic(token.Error())
   }
 }

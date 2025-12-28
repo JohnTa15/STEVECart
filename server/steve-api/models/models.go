@@ -41,3 +41,36 @@ type CartOperatorItem struct {
 	ProductID  uint
 	Quantity   int
 }
+
+// for mqtt.go
+type WeightData struct {
+	Value        float64   `json:"weight"`
+	StableWeight bool      `json:"isStable"`
+	Timestamp    time.Time `json:"timestamp"`
+}
+
+type NFCData struct {
+	TagID     string `json:"tag_id"`
+	ScannerID string `json:"scanner_id"`
+}
+
+type UltraSonicData struct {
+	Distance           float64   `json:"distance"`
+	Timestamp_Distance time.Time `json:"timestamp"`
+}
+
+type BatteryData struct {
+	BatLevel float64 `json:"battery_level"`
+	Charging bool    `json:"isCharging"`
+}
+
+type LightSensorData struct {
+	LuxLevel      float64   `json:"lux_level"`
+	Timestamp_Lux time.Time `json:"timestamp"`
+}
+
+type UWBData struct { //for UWB location data
+	UWB_NODEID    string    `json:"uwb_node_id"`
+	Coordinates       string    `json:"coordinates"`
+	Timestamp_Coords time.Time `json:"timestamp"`
+}
