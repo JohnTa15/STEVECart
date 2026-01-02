@@ -22,12 +22,36 @@ var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err
 }
 
 func initMQTT(){
-  var data models.WeightData
-  var data models.NFCData
-  var data models.UltraSonicData
-  var data models.BatteryData
-  var data models.LightSensorData
-  var data models.UWBData
+	var WeightData models.WeightData
+	WeightData.Value = 0.0
+	WeightData.StableWeight = false
+	WeightData.Timestamp = time.Now()
+
+	var NFCData models.NFCData
+	NFCData.TagID = "0000"
+	NFCData.ScannerID = "sc_01"
+
+	var UltraSonicData models.UltraSonicData
+	UltraSonicData.Distance = 0.0
+	UltraSonicData.Timestamp_Distance = time.Now()
+
+	var UltraSonicData2 models.UltraSonicData
+	UltraSonicData2.Distance = 0.0
+	UltraSonicData2.Timestamp_Distance = time.Now()
+
+	var BatteryData models.BatteryData
+	BatteryData.BatLevel = 100.0
+	BatteryData.Charging = false
+
+	var LightSensorData models.LightSensorData
+	LightSensorData.LuxLevel = 0.0
+	LightSensorData.Timestamp_Lux = time.Now()
+
+	var UWBData models.UWBData
+	UWBData.X_Coordinate = 0.0
+	UWBData.Y_Coordinate = 0.0
+	UWBData.Z_Coordinate = 0.0
+	UWBData.Timestamp_UWB = time.Now()
 }
 func ConnectMQTT() {
 	broker := os.Getenv("MQTT_BROKER")

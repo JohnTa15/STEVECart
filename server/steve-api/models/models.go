@@ -71,6 +71,8 @@ type LightSensorData struct {
 
 type UWBData struct { //for UWB location data
 	UWB_NODEID    string    `json:"uwb_node_id"`
-	Coordinates       string    `json:"coordinates"`
-	Timestamp_Coords time.Time `json:"timestamp"`
+	X_Coordinate  float64   `json:"x_coordinate"`
+	Y_Coordinate  float64   `json:"y_coordinate"`
+	Z_Coordinate  float64   `json:"z_coordinate"`
+	Timestamp_UWB time.Time `json:"timestamp"`
 }
