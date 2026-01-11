@@ -45,9 +45,8 @@ int main(int argc, char* argv){
 
         close(i2c_fd);
         MQTT_disconnect();
-        return 0;
     }
-
+    return 0;
 }
 
 int read_voltage(int i2c_fd){

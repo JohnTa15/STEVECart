@@ -16,6 +16,12 @@ echo "The dependencies have been installed successfully!"
 
 tail -f /dev/null
 
+#Configuring PN32 (NFC MODULE)
+apk add --no-cache libnfc-bin libnfc-dev
+mv libnfc.conf /etc/nfc/
+echo "Applying NFC changes.."
+sudo reboot
+
 # mariadb -h 192.168.10.15 -uuniwa_admin -padminUNIWA supermarket_db
 # use supermarket_db;
 # show tables;
