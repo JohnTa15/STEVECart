@@ -51,11 +51,11 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ./percona_cluster/percona_data_1:/var/lib/mysql
+      # - ./percona_cluster/percona_data_1:/var/lib/mysql
       - ./percona_cluster/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./alpine/ca.pem:/etc/mysql/certs/ca.pem
-      - ./alpine/server-cert.pem:/etc/mysql/certs/server-cert.pem
-      - ./alpine/server-key.pem:/etc/mysql/certs/server-key.pem
+      - ./alpine/ssl_certs/ca.pem:/etc/mysql/certs/ca.pem
+      - ./alpine/ssl_certs/server-cert.pem:/etc/mysql/certs/server-cert.pem
+      - ./alpine/ssl_certs/server-key.pem:/etc/mysql/certs/server-key.pem
     environment:
       CLUSTER_NAME: pxc-cluster
       XTRABACKUP_PASSWORD: 6RG1hSltfljC9e
@@ -81,10 +81,10 @@ services:
   percona_cluster_2:
     image: percona/percona-xtradb-cluster:latest
     volumes:
-      - ./percona_cluster/percona_data_2:/var/lib/mysql
-      - ./alpine/ca.pem:/etc/mysql/certs/ca.pem
-      - ./alpine/server-cert.pem:/etc/mysql/certs/server-cert.pem
-      - ./alpine/server-key.pem:/etc/mysql/certs/server-key.pem
+      # - ./percona_cluster/percona_data_2:/var/lib/mysql
+      - ./alpine/ssl_certs/ca.pem:/etc/mysql/certs/ca.pem
+      - ./alpine/ssl_certs/server-cert.pem:/etc/mysql/certs/server-cert.pem
+      - ./alpine/ssl_certs/server-key.pem:/etc/mysql/certs/server-key.pem
     environment:
       CLUSTER_NAME: pxc-cluster
       CLUSTER_JOIN: percona_cluster_1
@@ -110,10 +110,10 @@ services:
   percona_cluster_3:
     image: percona/percona-xtradb-cluster:latest
     volumes:
-      - ./percona_cluster/percona_data_3:/var/lib/mysql
-      - ./alpine/ca.pem:/etc/mysql/certs/ca.pem
-      - ./alpine/server-cert.pem:/etc/mysql/certs/server-cert.pem
-      - ./alpine/server-key.pem:/etc/mysql/certs/server-key.pem
+      # - ./percona_cluster/percona_data_3:/var/lib/mysql
+      - ./alpine/ssl_certs/ca.pem:/etc/mysql/certs/ca.pem
+      - ./alpine/ssl_certs/server-cert.pem:/etc/mysql/certs/server-cert.pem
+      - ./alpine/ssl_certs/server-key.pem:/etc/mysql/certs/server-key.pem
     environment:
       CLUSTER_NAME: pxc-cluster
       CLUSTER_JOIN: percona_cluster_1
@@ -174,4 +174,5 @@ volumes:
 
 # Remove stack
 # docker stack rm smartcart
-#https://docs.percona.com/percona-xtradb-cluster/8.0/docker.html
+# https://docs.percona.com/percona-xtradb-cluster/8.0/docker.html
+# docker service ps smartcart_golang --no-trunc
