@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   golang:
     image: golang:latest
@@ -13,13 +15,13 @@ services:
     working_dir: /app
     entrypoint: ["/app/entrypoint.sh"]
     environment:
-      - DB_URL=uniwa_admin:adminUNIWA@tcp(mariadb:3306)/supermarket_db
-      - DB_HOST=mariadb
+      # Use the swarm service name "mariadb_1" or "mariadb_2"
+      - DB_URL=uniwa_admin:adminUNIWA@tcp(mariadb_1:3306)/supermarket_db?tls=skip-verify
+      - DB_HOST=mariadb_1
       - DB_NAME=supermarket_db
       - INFLUX_DB=http://influxdb:8086
       - INFLUX_TOKEN=adminUNIWAsuper
-      - MQTT_BROKER=tcp://mosquitto:1884
-      - DB_URL=uniwa_admin:adminUNIWA@tcp(percona_cluster_1:3306)/supermarket_db?tls=skip-verify
+      - MQTT_BROKER=tcp://mosquitto:1883 # Fixed port 1884->1883 (internal)
     deploy:
       replicas: 3
       restart_policy:
@@ -46,95 +48,115 @@ services:
     deploy:
       replicas: 1
 
-  percona_cluster_1:
-    image: percona/percona-xtradb-cluster:latest
+  # PRIMARY NODE
+  mariadb_1:
+    image: mariadb:latest
     ports:
       - "3306:3306"
-    volumes:
-      # - ./percona_cluster/percona_data_1:/var/lib/mysql
-      - ./percona_cluster/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./alpine/ssl_certs/ca.pem:/etc/mysql/certs/ca.pem
-      - ./alpine/ssl_certs/server-cert.pem:/etc/mysql/certs/server-cert.pem
-      - ./alpine/ssl_certs/server-key.pem:/etc/mysql/certs/server-key.pem
+    configs:
+      - source: mysql_ca_cert
+        target: /etc/mysql/certs/ca.pem
+      - source: mysql_server_cert
+        target: /etc/mysql/certs/server-cert.pem
+      - source: mysql_server_key
+        target: /etc/mysql/certs/server-key.pem
+      - source: mysql_init_sql
+        target: /docker-entrypoint-initdb.d/init.sql
     environment:
-      CLUSTER_NAME: pxc-cluster
-      XTRABACKUP_PASSWORD: 6RG1hSltfljC9e
       MYSQL_ROOT_PASSWORD: rootUNIWA
       MYSQL_DATABASE: supermarket_db
       MYSQL_USER: uniwa_admin
       MYSQL_PASSWORD: adminUNIWA
+    # Use standard names in gcomm address
     command: >
+      --wsrep_on=ON
+      --binlog_format=ROW
+      --wsrep_provider=/usr/lib/galera/libgalera_smm.so
+      --wsrep_cluster_name=mariadb_cluster
+      --wsrep_node_name=node_1
+      --wsrep_cluster_address=gcomm://
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_unicode_ci
-      --pxc-encrypt-cluster-traffic=ON
       --ssl-ca=/etc/mysql/certs/ca.pem
       --ssl-cert=/etc/mysql/certs/server-cert.pem
       --ssl-key=/etc/mysql/certs/server-key.pem
     networks:
-      - smart_cart_network
+      smart_cart_network:
     deploy:
       replicas: 1
       placement:
         constraints:
           - node.role == manager
 
-  percona_cluster_2:
-    image: percona/percona-xtradb-cluster:latest
-    volumes:
-      # - ./percona_cluster/percona_data_2:/var/lib/mysql
-      - ./alpine/ssl_certs/ca.pem:/etc/mysql/certs/ca.pem
-      - ./alpine/ssl_certs/server-cert.pem:/etc/mysql/certs/server-cert.pem
-      - ./alpine/ssl_certs/server-key.pem:/etc/mysql/certs/server-key.pem
+  # SECONDARY NODE
+  mariadb_2:
+    image: mariadb:latest
+    ports:
+      - "3307:3306"
+    configs:
+      - source: mysql_ca_cert
+        target: /etc/mysql/certs/ca.pem
+      - source: mysql_server_cert
+        target: /etc/mysql/certs/server-cert.pem
+      - source: mysql_server_key
+        target: /etc/mysql/certs/server-key.pem
     environment:
-      CLUSTER_NAME: pxc-cluster
-      CLUSTER_JOIN: percona_cluster_1
-      XTRABACKUP_PASSWORD: 6RG1hSltfljC9
       MYSQL_ROOT_PASSWORD: rootUNIWA
       MYSQL_DATABASE: supermarket_db
       MYSQL_USER: uniwa_admin
       MYSQL_PASSWORD: adminUNIWA
+    # Connects to node_1
     command: >
+      --wsrep_on=ON
+      --wsrep_cluster_name=mariadb_cluster
+      --wsrep_node_name=node_2
+      --wsrep_provider=/usr/lib/galera/libgalera_smm.so
+      --binlog_format=ROW
+      --wsrep_cluster_address=gcomm://mariadb_1,mariadb_2,mariadb_3
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_unicode_ci
-      --pxc-encrypt-cluster-traffic=ON
       --ssl-ca=/etc/mysql/certs/ca.pem
       --ssl-cert=/etc/mysql/certs/server-cert.pem
       --ssl-key=/etc/mysql/certs/server-key.pem
     networks:
-      - smart_cart_network
+      smart_cart_network:
     deploy:
       replicas: 1
-    depends_on:
-      - percona_cluster_1
 
-  percona_cluster_3:
-    image: percona/percona-xtradb-cluster:latest
-    volumes:
-      # - ./percona_cluster/percona_data_3:/var/lib/mysql
-      - ./alpine/ssl_certs/ca.pem:/etc/mysql/certs/ca.pem
-      - ./alpine/ssl_certs/server-cert.pem:/etc/mysql/certs/server-cert.pem
-      - ./alpine/ssl_certs/server-key.pem:/etc/mysql/certs/server-key.pem
+  # TERTIARY NODE
+  mariadb_3:
+    image: mariadb:latest
+    ports:
+      - "3308:3306"
+    configs:
+      - source: mysql_ca_cert
+        target: /etc/mysql/certs/ca.pem
+      - source: mysql_server_cert
+        target: /etc/mysql/certs/server-cert.pem
+      - source: mysql_server_key
+        target: /etc/mysql/certs/server-key.pem
     environment:
-      CLUSTER_NAME: pxc-cluster
-      CLUSTER_JOIN: percona_cluster_1
-      XTRABACKUP_PASSWORD: 6RG1hSltfljC9e
       MYSQL_ROOT_PASSWORD: rootUNIWA
       MYSQL_DATABASE: supermarket_db
       MYSQL_USER: uniwa_admin
       MYSQL_PASSWORD: adminUNIWA
+    # Connects to node_1
     command: >
+      --wsrep_on=ON
+      --binlog_format=ROW
+      --wsrep_provider=/usr/lib/galera/libgalera_smm.so
+      --wsrep_cluster_name=mariadb_cluster
+      --wsrep_node_name=node_3
+      --wsrep_cluster_address=gcomm://mariadb_1,mariadb_2,mariadb_3
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_unicode_ci
-      --pxc-encrypt-cluster-traffic=ON
       --ssl-ca=/etc/mysql/certs/ca.pem
       --ssl-cert=/etc/mysql/certs/server-cert.pem
       --ssl-key=/etc/mysql/certs/server-key.pem
     networks:
-      - smart_cart_network
+      smart_cart_network:
     deploy:
       replicas: 1
-    depends_on:
-      - percona_cluster_1
 
   mosquitto:
     image: eclipse-mosquitto:latest
@@ -146,7 +168,7 @@ services:
       - ./mosquitto/data:/mosquitto/data
       - ./mosquitto/log:/mosquitto/log
     networks:
-      - sensors_network 
+      - sensors_network
     deploy:
       replicas: 1
 
@@ -159,12 +181,18 @@ networks:
     attachable: true
 
 volumes:
-  percona_data_1:
-  percona_data_2:
-  percona_data_3:
   influxdb_data:
   influxdb_logs:
 
+configs:
+  mysql_ca_cert:
+    external: true
+  mysql_server_cert:
+    external: true
+  mysql_server_key:
+    external: true
+  mysql_init_sql:
+    external: true
 
 # Leave Swarm if needed (already in Swarm)
 # docker stack deploy -c server.yml smartcart
