@@ -10,7 +10,7 @@ openssl x509 -req -in ssl_certs/server-req.pem -days 3650 \
     -CA ssl_certs/ca-cert.pem -CAkey ssl_certs/ca-key.pem -set_serial 01 \
     -out ssl_certs/server-cert.pem \
     -extensions v3_req \
-    -extfile <(printf "[v3_req]\nsubjectAltName=DNS:percona_cluster_1,DNS:percona_cluster_2,DNS:percona_cluster_3,DNS:localhost,IP:127.0.0.1")
+    -extfile <(printf "[v3_req]\nsubjectAltName=DNS:mariadb_1,DNS:mariadb_2,DNS:mariadb_3,DNS:localhost,IP:127.0.0.1")
 
 chmod 644 ssl_certs/*.pem
 chmod 600 ssl_certs/*-key.pem

@@ -13,24 +13,28 @@ services:
     working_dir: /app
     entrypoint: ["/app/entrypoint.sh"]
     environment:
-      # Use the swarm service name "mariadb_1" or "mariadb_2"
       - DB_URL=uniwa_admin:adminUNIWA@tcp(mariadb_1:3306)/supermarket_db?tls=skip-verify
       - DB_HOST=mariadb_1
       - DB_NAME=supermarket_db
       - INFLUX_DB=http://influxdb:8086
       - INFLUX_TOKEN=adminUNIWAsuper
-      - MQTT_BROKER=tcp://mosquitto:1883 # Fixed port 1884->1883 (internal)
+      - MQTT_BROKER=tcp://mosquitto:1884
     deploy:
       replicas: 3
       restart_policy:
         condition: on-failure
         delay: 5s
         max_attempts: 5
+      placement:
+        constraints:
+          - node.role == manager
 
   influxdb:
     image: influxdb:2.7.12
     ports:
-      - "8086:8086"
+      - target: 8086
+        published: 8086
+        protocol: tcp
     volumes:
       - influxdb_data:/var/lib/influxdb2
       - influxdb_logs:/var/log/influxdb2
@@ -55,28 +59,18 @@ services:
   mariadb_1:
     image: mariadb:latest
     ports:
-      - "3306:3306"
+      - target: 3306
+        published: 3306
+        protocol: tcp
     configs:
       - source: mysql_ca_cert
         target: /etc/mysql/certs/ca.pem
-        uid: '1883'
-        gid: '1883'
-        mode: 0600
       - source: mysql_server_cert
         target: /etc/mysql/certs/server-cert.pem
-        uid: '1883'
-        gid: '1883'
-        mode: 0600
       - source: mysql_server_key
         target: /etc/mysql/certs/server-key.pem
-        uid: '1883'
-        gid: '1883'
-        mode: 0600
       - source: mysql_init_sql
         target: /docker-entrypoint-initdb.d/init.sql
-        uid: '1883'
-        gid: '1883'
-        mode: 0600
     environment:
       MYSQL_ROOT_PASSWORD: rootUNIWA
       MYSQL_DATABASE: supermarket_db
@@ -111,23 +105,16 @@ services:
   mariadb_2:
     image: mariadb:latest
     ports:
-      - "3307:3306"
+      - target: 3306
+        published: 3307
+        protocol: tcp
     configs:
       - source: mysql_ca_cert
         target: /etc/mysql/certs/ca.pem
-        uid: '1883'
-        gid: '1883'
-        mode: 0600
       - source: mysql_server_cert
         target: /etc/mysql/certs/server-cert.pem
-        uid: '1883'
-        gid: '1883'
-        mode: 0600
       - source: mysql_server_key
         target: /etc/mysql/certs/server-key.pem
-        uid: '1883'
-        gid: '1883'
-        mode: 0600
     environment:
       MYSQL_ROOT_PASSWORD: rootUNIWA
       MYSQL_DATABASE: supermarket_db
@@ -159,23 +146,16 @@ services:
   mariadb_3:
     image: mariadb:latest
     ports:
-      - "3308:3306"
+      - target: 3306
+        published: 3308
+        protocol: tcp
     configs:
       - source: mysql_ca_cert
         target: /etc/mysql/certs/ca.pem
-        uid: '1883'
-        gid: '1883'
-        mode: 0700
       - source: mysql_server_cert
         target: /etc/mysql/certs/server-cert.pem
-        uid: '1883'
-        gid: '1883'
-        mode: 0700
       - source: mysql_server_key
         target: /etc/mysql/certs/server-key.pem
-        uid: '1883'
-        gid: '1883'
-        mode: 0700
     environment:
       MYSQL_ROOT_PASSWORD: rootUNIWA
       MYSQL_DATABASE: supermarket_db
@@ -206,24 +186,28 @@ services:
   mosquitto:
     image: eclipse-mosquitto:latest
     ports:
-      - "1884:1883"
-      - "9001:9001"
+        - target: 1883
+          published: 1884
+          protocol: tcp
+        - target: 9001
+          published: 9001
+          protocol: tcp
     configs:
       - source: mqtt_conf
         target: /mosquitto/config/mosquitto.conf
         uid: '1883'
         gid: '1883'
-        mode: 0600
+        mode: 0644
       - source: pwfile
         target: /mosquitto/config/pwfile
         uid: '1883'
         gid: '1883'
-        mode: 0600
+        mode: 0700
       - source: acl_file
         target: /mosquitto/config/acl_file
         uid: '1883'
         gid: '1883'
-        mode: 0600
+        mode: 0700
     volumes:
       - mosquitto_data:/mosquitto/data
       - mosquitto_log:/mosquitto/log
