@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   golang:
     image: golang:latest
@@ -8,7 +6,7 @@ services:
         published: 8089
         protocol: tcp
     networks:
-      - smart_cart_network
+      - smartcart_network
       - sensors_network
     volumes:
       - ./steve-api/:/app
@@ -47,6 +45,11 @@ services:
       - sensors_network
     deploy:
       replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+
 
   # PRIMARY NODE
   mariadb_1:
@@ -56,12 +59,24 @@ services:
     configs:
       - source: mysql_ca_cert
         target: /etc/mysql/certs/ca.pem
+        uid: '1883'
+        gid: '1883'
+        mode: 0600
       - source: mysql_server_cert
         target: /etc/mysql/certs/server-cert.pem
+        uid: '1883'
+        gid: '1883'
+        mode: 0600
       - source: mysql_server_key
         target: /etc/mysql/certs/server-key.pem
+        uid: '1883'
+        gid: '1883'
+        mode: 0600
       - source: mysql_init_sql
         target: /docker-entrypoint-initdb.d/init.sql
+        uid: '1883'
+        gid: '1883'
+        mode: 0600
     environment:
       MYSQL_ROOT_PASSWORD: rootUNIWA
       MYSQL_DATABASE: supermarket_db
@@ -81,9 +96,13 @@ services:
       --ssl-cert=/etc/mysql/certs/server-cert.pem
       --ssl-key=/etc/mysql/certs/server-key.pem
     networks:
-      smart_cart_network:
+      smartcart_network:
     deploy:
       replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
       placement:
         constraints:
           - node.role == manager
@@ -96,10 +115,19 @@ services:
     configs:
       - source: mysql_ca_cert
         target: /etc/mysql/certs/ca.pem
+        uid: '1883'
+        gid: '1883'
+        mode: 0600
       - source: mysql_server_cert
         target: /etc/mysql/certs/server-cert.pem
+        uid: '1883'
+        gid: '1883'
+        mode: 0600
       - source: mysql_server_key
         target: /etc/mysql/certs/server-key.pem
+        uid: '1883'
+        gid: '1883'
+        mode: 0600
     environment:
       MYSQL_ROOT_PASSWORD: rootUNIWA
       MYSQL_DATABASE: supermarket_db
@@ -119,9 +147,13 @@ services:
       --ssl-cert=/etc/mysql/certs/server-cert.pem
       --ssl-key=/etc/mysql/certs/server-key.pem
     networks:
-      smart_cart_network:
+      smartcart_network:
     deploy:
       replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
 
   # TERTIARY NODE
   mariadb_3:
@@ -131,10 +163,19 @@ services:
     configs:
       - source: mysql_ca_cert
         target: /etc/mysql/certs/ca.pem
+        uid: '1883'
+        gid: '1883'
+        mode: 0700
       - source: mysql_server_cert
         target: /etc/mysql/certs/server-cert.pem
+        uid: '1883'
+        gid: '1883'
+        mode: 0700
       - source: mysql_server_key
         target: /etc/mysql/certs/server-key.pem
+        uid: '1883'
+        gid: '1883'
+        mode: 0700
     environment:
       MYSQL_ROOT_PASSWORD: rootUNIWA
       MYSQL_DATABASE: supermarket_db
@@ -154,26 +195,49 @@ services:
       --ssl-cert=/etc/mysql/certs/server-cert.pem
       --ssl-key=/etc/mysql/certs/server-key.pem
     networks:
-      smart_cart_network:
+      smartcart_network:
     deploy:
       replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
 
   mosquitto:
     image: eclipse-mosquitto:latest
     ports:
       - "1884:1883"
       - "9001:9001"
+    configs:
+      - source: mqtt_conf
+        target: /mosquitto/config/mosquitto.conf
+        uid: '1883'
+        gid: '1883'
+        mode: 0600
+      - source: pwfile
+        target: /mosquitto/config/pwfile
+        uid: '1883'
+        gid: '1883'
+        mode: 0600
+      - source: acl_file
+        target: /mosquitto/config/acl_file
+        uid: '1883'
+        gid: '1883'
+        mode: 0600
     volumes:
-      - ./mosquitto/config:/mosquitto/config
-      - ./mosquitto/data:/mosquitto/data
-      - ./mosquitto/log:/mosquitto/log
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
     networks:
       - sensors_network
     deploy:
       replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
 
 networks:
-  smart_cart_network:
+  smartcart_network:
     driver: overlay
     attachable: true
   sensors_network:
@@ -183,7 +247,9 @@ networks:
 volumes:
   influxdb_data:
   influxdb_logs:
-
+  mosquitto_data:
+  mosquitto_log:
+  
 configs:
   mysql_ca_cert:
     external: true
@@ -192,6 +258,12 @@ configs:
   mysql_server_key:
     external: true
   mysql_init_sql:
+    external: true
+  mqtt_conf:
+    external: true
+  pwfile:
+    external: true
+  acl_file:
     external: true
 
 # Leave Swarm if needed (already in Swarm)

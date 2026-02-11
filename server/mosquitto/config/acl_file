@@ -1,0 +1,7 @@
+user cart_controller
+topic write sensors/weight/
+topic write sensors/nfc/
+topic write sensors/ultrasonic/
+topic write sensors/battery/
+topic write sensors/lightsensordata/
+topic write sensors/uwb/
