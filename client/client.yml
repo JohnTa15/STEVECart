@@ -23,12 +23,12 @@ services:
       - telegraf
     volumes: 
       - ./alpine/entrypoint.sh:/STEVE-CART/entrypoint.sh
+      - ./steve-display:/STEVE-CART/steve-display
     working_dir: /STEVE-CART
     command: "chmod +x /STEVE-CART/entrypoint.sh"
     entrypoint: ["sh", "/STEVE-CART/entrypoint.sh"]
     ports:
       - 5000:5000
-    
 
     networks:
       sensors_network:

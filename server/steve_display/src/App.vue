@@ -1,9 +1,10 @@
 <script setup>
 import { errorMessages } from '@vue/compiler-core'
 import { ref, onMounted, onUnmounted } from 'vue'
-const user = ref('John')
+import { getClientId } from './utils/clientId'
+const user = ref('')
 const user_id = ref('U-98765')
-const cart_id = ref('SC-12345')
+const cart_id = ref('')
 const cart_version = ref('v1.0.3')
 const message = ref(`Your smart cart assistant!`)
 const time = ref('')
@@ -13,6 +14,7 @@ const errMessage = ref('')
 const weight = ref('54.3 kg')
 const price = ref('23.75 €')
 const isMenuOpen = ref(false)
+const isLogin = ref(false)
 const getWeather = async () => {
   errMessage.value = ''
   weatherData.value = null
@@ -37,6 +39,15 @@ const getWeather = async () => {
     errMessage.value = error.message
   }
 }
+
+if (!user && !user_id.value) {
+  throw new Error('User information is missing! Login or sign up to get more features.')
+} else{
+  isLogin.value = true
+  user.value = localStorage.getItem('smartcart_user')
+  user_id.value 
+}
+
 
 const sen_bool_1 = ref('Active')
 const sen_bool_2 = ref('Active')
@@ -74,6 +85,19 @@ onMounted(() => {
 onUnmounted(() => {
   clearInterval(timer)
 })
+
+onMounted(() => {
+  cart_id.value = getClientId()
+})
+
+export function getClientId(){
+  let id = localStorage.getItem('smartcart_id')
+  if(!id){
+    id = crypto.randomUUID()
+    localStorage.setItem('smartcart_id', id)
+  }
+  return id
+}
 </script>
 
 <template>
