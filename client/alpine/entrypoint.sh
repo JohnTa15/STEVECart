@@ -19,7 +19,7 @@ if[ -f "battery_sensor.c"]; then
     echo "Battery sensor compiled successfully!"
 else
     echo "battery_sensor.c not found. Skipping compilation."
-    flag = 1;
+    flag = 1
 fi
 if[ -f "nfc_publisher.c"]; then
     gcc nfc_publisher.c mqtt_handler.c -o nfc_publisher -lpaho-mqtt3c -lnfc
@@ -84,27 +84,32 @@ fi
 MASTER_IP = "192.168.136.11"
 SECONDARY_IP = "192.168.136.12"
 THIRD_IP = "192.168.136.13"
+TELEGRAF_CONF = "/etc/telegraf/telegraf.conf"
 
 echo "Starting pinging the server nodes to check their availability..."
 
+#Reverting by default to the master ip in case of any previous changes
+sed -i "s/$SECONDARY_IP/$MASTER_IP/g" "$TELEGRAF_CONF"
+sed -i "s/$THIRD_IP/$MASTER_IP/g" "$TELEGRAF_CONF"
+
 # Check the availability of the master node first, then the secondary and third nodes if the master is not reachable
-if ping -c 4 $MASTER_IP &> /dev/null; then
+# If any of ip is not reachable, the client will try to connect to the next one. If all nodes are unreachable, it will print a message and keep running without connecting to any server.
+if ping -c 2 -W 2 "$MASTER_IP" &> /dev/null; then
     echo "Master node ($MASTER_IP) is reachable."
-    /usr/bin/chromium-browser --no-sandbox --headless --disable-gpu --remote-debugging-port=9222 "http://192.168.136.11:8080"
+    /usr/bin/chromium-browser --no-sandbox --headless --disable-gpu --remote-debugging-port=9222 "http://$MASTER_IP:8080"
+    
+elif ping -c 2 -W 2 "$SECONDARY_IP" &> /dev/null; then
+    echo "Master down. Secondary ($SECONDARY_IP) reachable. Updating config..."
+    sed -i "s/$MASTER_IP/$SECONDARY_IP/g" "$TELEGRAF_CONF"
+    /usr/bin/chromium-browser --no-sandbox --headless --disable-gpu --remote-debugging-port=9222 "http://$SECONDARY_IP:8080"
+
+elif ping -c 2 -W 2 "$THIRD_IP" &> /dev/null; then
+    echo "Master/Secondary down. Third ($THIRD_IP) reachable. Updating config..."
+    sed -i "s/$MASTER_IP/$THIRD_IP/g" "$TELEGRAF_CONF"
+    /usr/bin/chromium-browser --no-sandbox --headless --disable-gpu --remote-debugging-port=9222 "http://$THIRD_IP:8080"
+
 else
-    echo "Master node ($MASTER_IP) is not reachable. Checking the secondary node..."
-    if ping -c 4 $SECONDARY_IP &> /dev/null; then
-        echo "Secondary node ($SECONDARY_IP) is reachable."
-        /usr/bin/chromium-browser --no-sandbox --headless --disable-gpu --remote-debugging-port=9222 "http://192.168.136.12:8080"
-    else
-        echo "Secondary node ($SECONDARY_IP) is not reachable. Checking the third node..."
-        if ping -c 4 $THIRD_IP &> /dev/null; then
-            echo "Third node ($THIRD_IP) is reachable."
-            /usr/bin/chromium-browser --no-sandbox --headless --disable-gpu --remote-debugging-port=9222 "http://192.168.136.13:8080"
-        else
-            echo "All server nodes are unreachable."
-        fi
-    fi
+    echo "All nodes unreachable."
 fi
 
 #~~~Missing the GUI part~~~
