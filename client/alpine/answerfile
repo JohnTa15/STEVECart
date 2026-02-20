@@ -11,6 +11,8 @@ HOSTNAMEOPTS=STEVEcart
 # Set device manager to mdev
 DEVDOPTS=mdev
 
+ROOTPASSWORDOPTS="adminUNIWA"
+
 # Contents of /etc/network/interfaces
 INTERFACESOPTS="auto lo
 iface lo inet loopback
