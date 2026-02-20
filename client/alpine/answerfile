@@ -1,0 +1,5 @@
+KEYMAPOPTS="us us"
+HOSTNAMEOPTS="-n STEVEcart"
+USEROPTS ="-a -u uniwa"
+ROOTPASSWORD="adminUNIWA"
+DISKOPTS="-m sys /dev/sda"
