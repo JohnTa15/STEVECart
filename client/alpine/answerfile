@@ -11,7 +11,7 @@ HOSTNAMEOPTS=STEVEcart
 # Set device manager to mdev
 DEVDOPTS=mdev
 
-ROOTPASSWORDOPTS="adminUNIWA"
+ROOTPASSWORD="adminUNIWA"
 
 # Contents of /etc/network/interfaces
 INTERFACESOPTS="auto lo
@@ -21,6 +21,7 @@ auto eth0
 iface eth0 inet dhcp
 hostname alpine-test
 "
+DNSOPTS="-d local 8.8.8.8"
 
 # Search domain of example.com, Google public nameserver
 # DNSOPTS="-d example.com 8.8.8.8"
@@ -36,11 +37,6 @@ PROXYOPTS=none
 # Add first mirror (CDN) - Option -1
 # Enable the community repo - Option -c
 APKREPOSOPTS="-1 -c"
-
-# Create admin user
-USEROPTS="-a -u -g audio,input,video,netdev uniwa_admin"
-#USERSSHKEY="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOIiHcbg/7ytfLFHUNLRgEAubFz/13SwXBOM/05GNZe4 juser@example.com"
-#USERSSHKEY="https://example.com/juser.keys"
 
 # Install Openssh
 SSHDOPTS=openssh
@@ -61,3 +57,5 @@ LBUOPTS=none
 
 #APKCACHEOPTS="/media/LABEL=APKOVL/cache"
 APKCACHEOPTS=none
+
+ERASE_DISKS="/dev/sda"
