@@ -10,6 +10,12 @@ echo "The dependencies have been installed successfully!"
 sleep 1
 apk add --no-cache chromium mesa-gl mesa-dri-gallium xorg-server xf86-video-fbdev xf86-input-evdev xf86-input-libinput # Adding the display dependencies for the GUI
 echo "Dependecies installed."
+#making static ip address for the client
+if [ -f "making_static_ip.sh" ]; then
+    sudo bash -c ./making_static_ip.sh
+else
+    echo "making_static_ip.sh not found."
+fi
 flag=0
 cd /STEVE-CART
 
