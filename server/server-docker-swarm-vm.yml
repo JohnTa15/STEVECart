@@ -220,6 +220,19 @@ services:
         delay: 5s
         max_attempts: 5
 
+  telegraf:
+    image: telegraf:latest
+    volumes:
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    ports:
+      - "8092:8092/udp"
+      - "8094:8094"
+      - "8125:8125/udp"
+    depends_on:
+      - mosquitto
+    deploy:
+      replicas: 3
+
 networks:
   smartcart_network:
     driver: overlay

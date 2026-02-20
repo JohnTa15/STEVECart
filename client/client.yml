@@ -1,26 +1,9 @@
 services:
-  telegraf:
-    image: telegraf:latest
-    volumes:
-      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
-    ports:
-      - "8092:8092/udp"
-      - "8094:8094"
-      - "8125:8125/udp"
-    depends_on:
-      - mosquitto
-    deploy:
-      replicas: 3
-    networks:
-      - sensors_network
-
   alpine:
     image: alpine:latest
     container_name: alpine
     stdin_open: true
     tty: true
-    depends_on:
-      - telegraf
     volumes: 
       - ./alpine/entrypoint.sh:/STEVE-CART/entrypoint.sh
       - ./steve-display:/STEVE-CART/steve-display
@@ -28,7 +11,4 @@ services:
     command: "chmod +x /STEVE-CART/entrypoint.sh"
     entrypoint: ["sh", "/STEVE-CART/entrypoint.sh"]
     ports:
-      - 5000:5000
-
-    networks:
-      sensors_network:
+      - 8080:8080
