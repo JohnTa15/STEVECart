@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS products (
 -- cart info
 CREATE TABLE IF NOT EXISTS carts (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    cart_id VARCHAR(255) UNIQUE,
+    mac_address VARCHAR(255) UNIQUE,
     active BOOLEAN,
     fw_version VARCHAR(20)
 );

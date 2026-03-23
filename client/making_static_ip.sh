@@ -11,6 +11,8 @@ current_gateway=$(ip route | grep default | awk '{print $3}')
 
 ID=$(echo $current_ip | awk '{print $1}' | cut -d '.' -f 4)
 
+ACTIVE_NODE=0
+
 if [ -n "$current_ip" && -n "$current_gateway" ]; then
     echo "I don't have any ip available returning to the backup ip"
     current_ip="10.10.10.10"
@@ -28,6 +30,30 @@ echo "Setting hostname to $hostname"
 echo $hostname > /etc/hostname
 hostname -f /etc/hostname 
 
+#Registering cart_ID to server's backend and pings if the sites are alive
+if ping -c 2 -W 2 "$MASTER_IP" &> /dev/null; then
+    echo "Master node ($MASTER_IP) is reachable."
+	ACTIVE_NODE=$MASTER_IP
+elif ping -c 2 -W 2 "$SECONDARY_IP" &> /dev/null; then
+    echo "Master down. Secondary ($SECONDARY_IP) reachable."
+    # sed -i "s/$MASTER_IP/$SECONDARY_IP/g" "$TELEGRAF_CONF"
+	ACTIVE_NODE=$SECONDARY_IP
+elif ping -c 2 -W 2 "$THIRD_IP" &> /dev/null; then
+    echo "Master/Secondary down. Third ($THIRD_IP) reachable."
+    # sed -i "s/$MASTER_IP/$THIRD_IP/g" "$TELEGRAF_CONF"
+	ACTIVE_NODE=$THIRD_IP
+else
+    echo "All nodes unreachable."
+fi
+curl -X POST http://$ACTIVE_NODE:8089/registerCartID -H "Content-Type: application/json" -d "{\"cart_id\": \"$cart_id\"}"    
+
+while true; do
+	if ping -c 1 -W 5 "$ACTIVE_NODE" &> /dev/null; then
+		curl -X POST http://$ACTIVE_NODE:8089/registerCartID -H "Content-Type: application/json" -d "{\"is_active\": \"true\"}"    
+    fi
+	
+	sleep 30
+done
 
 # 5. Update /etc/hosts (Required for 'sudo' to not complain)
 # echo "Updating /etc/hosts..."

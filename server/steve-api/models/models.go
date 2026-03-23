@@ -16,9 +16,12 @@ type Product struct {
 }
 
 type Cart struct {
-	ID        uint `gorm:"primaryKey"`
-	IsActive  bool
-	FwVersion string
+	ID         uint      `gorm:"primaryKey" json:"-"`
+	Cart_ID    string    `gorm:"unique" json:"cart_id"`
+	MacAddress string    `gorm:"unique" json:"mac_address"`
+	IsActive   bool      `json:"is_active"`
+	LastSeen   time.Time `json:"last_seen"`
+	FwVersion  string    `json:"fw_version"`
 }
 
 type User struct {

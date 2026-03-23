@@ -1,15 +1,29 @@
 package main
 
 import (
-	// "net/http"
+	"net/http"
+	"time"
 	"steve-api/controllers"
-
+	"steve-api/models"
 	"github.com/gin-gonic/gin"
 )
 
+func CartRegister(c *gin.Context) {
+	var cart models.Cart
+	if err := c.ShouldBindJSON(&cart); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	cart.LastSeen = time.Now()
+	cart.IsActive = true
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Cart registered successfully",
+		"cart_id": cart.Cart_ID})
+}
+
 func main() {
 	r := gin.Default()
-	r.GET("/", controllers.PostsCreate)
+	r.POST("/registerCartID", CartRegister)
 }
 
 //https://www.emqx.com/en/blog/how-to-use-mqtt-in-golang
