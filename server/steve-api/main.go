@@ -3,9 +3,11 @@ package main
 import (
 	"net/http"
 	"time"
-	"steve-api/controllers"
-	"steve-api/models"
+
 	"github.com/gin-gonic/gin"
+	"steve-api/controllers"
+	"steve-api/initializers"
+	"steve-api/models"
 )
 
 func CartRegister(c *gin.Context) {
@@ -18,12 +20,25 @@ func CartRegister(c *gin.Context) {
 	cart.IsActive = true
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Cart registered successfully",
-		"cart_id": cart.Cart_ID})
+		"cart_id": cart.Cart_ID,
+		"mac_address": cart.MacAddress})
+}
+
+func GetAllUsers(c *gin.Context) {
+	var users []models.User
+	if err := initializers.DB.Find(&users).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, gin.H{"status": http.StatusOK, "data": users})
 }
 
 func main() {
+	initializers.ConnectDB()
 	r := gin.Default()
 	r.POST("/registerCartID", CartRegister)
+	r.GET("/users", GetAllUsers)
+	r.Run(":8089")
 }
 
 //https://www.emqx.com/en/blog/how-to-use-mqtt-in-golang

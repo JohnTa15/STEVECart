@@ -6,6 +6,7 @@ hostname="cart-$cart_id"
 ip_address=$(ip -o -f inet addr show $interface | awk '{print $4}' | head -n 1)
 
 current_ip=${ip_address%/*}
+mac_address=$(cat /sys/class/net/$interface/address)
 
 current_gateway=$(ip route | grep default | awk '{print $3}')
 
@@ -46,6 +47,7 @@ else
     echo "All nodes unreachable."
 fi
 curl -X POST http://$ACTIVE_NODE:8089/registerCartID -H "Content-Type: application/json" -d "{\"cart_id\": \"$cart_id\"}"    
+curl -X POST http://$ACTIVE_NODE:8089/registerCartID -H "Content-Type: application/json" -d "{\"mac_address\": \"$mac_address\"}"    
 
 while true; do
 	if ping -c 1 -W 5 "$ACTIVE_NODE" &> /dev/null; then

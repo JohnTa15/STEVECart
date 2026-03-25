@@ -25,10 +25,11 @@ type Cart struct {
 }
 
 type User struct {
-	ID           uint   `gorm:"primaryKey"`
-	Email        string `gorm:"unique"`
-	PasswordHash string
-	UserCreation time.Time
+	ID           uint   `gorm:"primaryKey" json:"-"`
+	Username     string `gorm:"unique" json:"username"`
+	Email        string `gorm:"unique" json:"email"`
+	PasswordHash string `json:"password_hash"`
+	UserCreation time.Time `json:"user_creation"`
 }
 
 type CartOperator struct {
