@@ -2,7 +2,7 @@
 
 set -e 
 apk update && apk add bash openssl -y
-mkdir -p ssl_certss
+mkdir -p ssl_certs
 openssl genrsa 2048 > ssl_certs/ca-key.pem
 openssl req -new -x509 -nodes -days 3650 -key ssl_certs/ca-key.pem -out ssl_certs/ca-cert.pem -subj "/CN=SmartCart-Internal-CA"
 openssl req -newkey rsa:2048 -days 3650 -nodes -keyout ssl_certs/server-key.pem -out ssl_certs/server-req.pem -subj "/CN=percona_cluster_node"

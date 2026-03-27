@@ -22,7 +22,7 @@
 #define QOS 1
 #define TIMEOUT 10000L
 
-extern MQTT_Client client;
+extern MQTTClient client;
 extern MQTTClient_connectOptions conn_opts;
 
 void MQTT_init_and_connect(const char *CLIENTID);
