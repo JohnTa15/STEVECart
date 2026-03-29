@@ -78,6 +78,10 @@
           class="w-full bg-white/5 dark:bg-gray-800/50 placeholder:text-slate-500 rounded-4xl transition duration-300 border border-white/10 dark:border-gray-700 p-2"
           placeholder="Search here for products here" />
       </div>
+      <div class="flex flex-wrap gap-6 mt-10 text-center justify-end">
+        <button @click="logout"
+          class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit mx-auto inline-block">Logout</button>
+      </div>
 
       <div
         class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit mx-auto inline-block">
@@ -128,5 +132,11 @@
   </div>
 </template>
 <script>
-export default {};
+export default {
+  methods: {
+    logout() {
+      this.$router.push('/login')
+    }
+  }
+};
 </script>

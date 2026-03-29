@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Login from './pages/Login.vue'
 import Signup from './pages/Signup.vue'
-import Index from './pages/index.vue'
+import Index from './pages/Index.vue'
 
 const routes = [
     { path: '/login', component: Login },

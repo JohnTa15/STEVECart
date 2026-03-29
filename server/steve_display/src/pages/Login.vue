@@ -51,11 +51,13 @@ export default {
             this.$router.push('/signup')
         },
         handleSubmitLogin() {
-            for (const user of users.value) {
-                if (this.form.username === user.username && this.form.password === user.password_hash) {
-                    this.$router.push('/index')
-                } else {
-                    this.errorMessage = "Invalid username or password!"
+            if (this.form.username != null && this.form.password != null) {
+                for (const user of users.value) {
+                    if (this.form.username === user.username && this.form.password === user.password_hash) {
+                        this.$router.push('/index')
+                    } else {
+                        this.errorMessage = "Invalid username or password!"
+                    }
                 }
             }
         }
