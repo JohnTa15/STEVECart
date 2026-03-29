@@ -5,7 +5,7 @@ set -e
 echo "SmartCart client started. Keeping it running..."
 
 apk update && apk upgrade
-apk add --no-cache build-base pkgconf bash paho-mqtt-c paho-mqtt-c-dev libnfc libnfc-dev linux-headers curl-dev mariadb-dev sqlite-dev # Adding the dependencies for the sensors
+apk add --no-cache build-base pkgconf bash libnfc libnfc-dev linux-headers curl-dev mariadb-dev sqlite-dev # Adding the dependencies for the sensors
 echo "The dependencies have been installed successfully!"
 sleep 1
 apk add --no-cache chromium mesa-gl mesa-dri-gallium xorg-server xf86-video-fbdev xf86-input-evdev xf86-input-libinput # Adding the display dependencies for the GUI
@@ -21,71 +21,47 @@ cd /STEVE-CART
 
 echo "Completing the setup of the client environment..."
 #Compiling the sensor programs if the source files are present
-if [ -f "battery_publisher.c"]; then
-    gcc battery_publisher.c mqtt_handler.c -o battery_publisher -lpaho-mqtt3c
+if [ -f "battery_publisher.c" ]; then
+    gcc battery_publisher.c -o battery_publisher
     echo "Battery publisher compiled successfully!"
 else
     echo "battery_publisher.c not found. Skipping compilation."
     flag=1
 fi
-if [ -f "nfc_publisher.c"]; then
-    gcc nfc_publisher.c mqtt_handler.c -o nfc_publisher -lpaho-mqtt3c -lnfc
+if [ -f "nfc_publisher.c" ]; then
+    gcc nfc_publisher.c -o nfc_publisher -lnfc
     echo "NFC publisher compiled successfully!"
 else
     echo "nfc_publisher.c not found. Skipping compilation."
     flag=1;
 fi
-if [ -f "ultrasonic_publisher.c"]; then
-    gcc ultrasonic_publisher.c mqtt_handler.c -o ultrasonic_publisher -lpaho-mqtt3c
+if [ -f "ultrasonic_publisher.c" ]; then
+    gcc ultrasonic_publisher.c -o ultrasonic_publisher
     echo "Ultrasonic publisher compiled successfully!"
 else
     echo "ultrasonic_publisher.c not found. Skipping compilation."
     flag=1;
 fi
-if [ -f "weight_publisher.c"]; then
-    gcc weight_publisher.c mqtt_handler.c -o weight_publisher -lpaho-mqtt3c -lsqlite3
+if [ -f "weight_publisher.c" ]; then
+    gcc weight_publisher.c -o weight_publisher -lsqlite3
     echo "Weight publisher compiled successfully!"
 else
     echo "weight_publisher.c not found. Skipping compilation."
     flag=1;
 fi
-if [flag==0]; then
+if [ $flag -eq 0 ]; then
     echo "All sensor programs have been compiled successfully!"
-    if [-f "libnfc.conf"]; then
+    if [ -f "libnfc.conf" ]; then
         mkdir -p /etc/nfc
         cp libnfc.conf /etc/nfc/
         echo "libnfc.conf copied to /etc/nfc/"
+    fi
 else
     echo "Some sensor programs were not compiled due to missing source files."
     exit 1;
 fi
 
-echo "Starting the sensor programs in the background..."
-# Check if the sensor executables exist before trying to run them
-if [ -f "battery_sensor"]; then
-    ./battery_sensor &
-    echo "Battery sensor started."
-else
-    echo "Battery sensor executable not found. Skipping execution."
-fi
-if [ -f "nfc_publisher"]; then
-    ./nfc_publisher &
-    echo "NFC publisher started."
-else
-    echo "NFC publisher executable not found. Skipping execution."
-fi
-if [ -f "ultrasonic_publisher"]; then
-    ./ultrasonic_publisher &
-    echo "Ultrasonic publisher started."
-else
-    echo "Ultrasonic publisher executable not found. Skipping execution."
-fi 
-if [ -f "weight_publisher"]; then
-    ./weight_publisher &
-    echo "Weight publisher started."
-else
-    echo "Weight publisher executable not found. Skipping execution."
-fi
+echo "Sensors will be executed by Telegraf."
 
 # Define the IP addresses of the server nodes
 MASTER_IP="192.168.136.11"

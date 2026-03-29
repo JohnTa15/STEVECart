@@ -19,32 +19,29 @@ static uint8_t uiPeriod = 2; //total seconds
 
 int main(int argc, char *argv[]){
   //https://github.com/nfc-tools/libnfc/blob/master/examples/
-  const nfc_device *pnd = NULL; //NFC device(PN532)
-  const nfc_context *context; //env libraries
-  const nfc_target nt; //NFC tag
+  nfc_device *pnd = NULL; //NFC device(PN532)
+  nfc_context *context; //env libraries
+  nfc_target nt; //NFC tag
   init_NFC(&pnd, &context, nt);
-  MQTT_init_and_connect(CLIENTID, TOPIC);
-  char payload[128]; 
-  char topic[64];
-  char scanned_tag[64] = polling_data(&pnd, &context, nt);
 
+  char payload[128]; 
+  char timeStamp[64];
   
   while (1) {
-    time_t now = time(NULL);
-    strftime(timeStamp, sizeof(timeStamp), "%Y-%m-%dT%H:%M:%S%z", localtime(&now));
+    char* str_uid = polling_data(pnd, context, nt);
+    if (strlen(str_uid) > 0) {
+      time_t now = time(NULL);
+      strftime(timeStamp, sizeof(timeStamp), "%Y-%m-%dT%H:%M:%S%z", localtime(&now));
 
-    snprintf(payload, sizeof(payload),
-             "{\"NFC_data\": %s, \"timestamp_NFC\": \"%s\", \"PN532\"}",
-             str_uid,
-             timeStamp);
-
-    MQTTClient_publisher(TOPIC, payload);
-    printf("Waiting to remove the card from the reader..");
-    fflush(stdout);
+      printf("{\"NFC_data\": \"%s\", \"timestamp_NFC\": \"%s\", \"device\": \"PN532\"}\n",
+               str_uid,
+               timeStamp);
+      fflush(stdout);
+    }
+    sleep(1);
   }
   nfc_close(pnd);
   nfc_exit(context);
-  MQTT_disconnect();
   return 0;
 }
 

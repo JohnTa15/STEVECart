@@ -230,6 +230,8 @@ services:
       - "8125:8125/udp"
     depends_on:
       - mosquitto
+    networks:
+      - sensors_network
     deploy:
       replicas: 3
 

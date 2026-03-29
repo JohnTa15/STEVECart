@@ -6,31 +6,26 @@
 #define TOPIC "sensors/ultrasonic"
 
 int main(int argc, char* argv[]){
-  time_t total_time = NULL;
+  struct timespec start, end;
   if(wiringPiSetup() == -1){
     printf("WiringPi setup failed!\n");
     return -1;
   }
   pinMode(TRIG_PIN, OUTPUT);
-    pinMode(ECHO_PIN, INPUT);
-    calculate_distance(&start, &end); 
-    MQTT_init_and_connect(CLIENTID);
-    char payload[128];
-    char timeStamp[64];
-    while(1){
-      double distance = calculate_distance();
-      time_t now = time(NULL);
-      strftime(timeStamp, sizeof(timeStamp), "%Y-%m-%dT%H:%M:%S%z", localtime(&now));
-      snprintf(payload, sizeof(payload),
-               "{\"distance_cm\": %.2f, \"timestamp_ultrasonic\": \"%s\"}",
-               distance,
-               timeStamp);
-      MQTTClient_publisher(TOPIC, payload);
-      printf("Published ultrasonic data: %s\n", payload);
-      sleep(5);
-      MQTT_disconnect();
-    }
-    return 0;
+  pinMode(ECHO_PIN, INPUT);
+
+  char timeStamp[64];
+  while(1){
+    double distance = calculate_distance();
+    time_t now = time(NULL);
+    strftime(timeStamp, sizeof(timeStamp), "%Y-%m-%dT%H:%M:%S%z", localtime(&now));
+    printf("{\"distance_cm\": %.2f, \"timestamp_ultrasonic\": \"%s\"}\n",
+             distance,
+             timeStamp);
+    fflush(stdout);
+    sleep(5);
+  }
+  return 0;
 }
 
 

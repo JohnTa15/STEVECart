@@ -10,7 +10,7 @@
 #define INA226_REG_CURRENT 0x04
 #define INA226_REG_CALIBRATION 0x05
 
-int main(int argc, char* argv){
+int main(int argc, char* argv[]){
     int i2c_fd;
     char *fn = "/dev/i2c-1";
 
@@ -23,29 +23,28 @@ int main(int argc, char* argv){
         perror("Failed to have bus access.."); 
         exit(1);
     }
-    MQTT_init_and_connect(CLIENTID);
-    char payload[128];
+
     char timeStamp[64];
     while(1){
+        int batt_level = -1;
         int voltage_level = read_voltage(i2c_fd); //ina226 read battery level
-        if(voltage_level != -1) int batt_level = calculate_percentage(voltage_level);
+        if(voltage_level != -1) {
+            batt_level = calculate_percentage(voltage_level);
+        }
         int isCharging = 0;
         time_t now = time(NULL);
         strftime(timeStamp, sizeof(timeStamp), "%Y-%m-%dT%H:%M:%S%z", localtime(&now));
 
-        snprintf(payload, sizeof(payload),
-                 "{\"battery_level\": %d, \"is_charging\": %s, \"timestamp_battery\": \"%s\"}",
-                 batt_level,
-                 isCharging ? "true" : "false",
-                 timeStamp);
-
-        MQTTClient_publisher(TOPIC, payload);
-        printf("Published battery data: %s\n", payload);
+        if (batt_level != -1) {
+            printf("{\"battery_level\": %d, \"is_charging\": %s, \"timestamp_battery\": \"%s\"}\n",
+                   batt_level,
+                   isCharging ? "true" : "false",
+                   timeStamp);
+            fflush(stdout);
+        }
         sleep(5);
-
-        close(i2c_fd);
-        MQTT_disconnect();
     }
+    close(i2c_fd);
     return 0;
 }
 
