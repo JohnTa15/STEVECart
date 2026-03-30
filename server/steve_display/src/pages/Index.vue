@@ -108,6 +108,7 @@
         <div
           class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit">
           <p class="text-xl font-semibold dark:text-white">Minimap</p>
+          <img src="../assets/minimap.png" alt="Supermarket Minimap" class="w-full h-full object-cover" />
         </div>
 
         <div
