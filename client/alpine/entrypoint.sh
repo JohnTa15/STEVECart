@@ -36,14 +36,14 @@ else
     flag=1;
 fi
 if [ -f "ultrasonic_publisher.c" ]; then
-    gcc ultrasonic_publisher.c -o ultrasonic_publisher
+    gcc ultrasonic_publisher.c -o ultrasonic_publisher -lwiringPi
     echo "Ultrasonic publisher compiled successfully!"
 else
     echo "ultrasonic_publisher.c not found. Skipping compilation."
     flag=1;
 fi
 if [ -f "weight_publisher.c" ]; then
-    gcc weight_publisher.c -o weight_publisher -lsqlite3
+    gcc weight_publisher.c -o weight_publisher -lsqlite3 -lwiringPi
     echo "Weight publisher compiled successfully!"
 else
     echo "weight_publisher.c not found. Skipping compilation."
