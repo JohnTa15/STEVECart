@@ -67,6 +67,7 @@ else
     flag=1
 fi
 
+
 if [ $flag -eq 0 ]; then
     echo "All sensor programs have been compiled successfully!"
     if [ -f "libnfc.conf" ]; then
