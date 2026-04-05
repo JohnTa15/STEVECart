@@ -1,3 +1,4 @@
+
 # https://github.com/Makerfabs/MaUWB_ESP32S3-with-STM32-AT-Command/blob/main/hardware/Makerfabs%20UWB%20AT%20Module%20AT%20Command%20Manual(v1.0.8).pdf
 
 # Install python library for connecting to the UWB sensor
@@ -42,7 +43,7 @@ if "OK" in response:
         
     # Send configuration commands
     # Note: Standard AT commands typically use = rather than parentheses
-    send_wait("AT+SETCFG=0,0,0,1", ser) # set mode to tag
+    send_wait("AT+SETCFG=1,0,0,1", ser) # set mode to tag
     send_wait("AT+SETCAP=30,10,1", ser) # capacity 27 tags, 3 anchors, 10ms slot, 1 packet
     send_wait("AT+SETRPT=1", ser)       # automatic report mode active
     send_wait("AT+SAVE", ser)           # save to flash
@@ -52,8 +53,3 @@ else:
 
 ser.close()
 EOF
-
-
-#i need to send information 
-#about the location to the server
-#directly from the UWB TAG
