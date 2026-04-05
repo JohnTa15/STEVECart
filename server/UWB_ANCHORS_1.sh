@@ -53,7 +53,7 @@ if "OK" in response:
         f.write(f"CONFIG:\n{cfg}\n")
         
     # Send configuration AT commands
-    send_wait("AT+SETCFG=1,0,0,1", ser) # set mode to tag
+    send_wait("AT+SETCFG=1,1,0,1", ser) # set mode to tag
     send_wait("AT+SETCAP=30,10,1", ser) # capacity 27 tags, 3 anchors, 10ms slot, 1 packet
     send_wait("AT+SETRPT=1", ser)       # automatic report mode active
     send_wait("AT+SAVE", ser)           # save to flash

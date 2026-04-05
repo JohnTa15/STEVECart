@@ -1,4 +1,3 @@
-
 # https://github.com/Makerfabs/MaUWB_ESP32S3-with-STM32-AT-Command/blob/main/hardware/Makerfabs%20UWB%20AT%20Module%20AT%20Command%20Manual(v1.0.8).pdf
 
 # Install python library for connecting to the UWB sensor
@@ -11,21 +10,33 @@ import serial
 import time
 import sys
 
+# adding the influxDB info
+CLIENTID = 'UWB_TAG'
+TOPIC = 'sensors/location'
+
 PORT = '/dev/ttyUSB0'
 BAUDRATE = 115200
+ts = time.time()
 
-def send_wait(command, ser, delay=0.5):
-    print(f"Sending: {command}")
+def send_wait(command, ser, delay=0.5, quiet=False):
+    if not quiet:
+        print(f"Sending: {command}", file=sys.stderr)
     ser.write((command + "\r\n").encode())
     time.sleep(delay)
-    response = ser.read_all().decode(errors='ignore')
-    print(f"Response: {response}")
+    response = ser.read_all().decode(errors='ignore').strip()
+    if not quiet:
+        print(f"Response: {response}", file=sys.stderr)
     return response
+
+import json
+
+ver = "unknown"
+cfg = "unknown"
 
 try:
     ser = serial.Serial(PORT, BAUDRATE, timeout=1)
 except Exception as e:
-    print(f"Error opening port {PORT}: {e}")
+    print(f"Error opening port {PORT}: {e}", file=sys.stderr)
     sys.exit(1)
 
 # Wake up and check device
@@ -41,15 +52,31 @@ if "OK" in response:
     with open("current_cfg.txt", "a") as f:
         f.write(f"CONFIG:\n{cfg}\n")
         
-    # Send configuration commands
-    # Note: Standard AT commands typically use = rather than parentheses
-    send_wait("AT+SETCFG=1,0,0,1", ser) # set mode to tag
+    # Send configuration AT commands
+    send_wait("AT+SETCFG=3,1,0,1", ser) # set mode to tag
     send_wait("AT+SETCAP=30,10,1", ser) # capacity 27 tags, 3 anchors, 10ms slot, 1 packet
     send_wait("AT+SETRPT=1", ser)       # automatic report mode active
     send_wait("AT+SAVE", ser)           # save to flash
-    print("Configuration complete!")
+    print("Configuration complete!", file=sys.stderr)
 else:
-    print("Failed to get OK response from AT?")
+    print("Failed to get OK response from AT?", file=sys.stderr)
+
+print("Sending information to influxDB server", file=sys.stderr)
+
+while True:
+    timestamp = time.strftime('%Y-%m-%dT%H:%M:%S%z', time.localtime())
+    range_data = send_wait("AT+RANGE", ser, quiet=True)
+    
+    # Format and print data as JSON for Telegraf parsing
+    data = {
+        "version": ver,
+        "role_message": cfg,
+        "range": range_data,
+        "timestamp_location": timestamp
+    }
+    print(json.dumps(data))
+    sys.stdout.flush()
+    time.sleep(5)
 
 ser.close()
 EOF
