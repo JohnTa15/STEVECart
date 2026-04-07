@@ -257,7 +257,7 @@ configs:
   mysql_server_key:
     external: true
   mysql_init_sql:
-    external: true
+    file: ./db/init.sql
   mqtt_conf:
     external: true
   pwfile:

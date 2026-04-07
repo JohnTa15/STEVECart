@@ -34,10 +34,12 @@ func GetAllUsers(c *gin.Context) {
 }
 
 func main() {
-	initializers.ConnectDB()
 	r := gin.Default()
 	r.POST("/registerCartID", CartRegister)
 	r.GET("/users", GetAllUsers)
+	initializers.ConnectDB()
+	client := initializers.ConnectMQTT()
+	initializers.Sub(client)
 	r.Run(":8089")
 }
 

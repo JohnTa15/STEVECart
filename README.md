@@ -10,6 +10,7 @@ SmartCarts for supermarket tracking and management
 - NFC: PN532
 - Ultrasonic Sensor: HC-SR04
 - Load Cell: HX711 Amplifier
+- AI camera: OAK-D Lite
 
 ## Other components: 
 - Speakers

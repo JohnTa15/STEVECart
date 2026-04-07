@@ -1,7 +1,13 @@
 #!/bin/bash 
 interface="wlan0"
 
+# making cart_id from the last 2 bytes of the mac address
 cart_id=$(cat /sys/class/net/$interface/address | awk -F: '{print $5$6}')
+
+#exporting cart_id to telegraf config file
+echo "CART_ID=\"$cart_id\"" > /etc/default/telegraf 
+
+#hostname is made of "cart-" + cart_id
 hostname="cart-$cart_id"
 ip_address=$(ip -o -f inet addr show $interface | awk '{print $4}' | head -n 1)
 

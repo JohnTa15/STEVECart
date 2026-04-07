@@ -8,6 +8,7 @@ type Product struct {
 	ID                 uint `gorm:"primaryKey"`
 	ProductName        string
 	ProductCategory    string
+	NFCTag			   string
 	ProductAddedDate   time.Time
 	ProductDescription string
 	Weight             float32
