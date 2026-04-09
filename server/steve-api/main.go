@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"steve-api/controllers"
 	"steve-api/initializers"
 	"steve-api/models"
 )

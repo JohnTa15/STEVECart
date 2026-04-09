@@ -6,17 +6,22 @@ import (
 	"steve-api/models"
 )
 
-func NFCScan(tagID string) {
-	var product models.Product
+func CartChecking(cartID string) {
+	var cart models.Cart
+	resC := initializers.DB.Where("cart_id = ?", cartID).First(&cart)
+	if resC.Error != nil {
+		fmt.Println("Cart not found")
+		return
+		//pop-up error message to the display
+	}
+}
 
-	res := initializers.DB.Where("nfc_tag = ?", tagID).First(&product)
-	if res.Error != nil {
+func ProductChecking(TagID string) {
+	var product models.Product
+	resP := initializers.DB.Where("nfc_tag = ?", TagID).First(&product)
+	if resP.Error != nil {
 		fmt.Println("Product not found")
 		return
 	}
-	fmt.Println("Added: %s to Cart!\n", product.ProductName)
-	SumPriceProducts(product.Price)
-}
-
-func SumPriceProducts(price float32) {
+	//pop-up error message to the display
 }
