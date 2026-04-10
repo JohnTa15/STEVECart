@@ -6,22 +6,22 @@ import (
 	"steve-api/models"
 )
 
-func CartChecking(cartID string) {
+func CartChecking(cartID string) (models.Cart, error) {
 	var cart models.Cart
 	resC := initializers.DB.Where("cart_id = ?", cartID).First(&cart)
 	if resC.Error != nil {
 		fmt.Println("Cart not found")
-		return
-		//pop-up error message to the display
+		return cart, resC.Error
 	}
+	return cart, nil
 }
 
-func ProductChecking(TagID string) {
+func ProductChecking(TagID string) (models.Product, error) {
 	var product models.Product
 	resP := initializers.DB.Where("nfc_tag = ?", TagID).First(&product)
 	if resP.Error != nil {
 		fmt.Println("Product not found")
-		return
+		return product, resP.Error
 	}
-	//pop-up error message to the display
+	return product, nil
 }

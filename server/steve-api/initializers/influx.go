@@ -22,7 +22,6 @@ func ConnectINFLUX() influxdb2.Client {
 	client := influxdb2.NewClient(url, token)
 	writeAPI := client.WriteAPIBlocking(org, bucket)
 
-
 	tags := map[string]string{
 		"cart_id":       cartID,
 		"store_section": section,
@@ -37,18 +36,18 @@ func ConnectINFLUX() influxdb2.Client {
 	}
 
 	point := influxdb2.NewPoint(
-    "cart_metrics",
+		"cart_metrics",
 		tags,
 		fields,
 		time.Now())
 
-  writeAPI.WritePoint(point)
+	writeAPI.WritePoint(point)
 	err := writeAPI.WritePoint(context.Background(), point)
-  if err != nil {
-    return fmt.Errorf("Can't write to influxdb: %w", err)
-  }
+	if err != nil {
+		return fmt.Errorf("Can't write to influxdb: %w", err)
+	}
 
-  fmt.Printf("Telemetry success!"); 
+	fmt.Printf("Telemetry success!")
 	client.Close()
-  return client
+	return client
 }

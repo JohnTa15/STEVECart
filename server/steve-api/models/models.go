@@ -8,7 +8,7 @@ type Product struct {
 	ID                 uint `gorm:"primaryKey"`
 	ProductName        string
 	ProductCategory    string
-	NFCTag			   string
+	NFCTag             string
 	ProductAddedDate   time.Time
 	ProductDescription string
 	Weight             float32
@@ -17,21 +17,21 @@ type Product struct {
 }
 
 type Cart struct {
-	ID         uint      `gorm:"primaryKey" json:"-"`
-	Cart_ID    string    `gorm:"unique" json:"cart_id"`
-	MacAddress string    `gorm:"unique" json:"mac_address"`
-	IsActive   bool      `json:"is_active"`
-	LastSeen   time.Time `json:"last_seen"`
-	FwVersion  string    `json:"fw_version"`
-	TotalPrice float32   `json:"total_price"`
+	ID          uint      `gorm:"primaryKey" json:"-"`
+	Cart_ID     string    `gorm:"unique" json:"cart_id"`
+	MacAddress  string    `gorm:"unique" json:"mac_address"`
+	IsActive    bool      `json:"is_active"`
+	LastSeen    time.Time `json:"last_seen"`
+	FwVersion   string    `json:"fw_version"`
+	TotalPrice  float32   `json:"total_price"`
 	TotalWeight float32   `json:"total_weight"`
 }
 
 type User struct {
-	ID           uint   `gorm:"primaryKey" json:"-"`
-	Username     string `gorm:"unique" json:"username"`
-	Email        string `gorm:"unique" json:"email"`
-	PasswordHash string `json:"password_hash"`
+	ID           uint      `gorm:"primaryKey" json:"-"`
+	Username     string    `gorm:"unique" json:"username"`
+	Email        string    `gorm:"unique" json:"email"`
+	PasswordHash string    `json:"password_hash"`
 	UserCreation time.Time `json:"user_creation"`
 }
 
@@ -51,31 +51,31 @@ type CartOperatorItem struct {
 
 // for mqtt.go
 type WeightData struct {
-	ID			 uint `gorm:"primaryKey"`
+	ID           uint      `gorm:"primaryKey"`
 	Value        float64   `json:"weight"`
 	StableWeight bool      `json:"isStable"`
 	Timestamp    time.Time `json:"timestamp"`
 }
 
 type NFCData struct {
-	TagID     string `json:"tag_id"` // foreign key for product ?? 
+	TagID     string `json:"tag_id"` // foreign key for product ??
 	ScannerID string `json:"scanner_id"`
 }
 
 type UltraSonicData struct {
-	ID			 uint `gorm:"primaryKey"`
+	ID                 uint      `gorm:"primaryKey"`
 	Distance           float64   `json:"distance"`
 	Timestamp_Distance time.Time `json:"timestamp"`
 }
 
 type BatteryData struct {
-	ID			 uint `gorm:"primaryKey"`
+	ID       uint    `gorm:"primaryKey"`
 	BatLevel float64 `json:"battery_level"`
 	Charging bool    `json:"isCharging"`
 }
 
 type LightSensorData struct {
-	ID			 uint `gorm:"primaryKey"`
+	ID            uint      `gorm:"primaryKey"`
 	LuxLevel      float64   `json:"lux_level"`
 	Timestamp_Lux time.Time `json:"timestamp"`
 }

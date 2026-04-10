@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"steve-api/controllers"
 	"steve-api/models"
 )
 
@@ -11,7 +10,14 @@ func MeasureWeight(weight float64){
 	var product models.Product
 	var cart models.Cart
 
-	controllers.CartChecking(cart.Cart_ID)
-	controllers.ProductChecking(product.NFCTag)
+	cart, err := CartChecking(cart.Cart_ID)
+	if err != nil {
+		return 
+	}
+
+	product, error := ProductChecking(product.NFCTag)
+	if error != nil {
+		return
+	}
 		
 }
