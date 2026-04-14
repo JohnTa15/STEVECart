@@ -1,11 +1,10 @@
 package controllers
 
 import (
-	"fmt"
 	"steve-api/models"
 )
 
-
+//scaling the products and then compare them with the database(influxdb <-> mariadb)
 func MeasureWeight(weight float64){
 	var product models.Product
 	var cart models.Cart

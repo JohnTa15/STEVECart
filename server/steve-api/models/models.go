@@ -33,8 +33,10 @@ type User struct {
 	Email        string    `gorm:"unique" json:"email"`
 	PasswordHash string    `json:"password_hash"`
 	UserCreation time.Time `json:"user_creation"`
+	Role		 string		`json:"role"`
 }
 
+//the one who uses a cart with id cart_id
 type CartOperator struct {
 	ID        uint `gorm:"primaryKey"`
 	UserID    uint

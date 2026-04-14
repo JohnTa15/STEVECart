@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"steve-api/initializers"
 	"steve-api/models"
 )
