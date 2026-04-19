@@ -1,11 +1,12 @@
 package controllers
 
 import (
+	"log"
 	"steve-api/models"
 )
 
 //scaling the products and then compare them with the database(influxdb <-> mariadb)
-func MeasureWeight(weight float64){
+func MeasureWeight(cartID string){
 	var product models.Product
 	var cart models.Cart
 
@@ -18,5 +19,7 @@ func MeasureWeight(weight float64){
 	if error != nil {
 		return
 	}
+
+	weight, error := GetWeight(cart.Cart_ID)
 		
 }

@@ -1,53 +1,23 @@
 package initializers
 
 import (
-	"context"
-	"fmt"
+	"log"
 	"os"
-	"time"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 )
 
 var InfluxClient influxdb2.Client
 
-func ConnectINFLUX() influxdb2.Client {
+// ConnectINFLUX should be called once in your main.go when the server starts
+func ConnectINFLUX() {
+	// 1. Grab connection credentials from environment
 	url := os.Getenv("INFLUX_DB")
-	bucket := os.Getenv("INFLUX_BUCKET")
 	token := os.Getenv("INFLUX_TOKEN")
-	org := os.Getenv("INFLUX_ORG")
-	username := os.Getenv("INFLUX_USERNAME")
-	password := os.Getenv("INFLUX_PASSWORD")
 
-	client := influxdb2.NewClient(url, token)
-	writeAPI := client.WriteAPIBlocking(org, bucket)
+	// 2. Initialize the client and save it to the global variable
+	InfluxClient = influxdb2.NewClient(url, token)
 
-	tags := map[string]string{
-		"cart_id":       cartID,
-		"store_section": section,
-		"status":        "active",
-	}
-
-	fields := map[string]interface{}{
-		"temperature": temp,
-		"weight":      weight,
-		"battery":     battery,
-		"coordinates": coordinates,
-	}
-
-	point := influxdb2.NewPoint(
-		"cart_metrics",
-		tags,
-		fields,
-		time.Now())
-
-	writeAPI.WritePoint(point)
-	err := writeAPI.WritePoint(context.Background(), point)
-	if err != nil {
-		return fmt.Errorf("Can't write to influxdb: %w", err)
-	}
-
-	fmt.Printf("Telemetry success!")
-	client.Close()
-	return client
+	log.Println("Successfully initialized global InfluxDB client")
+	//telegraf handles the writing of the metrics, we just read from it
 }
