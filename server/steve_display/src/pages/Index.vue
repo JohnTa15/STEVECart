@@ -66,6 +66,22 @@
         <p class="subtitle text-lg font-light opacity-80 dark:text-gray-300">{{ message }}</p>
       </h1>
 
+      <!-- Flashlight Warning Banner -->
+      <transition enter-active-class="transition duration-500 ease-out"
+        enter-from-class="opacity-0 -translate-y-4" enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition duration-300 ease-in" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-4">
+        <div v-if="isBlackout" class="w-full bg-yellow-500/90 text-gray-900 rounded-xl p-6 mt-6 flex flex-col md:flex-row justify-between items-center shadow-red-500/50 shadow-2xl border border-yellow-300 animate-pulse">
+          <div class="text-left mb-4 md:mb-0">
+            <h2 class="text-2xl font-bold">⚠️ BLACKOUT DETECTED!</h2>
+            <p class="font-medium">Light levels dropped below safe limits. Do you need the flashlight?</p>
+          </div>
+          <button @click="flashlightOn = !flashlightOn" 
+            class="bg-gray-900 text-white font-bold py-3 px-8 rounded-full hover:bg-black transition shadow-lg border border-gray-700 whitespace-nowrap">
+            {{ flashlightOn ? 'TURN OFF FLASHLIGHT' : '🔦 TURN ON FLASHLIGHT' }}
+          </button>
+        </div>
+      </transition>
+
       <div class="text-lg opacity-80 capitalize dark:text-gray-400">
         {{ date }}
       </div>
@@ -134,9 +150,63 @@
 </template>
 <script>
 export default {
+  data() {
+    return {
+      weight: "0.0 kg",
+      price: "$0.00",
+      weightStatus: "",
+      scannedProduct: "",
+      // Added these for dynamic API calls!
+      cart_id: "DISPLAY_CART_01", 
+      current_nfc_tag: "NFC_456",
+      isBlackout: false,
+      flashlightOn: false
+    };
+  },
+  mounted() {
+    // Poll the light sensor every 2 seconds for real-time blackout detection
+    setInterval(this.checkEnvironmentLight, 2000);
+  },
   methods: {
     logout() {
       this.$router.push('/login')
+    },
+    async checkEnvironmentLight() {
+      try {
+        const url = `http://localhost:8089/measureLight?cartID=${this.cart_id}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.flashlight_needed) {
+          this.isBlackout = true;
+          // You could automatically turn it on here if you wanted by setting this.flashlightOn = true;
+        } else {
+          this.isBlackout = false;
+          // this.flashlightOn = false; // Optionally automatically turn it off if light is back
+        }
+      } catch (error) {
+        console.error("Failed to read light sensor", error);
+      }
+    },
+    //weight checking from the scale vs weight of the database
+    async triggerWeightCheck() {
+      try {
+        const url = `http://localhost:8089/measureWeight?cartID=${this.cart_id}&tag=${this.current_nfc_tag}`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.status === "correct") {
+          this.weightStatus = "Weight Match!";
+          this.weight = data.actual_weight + " kg";
+          this.scannedProduct = data.product_name;
+        } else {
+          this.weightStatus = "Weight Mismatch!";
+          this.weight = data.actual_weight + " kg (Expected: " + data.expected_weight + ")";
+        }
+      } catch (error) {
+        console.error("Failed to fetch weight data:", error);
+        this.weightStatus = "Error reaching Scale API";
+      }
     }
   }
 };

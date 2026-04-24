@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"steve-api/controllers"
 	"steve-api/initializers"
 	"steve-api/models"
 )
@@ -36,6 +37,9 @@ func main() {
 	r := gin.Default()
 	r.POST("/registerCartID", CartRegister)
 	r.GET("/users", GetAllUsers)
+	
+	r.GET("/measureWeight", controllers.MeasureWeightHandler)
+	r.GET("/measureLight", controllers.MeasureLight)
 	initializers.ConnectDB()
 	client := initializers.ConnectMQTT()
 	initializers.Sub(client)
