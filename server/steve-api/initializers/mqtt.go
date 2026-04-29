@@ -148,7 +148,7 @@ func ConnectMQTT() mqtt.Client {
 	user := os.Getenv("MQTT_USER")
 	pass := os.Getenv("MQTT_PASS")
 	opts := mqtt.NewClientOptions()
-	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", broker))
+	opts.AddBroker(broker)
 	opts.SetClientID("go_mqtt_client")
 	opts.SetUsername(user)
 	opts.SetPassword(pass)

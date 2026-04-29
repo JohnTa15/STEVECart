@@ -1,15 +1,14 @@
 package controllers
 
 import(
-	"fmt"
 	"github.com/gin-gonic/gin"
 )
 
 func MeasureLight(c *gin.Context){
 	cartID := c.Query("cartID")
-	tag := c.Query("tag")
+	_ = c.Query("tag")
 
-	cart, err := CartChecking(cartID)
+	_, err := CartChecking(cartID)
 	if err != nil {
 		c.JSON(500, gin.H{"status": "error", "message": "Cart not found"})
 		return

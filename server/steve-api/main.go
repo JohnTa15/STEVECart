@@ -40,7 +40,9 @@ func main() {
 	
 	r.GET("/measureWeight", controllers.MeasureWeightHandler)
 	r.GET("/measureLight", controllers.MeasureLight)
+	initializers.LoadENV()
 	initializers.ConnectDB()
+	initializers.ConnectINFLUX()
 	client := initializers.ConnectMQTT()
 	initializers.Sub(client)
 	r.Run(":8089")

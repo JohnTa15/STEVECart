@@ -20,3 +20,14 @@ SmartCarts for supermarket tracking and management
 
 # Notes
 > The UWB Sensor is a microcontroller based sensor so it will be connected to the Raspberry Pi 5 via USB. In order to get this to work we need to install some anchors in the supermarket. The anchors will be connected to the main server.
+
+
+# Running process steps
+1. In strong computer the CVAT must be installed and setup in order to train the AI model with annotated images(OAK-D-LITE train). 
+
+
+# CVAT tutorial
+- create superadmin
+- create project -> add product_labels -> add tasks (with options picture quality 100, segment size 60, validation mode ground truth)
+- do the annotation process
+- click project -> actions -> export dataset -> Ultralytics YOLO Detection 1.0, click save images

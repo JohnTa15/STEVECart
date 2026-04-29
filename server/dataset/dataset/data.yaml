@@ -1,0 +1,13 @@
+names:
+  0: coca_cola_500ml
+  1: monster_energy_drink_mango_loco
+  2: kyknos_ketchup_classic
+path: /home/johnt/Documents/STEVEcart/STEVECart/server/dataset/dataset
+train: images/train
+val: images/val
+
+nc: 3 # number of classes
+names: 
+  - coca_cola_500ml
+  - monster_energy_drink_mango_loco
+  - kyknos_ketchup_classic

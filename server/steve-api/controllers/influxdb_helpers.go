@@ -5,16 +5,31 @@ import (
 	"fmt"
 	"os"
 	"steve-api/initializers"
-
 )
 
 var org = os.Getenv("INFLUXDB_ORG")
 var bucket = os.Getenv("INFLUXDB_BUCKET")
+func ORGCheck(){
+	if os.Getenv("INFLUXDB_ORG") != "" {
+		org = os.Getenv("INFLUXDB_ORG")
+	} else {
+		fmt.Println("Probably .env file is missing or the INFLUXDB_ORG variable is not in the .env file")
+	}	
+}
+func BucketCheck(){
+	if os.Getenv("INFLUXDB_BUCKET") != "" {
+		bucket = os.Getenv("INFLUXDB_BUCKET")
+	} else {
+		fmt.Println("Probably .env file is missing or the INFLUXDB_BUCKET variable is not in the .env file")
+	}	
+}
 var measurement_name = "cart_metrics"
 
-//making a file in order to get the data from the influxdb
-//now with this I can directly use the file in the controllers..
-func GetNFC(cartID string) (string, error){
+// making a file in order to get the data from the influxdb
+// now with this I can directly use the file in the controllers..
+func GetNFC(cartID string) (string, error) {
+	ORGCheck()
+	BucketCheck()
 	queryAPI := initializers.InfluxClient.QueryAPI(org)
 
 	query := fmt.Sprintf(`from(bucket: "%s")
@@ -40,7 +55,9 @@ func GetNFC(cartID string) (string, error){
 	return nfc, nil
 }
 
-func GetWeight(cartID string) (float64, error){
+func GetWeight(cartID string) (float64, error) {
+	ORGCheck()
+	BucketCheck()
 	queryAPI := initializers.InfluxClient.QueryAPI(org)
 
 	query := fmt.Sprintf(`from(bucket: "%s")
@@ -66,8 +83,9 @@ func GetWeight(cartID string) (float64, error){
 	return weight, nil
 }
 
-
-func GetLux(cartID string) (float64, error){
+func GetLux(cartID string) (float64, error) {
+	ORGCheck()
+	BucketCheck()
 	queryAPI := initializers.InfluxClient.QueryAPI(org)
 
 	query := fmt.Sprintf(`from(bucket: "%s")

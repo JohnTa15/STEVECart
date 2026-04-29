@@ -60,6 +60,26 @@ else
     echo "Some sensor programs were not compiled due to missing source files."
     exit 1;
 fi
+echo "Installing AI Camera Dependencies..."
+
+# 1. Install Python, OpenCV(computer vision), and USB dependencies via apk to avoid massive compilation errors on Alpine
+apk add --no-cache python3 py3-pip py3-opencv py3-numpy py3-paho-mqtt libusb-dev || echo "Warning: Some apk packages failed."
+
+# 2. The Luxonis script is meant for Ubuntu/Debian. We run it gracefully so it doesn't crash the script if it fails.
+curl -fL https://docs.luxonis.com/install_dependencies.sh | bash || echo "Warning: Luxonis script failed (expected on Alpine), continuing with manual install."
+
+# 3. Install depthai and paho-mqtt via pip safely (newer pip versions need --break-system-packages)
+pip3 install --break-system-packages depthai paho-mqtt || pip3 install depthai paho-mqtt || echo "Warning: pip install failed."
+
+# 4. Only attempt to configure examples if the user actually cloned the repository
+if [ -d "depthai-python/examples" ]; then
+    echo "Configuring depthai examples..."
+    cd depthai-python/examples
+    python3 install_dependencies.py || echo "Warning: Failed to install example dependencies."
+    cd ../..
+else
+    echo "depthai-python examples folder not found, skipping examples setup."
+fi
 
 echo "Sensors will be executed by Telegraf."
 
