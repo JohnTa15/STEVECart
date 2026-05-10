@@ -38,6 +38,7 @@ func MeasureWeightHandler(c *gin.Context) {
 			"product_name":    product.ProductName,
 			"expected_weight": product.Weight,
 			"actual_weight":   weight,
+			"price":           product.Price,
 			"status":          "correct",
 		})
 	} else {
@@ -47,6 +48,7 @@ func MeasureWeightHandler(c *gin.Context) {
 			"product_name":    product.ProductName,
 			"expected_weight": product.Weight,
 			"actual_weight":   weight,
+			"price":           product.Price,
 			"status":          "incorrect",
 		})
 	}

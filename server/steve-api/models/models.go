@@ -4,6 +4,14 @@ import (
 	"time"
 )
 
+type ShelvePosition struct{
+	ID uint `gorm:"primaryKey"`
+	Shelve_id string `gorm:"unique" json:"shelve_id"`
+	X_Coordinate float64 `json:"x_coordinate"`
+	Y_Coordinate float64 `json:"y_coordinate"`
+	Description string `json:"description"`
+}
+
 type Product struct {
 	ID                 uint `gorm:"primaryKey"`
 	ProductName        string
@@ -14,6 +22,7 @@ type Product struct {
 	Weight             float32
 	Pcs                int
 	Price              float32
+	ShelveID string `gorm:"unique" json:"shelve_id"` //shelve where the product is located
 }
 
 type Cart struct {
@@ -83,9 +92,11 @@ type LightSensorData struct {
 }
 
 type UWBData struct { //for UWB location data
+	ID uint `gorm:"primaryKey"`
 	UWB_NODEID    string    `json:"uwb_node_id"`
 	X_Coordinate  float64   `json:"x_coordinate"`
 	Y_Coordinate  float64   `json:"y_coordinate"`
-	Z_Coordinate  float64   `json:"z_coordinate"`
-	Timestamp_UWB time.Time `json:"timestamp"`
+	LastSeen_UWB time.Time `json:"last_seen_uwb"`
+	Description string `json:"description"`
 }
+

@@ -48,10 +48,10 @@
               <span class="text-white font-mono">{{ cart_version }}</span>
             </div>
 
-            <a href="#"
-              class="block px-4 py-3 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors">
+            <button @click.prevent="triggerWeightCheck"
+              class="w-full text-left block px-4 py-3 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors border-t border-white/5">
               Sensors Test
-            </a>
+            </button>
 
             <a href="#"
               class="block px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors border-t border-white/5">
@@ -67,15 +67,16 @@
       </h1>
 
       <!-- Flashlight Warning Banner -->
-      <transition enter-active-class="transition duration-500 ease-out"
-        enter-from-class="opacity-0 -translate-y-4" enter-to-class="opacity-100 translate-y-0"
-        leave-active-class="transition duration-300 ease-in" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-4">
-        <div v-if="isBlackout" class="w-full bg-yellow-500/90 text-gray-900 rounded-xl p-6 mt-6 flex flex-col md:flex-row justify-between items-center shadow-red-500/50 shadow-2xl border border-yellow-300 animate-pulse">
+      <transition enter-active-class="transition duration-500 ease-out" enter-from-class="opacity-0 -translate-y-4"
+        enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-300 ease-in"
+        leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-4">
+        <div v-if="isBlackout"
+          class="w-full bg-yellow-500/90 text-gray-900 rounded-xl p-6 mt-6 flex flex-col md:flex-row justify-between items-center shadow-red-500/50 shadow-2xl border border-yellow-300 animate-pulse">
           <div class="text-left mb-4 md:mb-0">
             <h2 class="text-2xl font-bold">⚠️ BLACKOUT DETECTED!</h2>
             <p class="font-medium">Light levels dropped below safe limits. Do you need the flashlight?</p>
           </div>
-          <button @click="flashlightOn = !flashlightOn" 
+          <button @click="flashlightOn = !flashlightOn"
             class="bg-gray-900 text-white font-bold py-3 px-8 rounded-full hover:bg-black transition shadow-lg border border-gray-700 whitespace-nowrap">
             {{ flashlightOn ? 'TURN OFF FLASHLIGHT' : '🔦 TURN ON FLASHLIGHT' }}
           </button>
@@ -100,31 +101,48 @@
       </div>
 
       <div
-        class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit mx-auto inline-block">
-        <h3 class="text-xl font-semibold dark:text-white">Current scanned products list</h3>
-        <ul class="text-lg font-light dark:text-gray-300 w-fit">
-          <li>Product A</li>
-          <li>Product B</li>
-          <li>Product C</li>
+        class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit mx-auto inline-block text-left">
+        <p class="text-xl font-semibold dark:text-white mb-2">Cart Summary</p>
+        <ul class="bg-white/5 dark:bg-gray-900/30 rounded-xl p-4 space-y-2 dark:text-gray-300 w-full min-w-[300px]">
+          <li class="flex justify-between gap-4">
+            <span class="opacity-70">Total Weight:</span>
+            <span class="font-medium text-white">{{ totalWeight }} kg</span>
+          </li>
+          <li class="flex justify-between gap-4">
+            <span class="opacity-70">Total Price:</span>
+            <span class="font-medium text-white">{{ totalPrice }} €</span>
+          </li>
+          <li class="flex justify-between gap-4">
+            <span class="opacity-70">Status:</span>
+            <span class="font-medium"
+              :class="{ 'text-green-400': weightStatus === 'Weight Match!', 'text-red-400': weightStatus && weightStatus !== 'Weight Match!' }">
+              {{ weightStatus || '--' }}
+            </span>
+          </li>
         </ul>
       </div>
 
       <div class="flex flex-wrap gap-6 mt-10 text-center justify-center">
 
         <div
-          class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit">
-          <p class="text-xl font-semibold dark:text-white">Recent bought products</p>
-          <ul class="bg-white/5 dark:bg-gray-900/30 rounded-xl p-4 mt-2 space-y-1 dark:text-gray-300 w-fit">
-            <li>Product 1</li>
-            <li>Product 2</li>
-            <li>Product 3</li>
-          </ul>
-        </div>
-
-        <div
-          class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit">
-          <p class="text-xl font-semibold dark:text-white">Minimap</p>
-          <img src="../assets/minimap.png" alt="Supermarket Minimap" class="w-full h-full object-cover" />
+          class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-full max-w-md text-left flex-grow">
+          <p class="text-xl font-semibold dark:text-white mb-4">Scan Products</p>
+          <div class="space-y-2 max-h-48 overflow-y-auto pr-2 custom-Productsar">
+            <div v-for="(item, index) in scannedProducts" :key="index"
+              class="bg-white/5 dark:bg-gray-900/30 rounded-lg p-3 flex justify-between items-center">
+              <div>
+                <p class="font-bold text-white">{{ item.name }}</p>
+                <p class="text-sm opacity-70">{{ item.weight }} • {{ item.price }}</p>
+              </div>
+              <span class="text-sm font-bold px-2 py-1 rounded"
+                :class="{ 'bg-green-500/20 text-green-400': item.status === 'Match', 'bg-red-500/20 text-red-400': item.status === 'Mismatch' }">
+                {{ item.status }}
+              </span>
+            </div>
+            <div v-if="scannedProducts.length === 0" class="text-center opacity-50 py-4">
+              No products scanned yet.
+            </div>
+          </div>
         </div>
 
         <div
@@ -138,13 +156,16 @@
           <p v-if="errMessage" class="text-red-400">{{ errMessage }}</p>
         </div>
 
-        <div
-          class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition space-y-1 border border-transparent dark:border-gray-700 w-fit">
-          <p class="text-xl font-semibold dark:text-white">Details</p>
-          <p class="dark:text-gray-300">Weight: {{ weight }}</p>
-          <p class="dark:text-gray-300">Price: {{ price }}</p>
-        </div>
+
+
       </div>
+      <div
+        class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit">
+        <p class="text-xl font-semibold dark:text-white">Minimap</p>
+        <img src="../assets/minimap.png" alt="Supermarket Minimap" class="w-full h-full object-cover" />
+      </div>
+
+
     </header>
   </div>
 </template>
@@ -152,16 +173,31 @@
 export default {
   data() {
     return {
-      weight: "0.0 kg",
-      price: "$0.00",
+      weight: "", //kg 
+      price: "", //€
       weightStatus: "",
       scannedProduct: "",
+      scannedProducts: [],
       // Added these for dynamic API calls!
-      cart_id: "DISPLAY_CART_01", 
+      cart_id: "DISPLAY_CART_01",
       current_nfc_tag: "NFC_456",
       isBlackout: false,
       flashlightOn: false
     };
+  },
+  computed: {
+    totalWeight() {
+      return this.scannedProducts.reduce((acc, item) => {
+        const val = parseFloat(item.weight) || 0;
+        return acc + val;
+      }, 0).toFixed(2);
+    },
+    totalPrice() {
+      return this.scannedProducts.reduce((acc, item) => {
+        const val = parseFloat(item.price) || 0;
+        return acc + val;
+      }, 0).toFixed(2);
+    }
   },
   mounted() {
     // Poll the light sensor every 2 seconds for real-time blackout detection
@@ -176,13 +212,11 @@ export default {
         const url = `http://localhost:8089/measureLight?cartID=${this.cart_id}`;
         const response = await fetch(url);
         const data = await response.json();
-        
+
         if (data.flashlight_needed) {
           this.isBlackout = true;
-          // You could automatically turn it on here if you wanted by setting this.flashlightOn = true;
         } else {
           this.isBlackout = false;
-          // this.flashlightOn = false; // Optionally automatically turn it off if light is back
         }
       } catch (error) {
         console.error("Failed to read light sensor", error);
@@ -198,10 +232,24 @@ export default {
         if (data.status === "correct") {
           this.weightStatus = "Weight Match!";
           this.weight = data.actual_weight + " kg";
+          this.price = data.price ? data.price.toFixed(2) + " €" : "0.00 €";
           this.scannedProduct = data.product_name;
+          this.scannedProducts.unshift({
+            name: data.product_name,
+            weight: data.actual_weight + " kg",
+            price: data.price ? data.price.toFixed(2) + " €" : "0.00 €",
+            status: "Match"
+          });
         } else {
           this.weightStatus = "Weight Mismatch!";
           this.weight = data.actual_weight + " kg (Expected: " + data.expected_weight + ")";
+          this.price = data.price ? data.price.toFixed(2) + " €" : "0.00 €";
+          this.scannedProducts.unshift({
+            name: data.product_name || "Unknown",
+            weight: data.actual_weight + " kg",
+            price: data.price ? data.price.toFixed(2) + " €" : "0.00 €",
+            status: "Mismatch"
+          });
         }
       } catch (error) {
         console.error("Failed to fetch weight data:", error);

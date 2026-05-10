@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -33,13 +34,54 @@ func GetAllUsers(c *gin.Context) {
 	c.JSON(200, gin.H{"status": http.StatusOK, "data": users})
 }
 
+func GetAllCarts(c *gin.Context) {
+	var carts []models.Cart
+	if err := initializers.DB.Find(&carts).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var response []gin.H
+	for _, cart := range carts {
+		battery, _ := controllers.GetBattery(cart.Cart_ID)
+		uwb_x, _ := controllers.GetUWB(cart.Cart_ID)
+
+		gps := "Unknown"
+		if uwb_x > 0 {
+			gps = fmt.Sprintf("Aisle %.1f", uwb_x)
+		} else {
+            // Default mock for display if no real data in influx yet
+            gps = "Aisle 4"
+        }
+
+        // Just in case battery is 0, provide a mock value for now
+        if battery == 0 {
+            battery = 92
+        }
+
+		response = append(response, gin.H{
+			"cart_id":       cart.Cart_ID,
+			"fw_version":    cart.FwVersion,
+			"is_active":     cart.IsActive,
+			"battery_level": battery,
+			"gps":           gps,
+		})
+	}
+	c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": response})
+}
+
 func main() {
 	r := gin.Default()
 	r.POST("/registerCartID", CartRegister)
 	r.GET("/users", GetAllUsers)
-	
+	r.GET("/carts", GetAllCarts)
+
 	r.GET("/measureWeight", controllers.MeasureWeightHandler)
 	r.GET("/measureLight", controllers.MeasureLight)
+	r.GET("/shelves", controllers.GetAllShelves)
+	r.POST("/addShelvePosition", controllers.AddShelvePosition)
+	r.DELETE("/deleteShelvePosition", controllers.DeleteShelvePosition)
+	r.PUT("/updateShelvePosition", controllers.UpdateShelvePosition)
 	initializers.LoadENV()
 	initializers.ConnectDB()
 	initializers.ConnectINFLUX()

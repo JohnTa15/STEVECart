@@ -139,7 +139,6 @@ func initMQTT() {
 	var UWBData models.UWBData
 	UWBData.X_Coordinate = 0.0
 	UWBData.Y_Coordinate = 0.0
-	UWBData.Z_Coordinate = 0.0
 	UWBData.Timestamp_UWB = time.Now()
 }
 

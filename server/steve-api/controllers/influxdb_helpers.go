@@ -110,3 +110,59 @@ func GetLux(cartID string) (float64, error) {
 
 	return lux, nil
 }
+
+func GetBattery(cartID string) (float64, error) {
+	ORGCheck()
+	BucketCheck()
+	queryAPI := initializers.InfluxClient.QueryAPI(org)
+
+	query := fmt.Sprintf(`from(bucket: "%s")
+		|> range(start: -1m)
+		|> filter(fn: (r) => r["_measurement"] == "%s")
+		|> filter(fn: (r) => r["cart_id"] == "%s")
+		|> filter(fn: (r) => r["_field"] == "battery_level")
+		|> last()
+	`, bucket, measurement_name, cartID)
+
+	result, err := queryAPI.Query(context.Background(), query)
+	if err != nil {
+		return 0, err
+	}
+
+	var battery float64
+	for result.Next() {
+		if val, ok := result.Record().Value().(float64); ok {
+			battery = val
+		}
+	}
+
+	return battery, nil
+}
+
+func GetUWB(cartID string) (float64, error) {
+	ORGCheck()
+	BucketCheck()
+	queryAPI := initializers.InfluxClient.QueryAPI(org)
+
+	query := fmt.Sprintf(`from(bucket: "%s")
+		|> range(start: -1m)
+		|> filter(fn: (r) => r["_measurement"] == "%s")
+		|> filter(fn: (r) => r["cart_id"] == "%s")
+		|> filter(fn: (r) => r["_field"] == "x_coordinate")
+		|> last()
+	`, bucket, measurement_name, cartID)
+
+	result, err := queryAPI.Query(context.Background(), query)
+	if err != nil {
+		return 0, err
+	}
+
+	var x_coord float64
+	for result.Next() {
+		if val, ok := result.Record().Value().(float64); ok {
+			x_coord = val
+		}
+	}
+
+	return x_coord, nil
+}
