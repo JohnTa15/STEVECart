@@ -11,6 +11,7 @@ func init() {
 }
 
 func main() {
+	initializers.DB.AutoMigrate(&models.ShelvePosition{})
 	initializers.DB.AutoMigrate(&models.Product{})
 	initializers.DB.AutoMigrate(&models.Cart{})
 	initializers.DB.AutoMigrate(&models.User{})

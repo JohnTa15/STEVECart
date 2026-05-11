@@ -82,6 +82,27 @@
                 </div>
             </transition>
 
+            <transition enter-active-class="transition duration-500 ease-out"
+                enter-from-class="opacity-0 -translate-y-4" enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition duration-300 ease-in" leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 -translate-y-4">
+                <div v-if="assistanceCarts.length > 0"
+                    class="w-full bg-red-500/90 text-white rounded-xl p-5 mt-6 shadow-red-500/50 shadow-2xl border border-red-400 animate-pulse">
+                    <h2 class="text-xl font-bold mb-3">Assistance Requested!</h2>
+                    <div class="space-y-2">
+                        <div v-for="cart in assistanceCarts" :key="cart.cart_id"
+                            class="flex justify-between items-center bg-white/10 rounded-lg px-4 py-2">
+                            <span class="font-mono font-bold">{{ cart.cart_id }}</span>
+                            <span class="text-sm opacity-80">{{ cart.gps }}</span>
+                            <button @click="dismissAssistance(cart.cart_id)"
+                                class="bg-white text-red-600 font-bold text-xs px-4 py-1.5 rounded-full hover:bg-red-100 transition whitespace-nowrap">
+                                Dismiss
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </transition>
+
             <div class="text-lg opacity-80 capitalize dark:text-gray-400">
                 {{ date }}
             </div>
@@ -216,11 +237,17 @@
 
                 <div
                     class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit">
-                    <p class="text-xl font-semibold dark:text-white">Cart ID warnings</p>
-                    <ul class="bg-white/5 dark:bg-gray-900/30 rounded-xl p-4 mt-2 space-y-1 dark:text-gray-300 w-fit">
-                        <li>Cart 1</li>
-                        <li>Cart 2</li>
-                        <li>Cart 3</li>
+                    <p class="text-xl font-semibold dark:text-white">Assistance Requests</p>
+                    <ul class="bg-white/5 dark:bg-gray-900/30 rounded-xl p-4 mt-2 space-y-1 dark:text-gray-300 w-fit min-w-[180px]">
+                        <li v-for="cart in assistanceCarts" :key="cart.cart_id"
+                            class="flex items-center justify-between gap-3">
+                            <span class="font-mono text-red-400 font-bold">{{ cart.cart_id }}</span>
+                            <button @click="dismissAssistance(cart.cart_id)"
+                                class="text-xs bg-red-500/20 text-red-300 border border-red-500/30 rounded-lg px-2 py-0.5 hover:bg-red-500/40 transition">
+                                Dismiss
+                            </button>
+                        </li>
+                        <li v-if="assistanceCarts.length === 0" class="text-gray-500 text-sm">No requests</li>
                     </ul>
                 </div>
 
@@ -304,9 +331,24 @@ export default {
         setInterval(this.fetchUserStats, 10000);
         this.fetchShelvePositions();
     },
+    computed: {
+        assistanceCarts() {
+            return this.onlineCarts.filter(cart => cart.needs_assistance);
+        }
+    },
     methods: {
         logout() {
             this.$router.push('/login')
+        },
+        async dismissAssistance(cartID) {
+            try {
+                await fetch(`http://localhost:8089/dismissAssistance?cartID=${cartID}`);
+                // Immediately reflect in UI without waiting for next poll
+                const cart = this.onlineCarts.find(c => c.cart_id === cartID);
+                if (cart) cart.needs_assistance = false;
+            } catch (error) {
+                console.error("Failed to dismiss assistance:", error);
+            }
         },
         async fetchCarts() {
             try {

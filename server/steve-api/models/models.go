@@ -22,18 +22,19 @@ type Product struct {
 	Weight             float32
 	Pcs                int
 	Price              float32
-	ShelveID string `gorm:"unique" json:"shelve_id"` //shelve where the product is located
+	ShelveID string `gorm:"index" json:"shelve_id"` //shelve where the product is located
 }
 
 type Cart struct {
-	ID          uint      `gorm:"primaryKey" json:"-"`
-	Cart_ID     string    `gorm:"unique" json:"cart_id"`
-	MacAddress  string    `gorm:"unique" json:"mac_address"`
-	IsActive    bool      `json:"is_active"`
-	LastSeen    time.Time `json:"last_seen"`
-	FwVersion   string    `json:"fw_version"`
-	TotalPrice  float32   `json:"total_price"`
-	TotalWeight float32   `json:"total_weight"`
+	ID               uint      `gorm:"primaryKey" json:"-"`
+	Cart_ID          string    `gorm:"unique" json:"cart_id"`
+	MacAddress       string    `gorm:"unique" json:"mac_address"`
+	IsActive         bool      `json:"is_active"`
+	LastSeen         time.Time `json:"last_seen"`
+	FwVersion        string    `json:"fw_version"`
+	TotalPrice       float32   `json:"total_price"`
+	TotalWeight      float32   `json:"total_weight"`
+	NeedsAssistance  bool      `json:"needs_assistance"`
 }
 
 type User struct {

@@ -1,1 +1,0 @@
-![[Stevecart(1).svg]]

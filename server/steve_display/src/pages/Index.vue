@@ -32,12 +32,6 @@
             <div class="block px-4 py-3 text-sm text-gray-400 hover:bg-white/5 transition-colors cursor-default">
               <span class="block text-xs uppercase tracking-wider opacity-50">Announcements</span>
             </div>
-
-            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer"
-              class="block px-4 py-3 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors border-b border-white/5">
-              Need Help? Contact Support!
-            </a>
-
             <div class="block px-4 py-3 text-sm text-gray-400 hover:bg-white/5 transition-colors cursor-default">
               <span class="block text-xs uppercase tracking-wider opacity-50">Cart ID</span>
               <span class="text-white font-mono">{{ cart_id }}</span>
@@ -53,11 +47,6 @@
               Sensors Test
             </button>
 
-            <a href="#"
-              class="block px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors border-t border-white/5">
-              Logout
-            </a>
-
           </div>
         </transition>
       </div>
@@ -65,6 +54,23 @@
         <p class="title dark:text-white">Hello {{ user }}, this is S.T.E.V.E Display.</p>
         <p class="subtitle text-lg font-light opacity-80 dark:text-gray-300">{{ message }}</p>
       </h1>
+
+      <!-- Assistance Confirmation Banner -->
+      <transition enter-active-class="transition duration-500 ease-out" enter-from-class="opacity-0 -translate-y-4"
+        enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-300 ease-in"
+        leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-4">
+        <div v-if="assistanceRequested"
+          class="w-full bg-green-500/90 text-gray-900 rounded-xl p-6 mt-6 flex flex-col md:flex-row justify-between items-center shadow-green-500/50 shadow-2xl border border-green-300">
+          <div class="text-left mb-4 md:mb-0">
+            <h2 class="text-2xl font-bold">Help is on the way!</h2>
+            <p class="font-medium">A staff member has been notified and will assist you shortly.</p>
+          </div>
+          <button @click="assistanceRequested = false"
+            class="bg-gray-900 text-white font-bold py-3 px-8 rounded-full hover:bg-black transition shadow-lg border border-gray-700 whitespace-nowrap">
+            Dismiss
+          </button>
+        </div>
+      </transition>
 
       <!-- Flashlight Warning Banner -->
       <transition enter-active-class="transition duration-500 ease-out" enter-from-class="opacity-0 -translate-y-4"
@@ -98,6 +104,11 @@
       <div class="flex flex-wrap gap-6 mt-10 text-center justify-end">
         <button @click="logout"
           class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit mx-auto inline-block">Logout</button>
+      </div>
+      <div class="flex flex-wrap gap-6 mt-10 text-center justify-end">
+        <button @click="assistance"
+          class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit mx-auto inline-block">
+          Need Help?</button>
       </div>
 
       <div
@@ -156,15 +167,32 @@
           <p v-if="errMessage" class="text-red-400">{{ errMessage }}</p>
         </div>
 
-
-
       </div>
       <div
         class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit">
         <p class="text-xl font-semibold dark:text-white">Minimap</p>
-        <img src="../assets/minimap.png" alt="Supermarket Minimap" class="w-full h-full object-cover" />
+        <img id="source" src="../assets/minimap.png" alt="Supermarket Minimap" class="w-full h-full object-cover" />
+        <canvas id="canvas" class="mt-4"></canvas>
       </div>
+      <script> // live mini map
+        //drawing the image.. 
+        const canvas = document.getElementById("canvas")
+        const ctx = canvas.getContext("2d")
+        const source = document.getElementById("source")
 
+        //setting the dimensions of the minimap
+        function drawFullImage(){
+          canvas.width = image.naturalWidth;
+          canvas.height = image.naturalHeight;
+          ctx.drawImage(image,0,0);
+        }
+
+        if(image.complete){
+          drawFullImage();
+        }else{
+          image.addEventListener("load", drawFullImage);
+        }
+      </script>
 
     </header>
   </div>
@@ -182,7 +210,8 @@ export default {
       cart_id: "DISPLAY_CART_01",
       current_nfc_tag: "NFC_456",
       isBlackout: false,
-      flashlightOn: false
+      flashlightOn: false,
+      assistanceRequested: false,
     };
   },
   computed: {
@@ -197,7 +226,14 @@ export default {
         const val = parseFloat(item.price) || 0;
         return acc + val;
       }, 0).toFixed(2);
+    },
+    paymentTime() {
+      let totalWeight = this.totalWeight;
+      let totalPrice = this.totalPrice;
+      let payment_method = ["credit card", "debit card", "cash"];
+      console.log("The user chose to pay with " + payment_method)
     }
+
   },
   mounted() {
     // Poll the light sensor every 2 seconds for real-time blackout detection
@@ -206,6 +242,17 @@ export default {
   methods: {
     logout() {
       this.$router.push('/login')
+    },
+    async assistance() {
+      try {
+        const url = `http://localhost:8089/assistance?cartID=${this.cart_id}`;
+        await fetch(url);
+        this.assistanceRequested = true;
+        // Auto-clear confirmation after 30 seconds
+        setTimeout(() => { this.assistanceRequested = false; }, 30000);
+      } catch (error) {
+        console.error("Failed to request assistance", error);
+      }
     },
     async checkEnvironmentLight() {
       try {
