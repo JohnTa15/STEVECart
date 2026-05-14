@@ -7,8 +7,9 @@ SmartCarts for supermarket tracking and management
 # Client/SmartCart Side
 ## The sensors that will be used:
 - UWB Sensor (tag/anchors): MaUWB ESP32S3
-- NFC: PN532
+- NFC: Adafruit PN532
 - Ultrasonic Sensor: HC-SR04
+- LUX Sensor: Adafruit TSL2591
 - Load Cell: HX711 Amplifier
 - AI camera: OAK-D Lite
 

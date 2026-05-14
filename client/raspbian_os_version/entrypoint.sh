@@ -6,9 +6,22 @@ echo "SmartCart client started on Raspbian OS Lite. Keeping it running..."
 
 # Update and install dependencies using apt-get (Debian/Raspbian package manager)
 sudo apt-get update && sudo apt-get upgrade -y
-sudo apt-get install -y build-essential pkg-config bash libnfc-bin libnfc-dev libsqlite3-dev libmariadb-dev curl libcurl4-openssl-dev libi2c-dev wiringpi
+sudo apt-get install -y build-essential pkg-config bash python3-serial libnfc-bin libnfc-dev libsqlite3-dev libmariadb-dev curl libcurl4-openssl-dev libi2c-dev wiringpi
 echo "The dependencies have been installed successfully!"
 sleep 1
+
+# Installing python virtual environment
+python3 -m venv /.venv
+source /.venv/bin/activate
+
+# Installing python libraries
+pip3 install pn532pi
+pip3 install hx711
+pip3 install adafruit-circuitpython-pn532
+pip3 install gpiozero
+pip3 install adafruit-circuitpython-tsl2591
+pip3 install pyserial
+
 
 # Install Telegraf (InfluxData repository)
 echo "Setting up InfluxData repository for Telegraf..."
@@ -33,50 +46,55 @@ fi
 flag=0
 cd /STEVE-CART
 
-echo "Completing the setup of the client environment..."
-# Compiling the sensor programs if the source files are present
-if [ -f "battery_publisher.c" ]; then
-    gcc battery_publisher.c -o battery_publisher
-    echo "Battery publisher compiled successfully!"
+echo "Verifying the setup of the client environment..."
+# Checking if all Python publisher scripts are present
+if [ -f "client/sensor_publisher/battery_publisher.py" ]; then
+    echo "Battery publisher found!"
 else
-    echo "battery_publisher.c not found. Skipping compilation."
+    echo "battery_publisher.py not found!"
     flag=1
 fi
 
-if [ -f "nfc_publisher.c" ]; then
-    gcc nfc_publisher.c -o nfc_publisher -lnfc
-    echo "NFC publisher compiled successfully!"
+if [ -f "client/sensor_publisher/nfc_publisher.py" ]; then
+    echo "NFC publisher found!"
 else
-    echo "nfc_publisher.c not found. Skipping compilation."
+    echo "nfc_publisher.py not found!"
     flag=1
 fi
 
-if [ -f "ultrasonic_publisher.c" ]; then
-    gcc ultrasonic_publisher.c -o ultrasonic_publisher -lwiringPi
-    echo "Ultrasonic publisher compiled successfully!"
+if [ -f "client/sensor_publisher/ultrasonic_publisher.py" ]; then
+    echo "Ultrasonic publisher found!"
 else
-    echo "ultrasonic_publisher.c not found. Skipping compilation."
+    echo "ultrasonic_publisher.py not found!"
     flag=1
 fi
 
-if [ -f "weight_publisher.c" ]; then
-    gcc weight_publisher.c -o weight_publisher -lsqlite3 -lwiringPi
-    echo "Weight publisher compiled successfully!"
+if [ -f "client/sensor_publisher/scale_publisher.py" ]; then
+    echo "Scale publisher found!"
 else
-    echo "weight_publisher.c not found. Skipping compilation."
+    echo "scale_publisher.py not found!"
+    flag=1
+fi
+
+if [ -f "client/sensor_publisher/light_publisher.py" ]; then
+    echo "Light publisher found!"
+else
+    echo "light_publisher.py not found!"
+    flag=1
+fi
+
+if [ -f "client/sensor_publisher/uwb_publisher.py" ]; then
+    echo "UWB publisher found!"
+else
+    echo "uwb_publisher.py not found!"
     flag=1
 fi
 
 
 if [ $flag -eq 0 ]; then
-    echo "All sensor programs have been compiled successfully!"
-    if [ -f "libnfc.conf" ]; then
-        sudo mkdir -p /etc/nfc
-        sudo cp libnfc.conf /etc/nfc/
-        echo "libnfc.conf copied to /etc/nfc/"
-    fi
+    echo "All Python sensor publishers have been verified successfully!"
 else
-    echo "Some sensor programs were not compiled due to missing source files."
+    echo "Some sensor publishers are missing. Please check the 'client/sensor_publisher/' directory!"
     exit 1
 fi
 

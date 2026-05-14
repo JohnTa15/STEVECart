@@ -5,10 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"steve-api/controllers"
 	"steve-api/initializers"
 	"steve-api/models"
+
+	"github.com/gin-gonic/gin"
 )
 
 func CartRegister(c *gin.Context) {
@@ -20,8 +21,8 @@ func CartRegister(c *gin.Context) {
 	cart.LastSeen = time.Now()
 	cart.IsActive = true
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Cart registered successfully",
-		"cart_id": cart.Cart_ID,
+		"message":     "Cart registered successfully",
+		"cart_id":     cart.Cart_ID,
 		"mac_address": cart.MacAddress})
 }
 
@@ -133,12 +134,18 @@ func main() {
 	r.GET("/assistance", RequestAssistance)
 	r.GET("/dismissAssistance", DismissAssistance)
 
+	//routing UWB live tracking
+	r.GET("/ws/minimap", controllers.HandleMinimapWS)
+	r.GET("/uwb/positions", controllers.GetAllUWBPositions)
+
 	//connecting to database, influxdb, and mqtt
 	initializers.LoadENV()
 	initializers.ConnectDB()
 	initializers.ConnectINFLUX()
 	client := initializers.ConnectMQTT()
 	initializers.Sub(client)
+	// Start the goroutine that fans UWB positions out to WebSocket clients
+	controllers.StartUWBBroadcaster()
 	r.Run(":8089")
 }
 

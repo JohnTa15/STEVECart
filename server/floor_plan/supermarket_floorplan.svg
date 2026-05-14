@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700">
+  <defs>
+    <pattern id="floor" width="20" height="20" patternUnits="userSpaceOnUse">
+      <rect width="20" height="20" fill="#f5f0e8"/>
+      <rect width="1" height="20" fill="#e8e0d0" x="10"/>
+      <rect width="20" height="1" fill="#e8e0d0" y="10"/>
+    </pattern>
+    <marker id="arrowLeft" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,3 L8,0 L8,6 Z" fill="#333"/>
+    </marker>
+    <marker id="arrowUp" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,3 L8,0 L8,6 Z" fill="#333"/>
+    </marker>
+  </defs>
+
+  <rect width="900" height="700" fill="#e8e4dc"/>
+
+  <rect x="50" y="50" width="800" height="600" fill="url(#floor)" stroke="#555" stroke-width="4"/>
+
+  <line x1="50" y1="50" x2="50" y2="285" stroke="#555" stroke-width="4"/>
+  <line x1="50" y1="375" x2="50" y2="650" stroke="#555" stroke-width="4"/>
+
+  <line x1="50" y1="50" x2="395" y2="50" stroke="#555" stroke-width="4"/>
+  <line x1="485" y1="50" x2="850" y2="50" stroke="#555" stroke-width="4"/>
+
+  <rect x="50" y="50" width="800" height="4" fill="#c0c0c0" opacity="0.3"/>
+  <rect x="50" y="50" width="4" height="600" fill="#c0c0c0" opacity="0.3"/>
+
+  <rect x="10" y="310" width="40" height="22" rx="3" fill="#cc0000"/>
+  <text x="30" y="325" font-size="9" fill="white" text-anchor="middle" font-weight="bold">EXIT</text>
+  <text x="12" y="344" font-size="16" fill="#cc0000" font-weight="bold">◄</text>
+
+  <rect x="418" y="14" width="40" height="22" rx="3" fill="#cc0000"/>
+  <text x="438" y="29" font-size="9" fill="white" text-anchor="middle" font-weight="bold">EXIT</text>
+  <text x="439" y="49" font-size="16" fill="#cc0000" font-weight="bold">▲</text>
+
+  <!-- Checkout area at bottom -->
+  <rect x="120" y="575" width="70" height="35" rx="4" fill="#d4d4d4" stroke="#999" stroke-width="1"/>
+  <rect x="130" y="585" width="50" height="6" rx="2" fill="#666"/>
+  <text x="155" y="602" font-size="7" fill="#555" text-anchor="middle">CHECKOUT 1</text>
+
+  <rect x="220" y="575" width="70" height="35" rx="4" fill="#d4d4d4" stroke="#999" stroke-width="1"/>
+  <rect x="230" y="585" width="50" height="6" rx="2" fill="#666"/>
+  <text x="255" y="602" font-size="7" fill="#555" text-anchor="middle">CHECKOUT 2</text>
+
+  <rect x="320" y="575" width="70" height="35" rx="4" fill="#d4d4d4" stroke="#999" stroke-width="1"/>
+  <rect x="330" y="585" width="50" height="6" rx="2" fill="#666"/>
+  <text x="355" y="602" font-size="7" fill="#555" text-anchor="middle">CHECKOUT 3</text>
+
+  <rect x="420" y="575" width="70" height="35" rx="4" fill="#d4d4d4" stroke="#999" stroke-width="1"/>
+  <rect x="430" y="585" width="50" height="6" rx="2" fill="#666"/>
+  <text x="455" y="602" font-size="7" fill="#555" text-anchor="middle">CHECKOUT 4</text>
+
+  <!-- Entrance -->
+  <!-- <text x="510" y="600" font-size="9" fill="#333" text-anchor="middle">⟹ ENTRANCE ⟸</text> -->
+  <!-- <line x1="570" y1="570" x2="570" y2="650" stroke="#555" stroke-width="2" stroke-dasharray="4,3"/> -->
+
+  <!-- Aisles -->
+  <!-- Aisle layout: shelf-walkway-shelf, 10 total -->
+  <!-- Computed for 680px wide aisle area (x=110 to x=790) -->
+
+  <!-- Shelf strip 1 -->
+  <rect x="124" y="110" width="14" height="440" rx="2" fill="#b8d4e8" stroke="#7a9eb3" stroke-width="1"/>
+  <!-- Aisle 1 -->
+  <rect x="138" y="110" width="52" height="440" rx="2" fill="#fff8e7" stroke="#d4c9a8" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="164" y="330" font-size="9" fill="#666" text-anchor="middle" font-weight="bold" transform="rotate(-90,164,330)">AISLE 1</text>
+
+  <!-- Shelf strip 2 -->
+  <rect x="190" y="110" width="14" height="440" rx="2" fill="#b8d4e8" stroke="#7a9eb3" stroke-width="1"/>
+  <!-- Aisle 2 -->
+  <rect x="204" y="110" width="52" height="440" rx="2" fill="#fff8e7" stroke="#d4c9a8" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="230" y="330" font-size="9" fill="#666" text-anchor="middle" font-weight="bold" transform="rotate(-90,230,330)">AISLE 2</text>
+
+  <!-- Shelf strip 3 -->
+  <rect x="256" y="110" width="14" height="440" rx="2" fill="#b8d4e8" stroke="#7a9eb3" stroke-width="1"/>
+  <!-- Aisle 3 -->
+  <rect x="270" y="110" width="52" height="440" rx="2" fill="#fff8e7" stroke="#d4c9a8" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="296" y="330" font-size="9" fill="#666" text-anchor="middle" font-weight="bold" transform="rotate(-90,296,330)">AISLE 3</text>
+
+  <!-- Shelf strip 4 -->
+  <rect x="322" y="110" width="14" height="440" rx="2" fill="#b8d4e8" stroke="#7a9eb3" stroke-width="1"/>
+  <!-- Aisle 4 -->
+  <rect x="336" y="110" width="52" height="440" rx="2" fill="#fff8e7" stroke="#d4c9a8" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="362" y="330" font-size="9" fill="#666" text-anchor="middle" font-weight="bold" transform="rotate(-90,362,330)">AISLE 4</text>
+
+  <!-- Shelf strip 5 -->
+  <rect x="388" y="110" width="14" height="440" rx="2" fill="#b8d4e8" stroke="#7a9eb3" stroke-width="1"/>
+  <!-- Aisle 5 -->
+  <rect x="402" y="110" width="52" height="440" rx="2" fill="#fff8e7" stroke="#d4c9a8" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="428" y="330" font-size="9" fill="#666" text-anchor="middle" font-weight="bold" transform="rotate(-90,428,330)">AISLE 5</text>
+
+  <!-- Shelf strip 6 -->
+  <rect x="454" y="110" width="14" height="440" rx="2" fill="#b8d4e8" stroke="#7a9eb3" stroke-width="1"/>
+  <!-- Aisle 6 -->
+  <rect x="468" y="110" width="52" height="440" rx="2" fill="#fff8e7" stroke="#d4c9a8" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="494" y="330" font-size="9" fill="#666" text-anchor="middle" font-weight="bold" transform="rotate(-90,494,330)">AISLE 6</text>
+
+  <!-- Shelf strip 7 -->
+  <rect x="520" y="110" width="14" height="440" rx="2" fill="#b8d4e8" stroke="#7a9eb3" stroke-width="1"/>
+  <!-- Aisle 7 -->
+  <rect x="534" y="110" width="52" height="440" rx="2" fill="#fff8e7" stroke="#d4c9a8" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="560" y="330" font-size="9" fill="#666" text-anchor="middle" font-weight="bold" transform="rotate(-90,560,330)">AISLE 7</text>
+
+  <!-- Shelf strip 8 -->
+  <rect x="586" y="110" width="14" height="440" rx="2" fill="#b8d4e8" stroke="#7a9eb3" stroke-width="1"/>
+  <!-- Aisle 8 -->
+  <rect x="600" y="110" width="52" height="440" rx="2" fill="#fff8e7" stroke="#d4c9a8" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="626" y="330" font-size="9" fill="#666" text-anchor="middle" font-weight="bold" transform="rotate(-90,626,330)">AISLE 8</text>
+
+  <!-- Shelf strip 9 -->
+  <rect x="652" y="110" width="14" height="440" rx="2" fill="#b8d4e8" stroke="#7a9eb3" stroke-width="1"/>
+  <!-- Aisle 9 -->
+  <rect x="666" y="110" width="52" height="440" rx="2" fill="#fff8e7" stroke="#d4c9a8" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="692" y="330" font-size="9" fill="#666" text-anchor="middle" font-weight="bold" transform="rotate(-90,692,330)">AISLE 9</text>
+
+  <!-- Shelf strip 10 -->
+  <rect x="718" y="110" width="14" height="440" rx="2" fill="#b8d4e8" stroke="#7a9eb3" stroke-width="1"/>
+  <!-- Aisle 10 -->
+  <rect x="732" y="110" width="52" height="440" rx="2" fill="#fff8e7" stroke="#d4c9a8" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="758" y="330" font-size="9" fill="#666" text-anchor="middle" font-weight="bold" transform="rotate(-90,758,330)">AISLE 10</text>
+
+  <!-- Shelf strip 11 (rightmost) -->
+  <rect x="784" y="110" width="14" height="440" rx="2" fill="#b8d4e8" stroke="#7a9eb3" stroke-width="1"/>
+
+  <!-- Section labels -->
+  <rect x="124" y="88" width="80" height="18" rx="3" fill="#4a7c59"/>
+  <text x="164" y="100" font-size="8" fill="white" text-anchor="middle">PRODUCE</text>
+
+  <rect x="256" y="88" width="80" height="18" rx="3" fill="#c47a3d"/>
+  <text x="296" y="100" font-size="8" fill="white" text-anchor="middle">BAKERY</text>
+
+  <rect x="388" y="88" width="80" height="18" rx="3" fill="#2b6cb0"/>
+  <text x="428" y="100" font-size="8" fill="white" text-anchor="middle">DAIRY</text>
+
+  <rect x="520" y="88" width="80" height="18" rx="3" fill="#a83232"/>
+  <text x="560" y="100" font-size="8" fill="white" text-anchor="middle">MEAT</text>
+
+  <rect x="652" y="88" width="80" height="18" rx="3" fill="#6b46c1"/>
+  <text x="692" y="100" font-size="8" fill="white" text-anchor="middle">FROZEN</text>
+
+  <rect x="700" y="555" width="90" height="16" rx="3" fill="#d69e2e"/>
+  <text x="745" y="566" font-size="8" fill="white" text-anchor="middle">BEVERAGES</text>
+
+  <!-- Top cross-aisle label -->
+  <text x="300" y="74" font-size="8" fill="#888" font-style="italic">Top Cross-Aisle</text>
+
+  <!-- Side cross-aisle labels -->
+  <text x="74" y="340" font-size="8" fill="#888" font-style="italic" transform="rotate(-90,74,340)">Side Aisle</text>
+
+  <!-- Shopping carts -->
+  <!-- <rect x="75" y="580" width="20" height="14" rx="2" fill="#555"/> -->
+  <!-- <circle cx="85" cy="598" r="4" fill="none" stroke="#555" stroke-width="1.5"/> -->
+  <!-- <text x="85" y="591" font-size="6" fill="white" text-anchor="middle">🛒</text> -->
+
+  <!-- Title -->
+  <text x="450" y="678" font-size="14" fill="#555" text-anchor="middle" font-weight="bold">STEVEcart's DEMO  SUPERMARKET FLOOR PLAN</text>
+</svg>

@@ -4,12 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"steve-api/models"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
+
+// UWBBroadcast is read by controllers.StartUWBBroadcaster() to fan out
+// live positions to all connected WebSocket clients.
+var UWBBroadcast = make(chan models.UWBData, 100)
 
 func handleNFCScan(nfcTag string, cartID string) {
 	if DB == nil {
@@ -52,6 +57,51 @@ func handleNFCScan(nfcTag string, cartID string) {
 	fmt.Printf("Success! Added product %s to Cart %s. New total price: %.2f\n", product.ProductName, cart.Cart_ID, cart.TotalPrice)
 }
 
+func handleWeightScan(weight_kg float64, cartID string) {
+	if DB == nil {
+		fmt.Println("Database not initialized.")
+		return
+	}
+	var cart models.Cart
+
+	// Find the cart by cartID
+	if err := DB.Where("cart_id = ?", cartID).First(&cart).Error; err != nil {
+		fmt.Println("Error: Cart not found for Cart ID:", cartID)
+		return
+	}
+
+	// Update cart total weight
+	cart.TotalWeight += weight_kg
+	if err := DB.Save(&cart).Error; err != nil {
+		fmt.Println("Error: Could not update cart total weight:", err)
+		return
+	}
+
+	fmt.Printf("Success! Added %f kg to Cart %s. New total weight: %.2f\n", weight_kg, cart.Cart_ID, cart.TotalWeight)
+}
+
+func handleDistanceScan(distance_cm float64, cartID string) {
+	if DB == nil {
+		fmt.Println("Database not initialized.")
+		return
+	}
+	var cart models.Cart
+
+	// Find the cart by cartID
+	if err := DB.Where("cart_id = ?", cartID).First(&cart).Error; err != nil {
+		fmt.Println("Error: Cart not found for Cart ID:", cartID)
+		return
+	}
+
+	cart.Distance += distance_cm
+	if err := DB.Save(&cart).Error; err != nil {
+		fmt.Println("Error: Could not update cart total distance:", err)
+		return
+	}
+
+	fmt.Printf("Success! Added %f cm to Cart %s. New total distance: %.2f\n", distance_cm, cart.Cart_ID, cart.TotalDistance)
+}
+
 var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 	var payloadData map[string]interface{}
 
@@ -89,12 +139,37 @@ var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Me
 		}
 	} else if _, ok := fields["weight_kg"]; ok {
 		fmt.Println("Weight Detected!")
+
 	} else if _, ok := fields["distance_cm"]; ok {
 		fmt.Println("Distance Detected!")
 	} else if _, ok := fields["lux"]; ok {
 		fmt.Println("Lux Detected!")
 	} else if _, ok := fields["x_coordinate"]; ok {
 		fmt.Println("UWB Detected!")
+		x, _ := fields["x_coordinate"].(float64)
+		y, _ := fields["y_coordinate"].(float64)
+		// node_id comes from the cart_id tag, or a dedicated uwb_node_id field
+		nodeID := cartID
+		if nid, ok := fields["uwb_node_id"].(string); ok && nid != "" {
+			nodeID = nid
+		}
+		if nodeID == "" {
+			log.Println("Warning: UWB message received but node ID is missing")
+		} else {
+			uwbData := models.UWBData{
+				UWB_NODEID:   nodeID,
+				X_Coordinate: x,
+				Y_Coordinate: y,
+				LastSeen_UWB: time.Now(),
+				Description:  "Live MQTT position",
+			}
+			// Non-blocking send — drop if broadcaster is full
+			select {
+			case UWBBroadcast <- uwbData:
+			default:
+				log.Println("Warning: UWBBroadcast channel full, position dropped")
+			}
+		}
 	} else if _, ok := fields["battery_level"]; ok {
 		fmt.Println("Battery Detected!")
 	} else {

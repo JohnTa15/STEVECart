@@ -1,22 +1,15 @@
+#!/usr/bin/env python3
 # https://github.com/Makerfabs/MaUWB_ESP32S3-with-STM32-AT-Command/blob/main/hardware/Makerfabs%20UWB%20AT%20Module%20AT%20Command%20Manual(v1.0.8).pdf
 
-# Install python library for connecting to the UWB sensor
-sudo apt-get update
-sudo apt-get install -y python3-serial
-
-# Setting up the UWB sensor TAG programmatically using an inline Python script
-python3 - << 'EOF'
 import serial
 import time
 import sys
+import json
+from datetime import datetime
 
-# adding the influxDB info
-CLIENTID = 'UWB_TAG'
-TOPIC = 'sensors/location'
-
+CLIENTID = 'UWB_ANCHOR_1'
 PORT = '/dev/ttyUSB0'
 BAUDRATE = 115200
-ts = time.time()
 
 def send_wait(command, ser, delay=0.5, quiet=False):
     if not quiet:
@@ -27,8 +20,6 @@ def send_wait(command, ser, delay=0.5, quiet=False):
     if not quiet:
         print(f"Response: {response}", file=sys.stderr)
     return response
-
-import json
 
 ver = "unknown"
 cfg = "unknown"
@@ -43,40 +34,37 @@ except Exception as e:
 response = send_wait("AT?", ser)
 
 if "OK" in response:
-    # Save version and configuration to files
     ver = send_wait("AT+GETVER", ser)
-    with open("current_ver.txt", "a") as f:
-        f.write(f"VERSION:\n{ver}\n")
+    print(f"VERSION:\n{ver}\n", file=sys.stderr)
         
     cfg = send_wait("AT+GETCFG", ser)
-    with open("current_cfg.txt", "a") as f:
-        f.write(f"CONFIG:\n{cfg}\n")
+    print(f"CONFIG:\n{cfg}\n", file=sys.stderr)
         
     # Send configuration AT commands
-    send_wait("AT+SETCFG=1,1,0,1", ser) # set mode to tag
+    send_wait("AT+SETCFG=1,1,0,1", ser) # set mode to Anchor (id=1, role=1)
     send_wait("AT+SETCAP=30,10,1", ser) # capacity 27 tags, 3 anchors, 10ms slot, 1 packet
     send_wait("AT+SETRPT=1", ser)       # automatic report mode active
     send_wait("AT+SAVE", ser)           # save to flash
-    print("Configuration complete!", file=sys.stderr)
+    print("Configuration complete for Anchor 1!", file=sys.stderr)
 else:
     print("Failed to get OK response from AT?", file=sys.stderr)
 
-print("Sending information to influxDB server", file=sys.stderr)
+print("Reading range data...", file=sys.stderr)
 
 while True:
-    timestamp = time.strftime('%Y-%m-%dT%H:%M:%S%z', time.localtime())
-    range_data = send_wait("AT+RANGE", ser, quiet=True)
-    
-    # Format and print data as JSON for Telegraf parsing
-    data = {
-        "version": ver,
-        "role_message": cfg,
-        "range": range_data,
-        "timestamp_location": timestamp
-    }
-    print(json.dumps(data))
-    sys.stdout.flush()
+    try:
+        range_data = send_wait("AT+RANGE", ser, quiet=True)
+        
+        # Format and print data as JSON
+        print(json.dumps({
+            "client_id": CLIENTID,
+            "version": ver,
+            "role_message": cfg,
+            "range": range_data,
+            "timestamp_location": datetime.now().isoformat()
+        }), flush=True)
+        
+    except Exception as e:
+        print(f"Error reading UWB: {e}", file=sys.stderr)
+        
     time.sleep(5)
-
-ser.close()
-EOF

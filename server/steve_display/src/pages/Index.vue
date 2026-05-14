@@ -174,25 +174,6 @@
         <img id="source" src="../assets/minimap.png" alt="Supermarket Minimap" class="w-full h-full object-cover" />
         <canvas id="canvas" class="mt-4"></canvas>
       </div>
-      <script> // live mini map
-        //drawing the image.. 
-        const canvas = document.getElementById("canvas")
-        const ctx = canvas.getContext("2d")
-        const source = document.getElementById("source")
-
-        //setting the dimensions of the minimap
-        function drawFullImage(){
-          canvas.width = image.naturalWidth;
-          canvas.height = image.naturalHeight;
-          ctx.drawImage(image,0,0);
-        }
-
-        if(image.complete){
-          drawFullImage();
-        }else{
-          image.addEventListener("load", drawFullImage);
-        }
-      </script>
 
     </header>
   </div>

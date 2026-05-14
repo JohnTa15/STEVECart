@@ -9,20 +9,22 @@ import (
 
 var org = os.Getenv("INFLUXDB_ORG")
 var bucket = os.Getenv("INFLUXDB_BUCKET")
-func ORGCheck(){
+
+func ORGCheck() {
 	if os.Getenv("INFLUXDB_ORG") != "" {
 		org = os.Getenv("INFLUXDB_ORG")
 	} else {
 		fmt.Println("Probably .env file is missing or the INFLUXDB_ORG variable is not in the .env file")
-	}	
+	}
 }
-func BucketCheck(){
+func BucketCheck() {
 	if os.Getenv("INFLUXDB_BUCKET") != "" {
 		bucket = os.Getenv("INFLUXDB_BUCKET")
 	} else {
 		fmt.Println("Probably .env file is missing or the INFLUXDB_BUCKET variable is not in the .env file")
-	}	
+	}
 }
+
 var measurement_name = "cart_metrics"
 
 // making a file in order to get the data from the influxdb
@@ -139,7 +141,7 @@ func GetBattery(cartID string) (float64, error) {
 	return battery, nil
 }
 
-func GetUWB(cartID string) (float64, error) {
+func GetUWB(cartID string, nodeID string) (float64, error) {
 	ORGCheck()
 	BucketCheck()
 	queryAPI := initializers.InfluxClient.QueryAPI(org)
@@ -149,8 +151,10 @@ func GetUWB(cartID string) (float64, error) {
 		|> filter(fn: (r) => r["_measurement"] == "%s")
 		|> filter(fn: (r) => r["cart_id"] == "%s")
 		|> filter(fn: (r) => r["_field"] == "x_coordinate")
+		|> filter(fn: (r) => r["field"] == "y_coordinate")
+		|> filter(fn: (r) => r["node_id"] == "%s")
 		|> last()
-	`, bucket, measurement_name, cartID)
+	`, bucket, measurement_name, cartID, nodeID)
 
 	result, err := queryAPI.Query(context.Background(), query)
 	if err != nil {
