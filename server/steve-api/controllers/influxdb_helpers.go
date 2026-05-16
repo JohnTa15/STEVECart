@@ -38,7 +38,7 @@ func GetNFC(cartID string) (string, error) {
 		|> range(start: -1m)
 		|> filter(fn: (r) => r["_measurement"] == "%s")
 		|> filter(fn: (r) => r["cart_id"] == "%s")
-		|> filter(fn: (r) => r["_field"] == "nfc")
+		|> filter(fn: (r) => r["_field"] == "NFC_data")
 		|> last()
 	`, bucket, measurement_name, cartID)
 
@@ -141,7 +141,7 @@ func GetBattery(cartID string) (float64, error) {
 	return battery, nil
 }
 
-func GetUWB(cartID string, nodeID string) (float64, error) {
+func GetUWB(cartID string) (string, error) {
 	ORGCheck()
 	BucketCheck()
 	queryAPI := initializers.InfluxClient.QueryAPI(org)
@@ -150,23 +150,49 @@ func GetUWB(cartID string, nodeID string) (float64, error) {
 		|> range(start: -1m)
 		|> filter(fn: (r) => r["_measurement"] == "%s")
 		|> filter(fn: (r) => r["cart_id"] == "%s")
-		|> filter(fn: (r) => r["_field"] == "x_coordinate")
-		|> filter(fn: (r) => r["field"] == "y_coordinate")
-		|> filter(fn: (r) => r["node_id"] == "%s")
+		|> filter(fn: (r) => r["_field"] == "range")
 		|> last()
-	`, bucket, measurement_name, cartID, nodeID)
+	`, bucket, measurement_name, cartID)
+
+	result, err := queryAPI.Query(context.Background(), query)
+	if err != nil {
+		return "", err
+	}
+
+	var range_val string
+	for result.Next() {
+		if val, ok := result.Record().Value().(string); ok {
+			range_val = val
+		}
+	}
+
+	return range_val, nil
+}
+
+func GetDistance(cartID string) (float64, error) {
+	ORGCheck()
+	BucketCheck()
+	queryAPI := initializers.InfluxClient.QueryAPI(org)
+
+	query := fmt.Sprintf(`from(bucket: "%s")
+		|> range(start: -1m)
+		|> filter(fn: (r) => r["_measurement"] == "%s")
+		|> filter(fn: (r) => r["cart_id"] == "%s")
+		|> filter(fn: (r) => r["_field"] == "distance")
+		|> last()
+	`, bucket, measurement_name, cartID)
 
 	result, err := queryAPI.Query(context.Background(), query)
 	if err != nil {
 		return 0, err
 	}
 
-	var x_coord float64
+	var distance float64
 	for result.Next() {
 		if val, ok := result.Record().Value().(float64); ok {
-			x_coord = val
+			distance = val
 		}
 	}
 
-	return x_coord, nil
+	return distance, nil
 }

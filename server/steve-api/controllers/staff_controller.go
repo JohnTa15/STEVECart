@@ -84,15 +84,6 @@ func setAdmin(userID string, role string) {
 	initializers.DB.Save(&user)
 }
 
-func deleteUser(userID string, role string) {
-	if role != "admin" {
-		return
-	}
-	initializers.ConnectDB()
-	var user models.User
-	initializers.DB.Where("id = ?", userID).Delete(&user)
-}
-
 //managing shelve positions
 func addShelvePosition(shelveID string, xCoord float64, yCoord float64, description string, role string) {
 	if role != "admin" {

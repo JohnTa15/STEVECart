@@ -45,10 +45,17 @@ func GetAllCarts(c *gin.Context) {
 	var response []gin.H
 	for _, cart := range carts {
 		battery, _ := controllers.GetBattery(cart.Cart_ID)
-		uwb_x, _ := controllers.GetUWB(cart.Cart_ID)
+		
+		var uwbData models.UWBData
+		uwb_x := 0.0
+		uwb_y := 0.0
+		if err := initializers.DB.Where("uwb_node_id = ?", cart.Cart_ID).First(&uwbData).Error; err == nil {
+			uwb_x = uwbData.X_Coordinate
+			uwb_y = uwbData.Y_Coordinate
+		}
 
 		gps := "Unknown"
-		if uwb_x > 0 {
+		if uwb_x > 0 && uwb_y > 0 {
 			gps = fmt.Sprintf("Aisle %.1f", uwb_x)
 		} else {
 			// Default mock for display if no real data in influx yet

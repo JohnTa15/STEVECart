@@ -19,7 +19,7 @@ while True:
         print(json.dumps({
             "client_id": "LightSensor",
             "device": "TSL2591",
-            "light_level": round(lux, 2), 
+            "lux": round(lux, 2), 
             "timestamp_light": datetime.now().isoformat(),
         }), flush=True)
     except Exception as e:

@@ -1,6 +1,6 @@
 # https://learn.adafruit.com/adafruit-pn532-rfid-nfc/python-circuitpython
 #!/usr/bin/env python3
-import busio, board, json, time, sys, logging 
+import busio, board, json, time, sys 
 from digitalio import DigitalInOut 
 from adafruit_pn532.spi import PN532_SPI
 from datetime import datetime
@@ -26,8 +26,7 @@ while True:
               "client_id": "NFCSensor",
               "device": "PN532",
               "NFC_data"  : uid_str,
-              "timestamp_NFC" : datetime.now().isoformat(),
-              "logging" : logger,
+              "timestamp_NFC" : datetime.now().isoformat()
             }), flush=True)
             time.sleep(2)
     except Exception as e:

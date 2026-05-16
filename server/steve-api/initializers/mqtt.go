@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"os"
+	"regexp"
+	"strconv"
 	"steve-api/models"
 	"time"
 
@@ -71,7 +74,7 @@ func handleWeightScan(weight_kg float64, cartID string) {
 	}
 
 	// Update cart total weight
-	cart.TotalWeight += weight_kg
+	cart.TotalWeight += float32(weight_kg)
 	if err := DB.Save(&cart).Error; err != nil {
 		fmt.Println("Error: Could not update cart total weight:", err)
 		return
@@ -81,25 +84,8 @@ func handleWeightScan(weight_kg float64, cartID string) {
 }
 
 func handleDistanceScan(distance_cm float64, cartID string) {
-	if DB == nil {
-		fmt.Println("Database not initialized.")
-		return
-	}
-	var cart models.Cart
-
-	// Find the cart by cartID
-	if err := DB.Where("cart_id = ?", cartID).First(&cart).Error; err != nil {
-		fmt.Println("Error: Cart not found for Cart ID:", cartID)
-		return
-	}
-
-	cart.Distance += distance_cm
-	if err := DB.Save(&cart).Error; err != nil {
-		fmt.Println("Error: Could not update cart total distance:", err)
-		return
-	}
-
-	fmt.Printf("Success! Added %f cm to Cart %s. New total distance: %.2f\n", distance_cm, cart.Cart_ID, cart.TotalDistance)
+	// Υπέρηχος (εμπόδια): Δεν χρειάζεται να αποθηκεύεται αθροιστικά στο Cart
+	fmt.Printf("Cart %s is %f cm away from obstacle.\n", cartID, distance_cm)
 }
 
 var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
@@ -137,37 +123,86 @@ var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Me
 				fmt.Println("Warning: Could not process NFC scan because cart_id is missing or un-templated.")
 			}
 		}
-	} else if _, ok := fields["weight_kg"]; ok {
+	} else if _, ok := fields["weight"]; ok {
 		fmt.Println("Weight Detected!")
 
-	} else if _, ok := fields["distance_cm"]; ok {
+	} else if _, ok := fields["distance"]; ok {
 		fmt.Println("Distance Detected!")
 	} else if _, ok := fields["lux"]; ok {
 		fmt.Println("Lux Detected!")
-	} else if _, ok := fields["x_coordinate"]; ok {
-		fmt.Println("UWB Detected!")
-		x, _ := fields["x_coordinate"].(float64)
-		y, _ := fields["y_coordinate"].(float64)
-		// node_id comes from the cart_id tag, or a dedicated uwb_node_id field
-		nodeID := cartID
-		if nid, ok := fields["uwb_node_id"].(string); ok && nid != "" {
-			nodeID = nid
+	} else if rangeVal, ok := fields["range"]; ok {
+		fmt.Println("UWB Detected! Raw range string:", rangeVal)
+		
+		rangeStr, isString := rangeVal.(string)
+		if !isString {
+			fmt.Println("Error: range is not a string")
+			return
 		}
-		if nodeID == "" {
-			log.Println("Warning: UWB message received but node ID is missing")
+
+		re := regexp.MustCompile(`[0-9]+\.[0-9]+`)
+		matches := re.FindAllString(rangeStr, -1)
+		
+		if len(matches) < 3 {
+			fmt.Println("Warning: Could not find 3 distances in the UWB string:", rangeStr)
 		} else {
-			uwbData := models.UWBData{
-				UWB_NODEID:   nodeID,
-				X_Coordinate: x,
-				Y_Coordinate: y,
-				LastSeen_UWB: time.Now(),
-				Description:  "Live MQTT position",
-			}
-			// Non-blocking send — drop if broadcaster is full
-			select {
-			case UWBBroadcast <- uwbData:
-			default:
-				log.Println("Warning: UWBBroadcast channel full, position dropped")
+			d1, _ := strconv.ParseFloat(matches[0], 64)
+			d2, _ := strconv.ParseFloat(matches[1], 64)
+			d3, _ := strconv.ParseFloat(matches[2], 64)
+
+			// 2. Παίρνουμε τις θέσεις των 3 Anchors από την MariaDB (ShelvePosition table)
+			var anchors []models.ShelvePosition
+			DB.Order("shelve_id asc").Limit(3).Find(&anchors)
+
+			if len(anchors) < 3 {
+				fmt.Println("Error: Need at least 3 configured shelves (anchors) in DB to do trilateration!")
+			} else {
+				// 3. Μαθηματικός τύπος Τριγωνοποίησης (Trilateration)
+				x1, y1 := anchors[0].X_Coordinate, anchors[0].Y_Coordinate
+				x2, y2 := anchors[1].X_Coordinate, anchors[1].Y_Coordinate
+				x3, y3 := anchors[2].X_Coordinate, anchors[2].Y_Coordinate
+
+				A := 2*x2 - 2*x1
+				B := 2*y2 - 2*y1
+				C := math.Pow(d1, 2) - math.Pow(d2, 2) - math.Pow(x1, 2) + math.Pow(x2, 2) - math.Pow(y1, 2) + math.Pow(y2, 2)
+
+				D := 2*x3 - 2*x2
+				E := 2*y3 - 2*y2
+				F := math.Pow(d2, 2) - math.Pow(d3, 2) - math.Pow(x2, 2) + math.Pow(x3, 2) - math.Pow(y2, 2) + math.Pow(y3, 2)
+
+				denominator := (E*A - B*D)
+				if math.Abs(denominator) < 0.0001 {
+					fmt.Println("Error: Anchors are collinear, trilateration failed.")
+				} else {
+					x := (C*E - F*B) / denominator
+					y := (C*D - A*F) / (B*D - A*E)
+
+					nodeID := cartID
+					uwbData := models.UWBData{
+						UWB_NODEID:   nodeID,
+						X_Coordinate: x,
+						Y_Coordinate: y,
+						LastSeen_UWB: time.Now(),
+						Description:  "Live MQTT position (Trilaterated)",
+					}
+
+					var existing models.UWBData
+					if err := DB.Where("uwb_node_id = ?", nodeID).First(&existing).Error; err == nil {
+						existing.X_Coordinate = x
+						existing.Y_Coordinate = y
+						existing.LastSeen_UWB = time.Now()
+						DB.Save(&existing)
+					} else {
+						DB.Create(&uwbData)
+					}
+					
+					// Αποστολή στο Minimap!
+					select {
+					case UWBBroadcast <- uwbData:
+						fmt.Printf("Trilateration Success! Cart %s is at X:%.2f, Y:%.2f\n", nodeID, x, y)
+					default:
+						log.Println("Warning: UWBBroadcast channel full, position dropped")
+					}
+				}
 			}
 		}
 	} else if _, ok := fields["battery_level"]; ok {
@@ -214,7 +249,7 @@ func initMQTT() {
 	var UWBData models.UWBData
 	UWBData.X_Coordinate = 0.0
 	UWBData.Y_Coordinate = 0.0
-	UWBData.Timestamp_UWB = time.Now()
+	UWBData.LastSeen_UWB = time.Now()
 }
 
 func ConnectMQTT() mqtt.Client {
