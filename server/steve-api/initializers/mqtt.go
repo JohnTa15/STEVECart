@@ -161,20 +161,20 @@ var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Me
 				x2, y2 := anchors[1].X_Coordinate, anchors[1].Y_Coordinate
 				x3, y3 := anchors[2].X_Coordinate, anchors[2].Y_Coordinate
 
-				A := 2*x2 - 2*x1
-				B := 2*y2 - 2*y1
+				A := 2* x2 - 2 * x1
+				B := 2 * y2 - 2 * y1
 				C := math.Pow(d1, 2) - math.Pow(d2, 2) - math.Pow(x1, 2) + math.Pow(x2, 2) - math.Pow(y1, 2) + math.Pow(y2, 2)
 
-				D := 2*x3 - 2*x2
-				E := 2*y3 - 2*y2
+				D := 2 * x3 - 2 * x2
+				E := 2 * y3 - 2 * y2
 				F := math.Pow(d2, 2) - math.Pow(d3, 2) - math.Pow(x2, 2) + math.Pow(x3, 2) - math.Pow(y2, 2) + math.Pow(y3, 2)
 
-				denominator := (E*A - B*D)
+				denominator := (E * A - B * D)
 				if math.Abs(denominator) < 0.0001 {
 					fmt.Println("Error: Anchors are collinear, trilateration failed.")
 				} else {
-					x := (C*E - F*B) / denominator
-					y := (C*D - A*F) / (B*D - A*E)
+					x := (C * E - F * B) / denominator
+					y := (C * D - A * F) / (B * D - A * E)
 
 					nodeID := cartID
 					uwbData := models.UWBData{

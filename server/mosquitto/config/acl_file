@@ -1,4 +1,6 @@
 user cart_controller
+
+topic read sensors/#
 topic write sensors/weight/
 topic write sensors/nfc/
 topic write sensors/ultrasonic/

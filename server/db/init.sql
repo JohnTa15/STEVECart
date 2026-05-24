@@ -1,8 +1,8 @@
--- CREATE DATABASE IF NOT EXISTS supermarket_db;
+CREATE DATABASE IF NOT EXISTS supermarket_db;
 USE supermarket_db;
--- CREATE USER IF NOT EXISTS 'uniwa_admin'@'%' IDENTIFIED BY 'adminUNIWA';
--- GRANT ALL PRIVILEGES ON supermarket_db.* TO 'uniwa_admin'@'%';
--- FLUSH PRIVILEGES;
+CREATE USER IF NOT EXISTS 'uniwa_admin'@'%' IDENTIFIED BY 'adminUNIWA';
+GRANT ALL PRIVILEGES ON supermarket_db.* TO 'uniwa_admin'@'%';
+FLUSH PRIVILEGES;
 
 -- shelve/location info (must be created before products)
 CREATE TABLE IF NOT EXISTS shelves (
