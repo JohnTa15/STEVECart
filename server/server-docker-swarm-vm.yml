@@ -86,6 +86,7 @@ services:
       - target: 3306
         published: 3306
         protocol: tcp
+        mode: host
     configs:
       - source: mysql_ca_cert
         target: /etc/mysql/certs/ca.pem
@@ -131,6 +132,7 @@ services:
       - target: 3306
         published: 3307
         protocol: tcp
+        mode: host
     configs:
       - source: mysql_ca_cert
         target: /etc/mysql/certs/ca.pem
@@ -171,6 +173,7 @@ services:
       - target: 3306
         published: 3308
         protocol: tcp
+        mode: host
     configs:
       - source: mysql_ca_cert
         target: /etc/mysql/certs/ca.pem
