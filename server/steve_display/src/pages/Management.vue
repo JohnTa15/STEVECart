@@ -118,56 +118,136 @@
             <div class="flex flex-wrap gap-6 mt-10 text-center justify-end">
                 <button @click="logout"
                     class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit mx-auto inline-block">Logout</button>
-            </div>
+            </div> 
+
 
             <div
                 class="bg-white/10 dark:bg-gray-800 rounded-xl p-6 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-full max-w-3xl mx-auto mt-8">
-                <h3 class="text-2xl font-bold dark:text-white mb-4">Shelves Positions</h3>
-
-                <!-- Form for Add/Update/Delete -->
-                <div class="flex flex-wrap gap-3 mb-5">
-                    <input type="text" v-model="shelveID" placeholder="Shelve ID"
-                        class="bg-white/5 border border-white/10 rounded-lg p-2 text-white placeholder:text-gray-500 flex-grow" />
-                    <input type="text" v-model="xCoord" placeholder="X Coord"
-                        class="bg-white/5 border border-white/10 rounded-lg p-2 text-white placeholder:text-gray-500 w-24" />
-                    <input type="text" v-model="yCoord" placeholder="Y Coord"
-                        class="bg-white/5 border border-white/10 rounded-lg p-2 text-white placeholder:text-gray-500 w-24" />
-                    <input type="text" v-model="shelveDescription" placeholder="Description"
-                        class="bg-white/5 border border-white/10 rounded-lg p-2 text-white placeholder:text-gray-500 flex-grow" />
-                </div>
-                <div class="flex gap-3 mb-5 flex-wrap">
-                    <button @click="addShelvePosition" class="bg-green-500/20 text-green-300 border border-green-500/30 rounded-xl px-4 py-2 hover:bg-green-500/30 transition font-semibold">+ Add</button>
-                    <button @click="updateShelvePosition" class="bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-xl px-4 py-2 hover:bg-blue-500/30 transition font-semibold">✎ Update</button>
-                    <button @click="deleteShelvePosition" class="bg-red-500/20 text-red-300 border border-red-500/30 rounded-xl px-4 py-2 hover:bg-red-500/30 transition font-semibold">✕ Delete</button>
+                <div class="flex justify-between items-center select-none mb-4">
+                    <h3 class="text-2xl font-bold dark:text-white">Products Management</h3>
+                    <button type="button" @click="isProductsExpanded = !isProductsExpanded" class="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-sm transition-all duration-300 cursor-pointer">
+                        {{ isProductsExpanded ? '▼ Collapse' : '▶ Expand' }}
+                    </button>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-gray-300 border-collapse">
-                        <thead>
-                            <tr class="border-b border-gray-600">
-                                <th class="p-3">Shelve ID</th>
-                                <th class="p-3">Products Available</th>
-                                <th class="p-3">X Coord</th>
-                                <th class="p-3">Y Coord</th>
-                                <th class="p-3">Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="shelve in shelvePositions" :key="shelve.shelve_id"
-                                class="border-b border-gray-700/50 hover:bg-white/5 transition cursor-pointer"
-                                @click="shelveID = shelve.shelve_id; xCoord = shelve.x_coord; yCoord = shelve.y_coord; shelveDescription = shelve.description">
-                                <td class="p-3 font-mono text-white">{{ shelve.shelve_id }}</td>
-                                <td class="p-3">{{ shelve.product_count || '--' }}</td>
-                                <td class="p-3 text-blue-400">{{ shelve.x_coord }}</td>
-                                <td class="p-3 text-blue-400">{{ shelve.y_coord }}</td>
-                                <td class="p-3">{{ shelve.description }}</td>
-                            </tr>
-                            <tr v-if="shelvePositions.length === 0">
-                                <td colspan="5" class="p-6 text-center text-gray-500">No shelves added yet...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div v-if="isProductsExpanded">
+                    <!-- Form for Add/Update/Delete -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+                        <input type="text" v-model="productName" placeholder="Product Name"
+                            class="bg-white/5 border border-white/10 rounded-lg p-2 text-white placeholder:text-gray-500" />
+                        <input type="text" v-model="productCategory" placeholder="Category"
+                            class="bg-white/5 border border-white/10 rounded-lg p-2 text-white placeholder:text-gray-500" />
+                        <input type="text" v-model="nfcTag" placeholder="NFC Tag (ID)"
+                            class="bg-white/5 border border-white/10 rounded-lg p-2 text-white placeholder:text-gray-500" />
+                        <input type="number" v-model="pcs" placeholder="Quantity (Pcs)"
+                            class="bg-white/5 border border-white/10 rounded-lg p-2 text-white placeholder:text-gray-500" />
+                        <input type="text" v-model="weightVal" placeholder="Weight (kg)"
+                            class="bg-white/5 border border-white/10 rounded-lg p-2 text-white placeholder:text-gray-500" />
+                        <input type="text" v-model="priceVal" placeholder="Price (€)"
+                            class="bg-white/5 border border-white/10 rounded-lg p-2 text-white placeholder:text-gray-500" />
+                        <input type="text" v-model="productShelveID" placeholder="Shelve ID"
+                            class="bg-white/5 border border-white/10 rounded-lg p-2 text-white placeholder:text-gray-500" />
+                        <input type="text" v-model="productDescription" placeholder="Description"
+                            class="bg-white/5 border border-white/10 rounded-lg p-2 text-white placeholder:text-gray-500 flex-grow" />
+                    </div>
+                    <div class="flex gap-3 mb-5 flex-wrap">
+                        <button @click="addProductPosition" class="bg-green-500/20 text-green-300 border border-green-500/30 rounded-xl px-4 py-2 hover:bg-green-500/30 transition font-semibold">+ Add Product</button>
+                        <button @click="updateProductPosition" class="bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-xl px-4 py-2 hover:bg-blue-500/30 transition font-semibold">✎ Update Product</button>
+                        <button @click="deleteProductPosition" class="bg-red-500/20 text-red-300 border border-red-500/30 rounded-xl px-4 py-2 hover:bg-red-500/30 transition font-semibold">✕ Delete Product</button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-gray-300 border-collapse">
+                            <thead>
+                                <tr class="border-b border-gray-600">
+                                    <th class="p-3">Product Name</th>
+                                    <th class="p-3">Category</th>
+                                    <th class="p-3">NFC Tag</th>
+                                    <th class="p-3">Weight</th>
+                                    <th class="p-3">Quantity</th>
+                                    <th class="p-3">Price</th>
+                                    <th class="p-3">Shelve ID</th>
+                                    <th class="p-3">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="product in products" :key="product.ID"
+                                    class="border-b border-gray-700/50 hover:bg-white/5 transition cursor-pointer"
+                                    @click="productName = product.ProductName; productCategory = product.ProductCategory; nfcTag = product.NFCTag; productDescription = product.ProductDescription; weightVal = product.Weight; pcs = product.Pcs; priceVal = product.Price; productShelveID = product.shelve_id">
+                                    <td class="p-3 font-semibold text-white">{{ product.ProductName }}</td>
+                                    <td class="p-3">{{ product.ProductCategory }}</td>
+                                    <td class="p-3 font-mono text-blue-400">{{ product.NFCTag }}</td>
+                                    <td class="p-3">{{ product.Weight }} kg</td>
+                                    <td class="p-3 text-yellow-400 font-bold">{{ product.Pcs }}</td>
+                                    <td class="p-3 text-green-400 font-bold">{{ product.Price ? product.Price.toFixed(2) : '0.00' }} €</td>
+                                    <td class="p-3 font-mono">{{ product.shelve_id }}</td>
+                                    <td class="p-3 opacity-80">{{ product.ProductDescription }}</td>
+                                </tr>
+                                <tr v-if="products.length === 0">
+                                    <td colspan="8" class="p-6 text-center text-gray-500">No products added yet...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div> <!-- End v-show="isProductsExpanded" -->
+            </div>
+
+
+            <div
+                class="bg-white/10 dark:bg-gray-800 rounded-xl p-6 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-full max-w-3xl mx-auto mt-8">
+                <div class="flex justify-between items-center select-none mb-4">
+                    <h3 class="text-2xl font-bold dark:text-white">Shelves Positions</h3>
+                    <button type="button" @click="isShelvesExpanded = !isShelvesExpanded" class="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-sm transition-all duration-300 cursor-pointer">
+                        {{ isShelvesExpanded ? '▼ Collapse' : '▶ Expand' }}
+                    </button>
                 </div>
+
+                <div v-if="isShelvesExpanded">
+                    <!-- Form for Add/Update/Delete -->
+                    <div class="flex flex-wrap gap-3 mb-5">
+                        <input type="text" v-model="shelveID" placeholder="Shelve ID"
+                            class="bg-white/5 border border-white/10 rounded-lg p-2 text-white placeholder:text-gray-500 flex-grow" />
+                        <input type="text" v-model="xCoord" placeholder="X Coord"
+                            class="bg-white/5 border border-white/10 rounded-lg p-2 text-white placeholder:text-gray-500 w-24" />
+                        <input type="text" v-model="yCoord" placeholder="Y Coord"
+                            class="bg-white/5 border border-white/10 rounded-lg p-2 text-white placeholder:text-gray-500 w-24" />
+                        <input type="text" v-model="shelveDescription" placeholder="Description"
+                            class="bg-white/5 border border-white/10 rounded-lg p-2 text-white placeholder:text-gray-500 flex-grow" />
+                    </div>
+                    <div class="flex gap-3 mb-5 flex-wrap">
+                        <button @click="addShelvePosition" class="bg-green-500/20 text-green-300 border border-green-500/30 rounded-xl px-4 py-2 hover:bg-green-500/30 transition font-semibold">+ Add</button>
+                        <button @click="updateShelvePosition" class="bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-xl px-4 py-2 hover:bg-blue-500/30 transition font-semibold">✎ Update</button>
+                        <button @click="deleteShelvePosition" class="bg-red-500/20 text-red-300 border border-red-500/30 rounded-xl px-4 py-2 hover:bg-red-500/30 transition font-semibold">✕ Delete</button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-gray-300 border-collapse">
+                            <thead>
+                                <tr class="border-b border-gray-600">
+                                    <th class="p-3">Shelve ID</th>
+                                    <th class="p-3">Products Available</th>
+                                    <th class="p-3">X Coord</th>
+                                    <th class="p-3">Y Coord</th>
+                                    <th class="p-3">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="shelve in shelvePositions" :key="shelve.shelve_id"
+                                    class="border-b border-gray-700/50 hover:bg-white/5 transition cursor-pointer"
+                                    @click="shelveID = shelve.shelve_id; xCoord = shelve.x_coord; yCoord = shelve.y_coord; shelveDescription = shelve.description">
+                                    <td class="p-3 font-mono text-white">{{ shelve.shelve_id }}</td>
+                                    <td class="p-3">{{ shelve.product_count || '--' }}</td>
+                                    <td class="p-3 text-blue-400">{{ shelve.x_coord }}</td>
+                                    <td class="p-3 text-blue-400">{{ shelve.y_coord }}</td>
+                                    <td class="p-3">{{ shelve.description }}</td>
+                                </tr>
+                                <tr v-if="shelvePositions.length === 0">
+                                    <td colspan="5" class="p-6 text-center text-gray-500">No shelves added yet...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div> <!-- End v-show="isShelvesExpanded" -->
             </div>
 
             <div
@@ -319,7 +399,22 @@ export default {
             xCoord: "",
             yCoord: "",
             shelveDescription: "",
-            role: "admin" // TODO: derive from logged-in user
+            role: "admin", // TODO: derive from logged-in user
+            
+            // Product form state
+            products: [],
+            productName: "",
+            productCategory: "",
+            nfcTag: "",
+            productDescription: "",
+            weightVal: "",
+            pcs: "",
+            priceVal: "",
+            productShelveID: "",
+
+            // Collapse/Expand state
+            isProductsExpanded: false,
+            isShelvesExpanded: false
         };
     },
     mounted() {
@@ -330,6 +425,7 @@ export default {
         this.fetchUserStats();
         setInterval(this.fetchUserStats, 10000);
         this.fetchShelvePositions();
+        this.fetchProducts();
     },
     computed: {
         assistanceCarts() {
@@ -484,6 +580,95 @@ export default {
             } catch (error) {
                 console.error("Failed to update shelve position:", error);
             }
+        },
+        // Product APIs
+        async fetchProducts() {
+            try {
+                const response = await fetch('http://localhost:8089/products');
+                const data = await response.json();
+                if (data.status === 200) {
+                    this.products = data.data;
+                }
+            } catch (error) {
+                console.warn("Failed to fetch products:", error);
+            }
+        },
+        async addProductPosition() {
+            try {
+                const response = await fetch('http://localhost:8089/addProduct', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        product_name: this.productName,
+                        product_category: this.productCategory,
+                        nfc_tag: this.nfcTag,
+                        product_description: this.productDescription,
+                        weight: parseFloat(this.weightVal) || 0.0,
+                        pcs: parseInt(this.pcs) || 0,
+                        price: parseFloat(this.priceVal) || 0.0,
+                        shelve_id: this.productShelveID,
+                        role: this.role
+                    })
+                });
+                const data = await response.json();
+                if (data.status === 200) {
+                    await this.fetchProducts();
+                    this.clearProductForm();
+                }
+            } catch (error) {
+                console.error("Failed to add product:", error);
+            }
+        },
+        async updateProductPosition() {
+            if (!this.nfcTag) return alert("NFC Tag is required to update a product.");
+            try {
+                const response = await fetch('http://localhost:8089/updateProduct', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nfc_tag: this.nfcTag,
+                        product_name: this.productName,
+                        product_category: this.productCategory,
+                        product_description: this.productDescription,
+                        weight: parseFloat(this.weightVal) || 0.0,
+                        pcs: parseInt(this.pcs) || 0,
+                        price: parseFloat(this.priceVal) || 0.0,
+                        shelve_id: this.productShelveID,
+                        role: this.role
+                    })
+                });
+                const data = await response.json();
+                if (data.status === 200) {
+                    await this.fetchProducts();
+                }
+            } catch (error) {
+                console.error("Failed to update product:", error);
+            }
+        },
+        async deleteProductPosition() {
+            if (!this.nfcTag) return alert("Select or enter an NFC Tag to delete.");
+            try {
+                const response = await fetch(`http://localhost:8089/deleteProduct?nfcTag=${this.nfcTag}&role=${this.role}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                if (data.status === 200) {
+                    await this.fetchProducts();
+                    this.clearProductForm();
+                }
+            } catch (error) {
+                console.error("Failed to delete product:", error);
+            }
+        },
+        clearProductForm() {
+            this.productName = "";
+            this.productCategory = "";
+            this.nfcTag = "";
+            this.productDescription = "";
+            this.weightVal = "";
+            this.pcs = "";
+            this.priceVal = "";
+            this.productShelveID = "";
         }
     }
 };

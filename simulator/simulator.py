@@ -39,7 +39,15 @@ client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id)
 client.username_pw_set(mqtt_user, mqtt_pass)
 client.on_connect = on_connect
 client.on_log = on_log
-client.connect(mqtt_broker, port, 60)
+i = 0 
+while True:
+    try:
+        client.connect(mqtt_broker, port, 60)
+        break
+    except Exception as e:
+        i+=1
+        print(f"Error while trying to connect.. {e}, retries {i}")
+        time.sleep(5)
 client.loop_start() 
 
 while True:

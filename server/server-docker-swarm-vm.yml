@@ -20,9 +20,32 @@ services:
       - INFLUX_TOKEN=adminUNIWAsuper
       - INFLUXDB_ORG=UNIWA
       - INFLUXDB_BUCKET=sensors
-      - MQTT_BROKER=tcp://mosquitto:1884
+      - MQTT_BROKER=tcp://mosquitto:1883
     deploy:
       replicas: 3
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+      placement:
+        constraints:
+          - node.role == manager
+
+  vue_vite:
+    image: node:22-alpine
+    ports:
+      - target: 5173
+        published: 8080
+        protocol: tcp
+    networks:
+      - smartcart_network
+      - sensors_network
+    volumes:
+      - ./steve_display:/app
+    working_dir: /app
+    entrypoint: ["/app/entrypoint.sh"]
+    deploy:
+      replicas: 2
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -56,7 +79,6 @@ services:
         delay: 5s
         max_attempts: 5
 
-
   # PRIMARY NODE
   mariadb_1:
     image: mariadb:latest
@@ -78,7 +100,6 @@ services:
       MYSQL_DATABASE: supermarket_db
       MYSQL_USER: uniwa_admin
       MYSQL_PASSWORD: adminUNIWA
-    # Use standard names in gcomm address
     command: >
       --wsrep_on=ON
       --binlog_format=ROW
@@ -92,7 +113,7 @@ services:
       --ssl-cert=/etc/mysql/certs/server-cert.pem
       --ssl-key=/etc/mysql/certs/server-key.pem
     networks:
-      smartcart_network:
+      - smartcart_network
     deploy:
       replicas: 1
       restart_policy:
@@ -122,7 +143,6 @@ services:
       MYSQL_DATABASE: supermarket_db
       MYSQL_USER: uniwa_admin
       MYSQL_PASSWORD: adminUNIWA
-    # Connects to node_1
     command: >
       --wsrep_on=ON
       --wsrep_cluster_name=mariadb_cluster
@@ -136,7 +156,7 @@ services:
       --ssl-cert=/etc/mysql/certs/server-cert.pem
       --ssl-key=/etc/mysql/certs/server-key.pem
     networks:
-      smartcart_network:
+      - smartcart_network
     deploy:
       replicas: 1
       restart_policy:
@@ -163,7 +183,6 @@ services:
       MYSQL_DATABASE: supermarket_db
       MYSQL_USER: uniwa_admin
       MYSQL_PASSWORD: adminUNIWA
-    # Connects to node_1
     command: >
       --wsrep_on=ON
       --binlog_format=ROW
@@ -177,7 +196,7 @@ services:
       --ssl-cert=/etc/mysql/certs/server-cert.pem
       --ssl-key=/etc/mysql/certs/server-key.pem
     networks:
-      smartcart_network:
+      - smartcart_network
     deploy:
       replicas: 1
       restart_policy:
@@ -266,14 +285,3 @@ configs:
     external: true
   acl_file:
     external: true
-
-# Leave Swarm if needed (already in Swarm)
-# docker stack deploy -c server.yml smartcart
-
-# Check services
-# docker stack services smartcart
-
-# Remove stack
-# docker stack rm smartcart
-# https://docs.percona.com/percona-xtradb-cluster/8.0/docker.html
-# docker service ps smartcart_golang --no-trunc
