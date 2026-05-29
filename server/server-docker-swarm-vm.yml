@@ -246,8 +246,9 @@ services:
 
   telegraf:
     image: telegraf:latest
-    volumes:
-      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    configs:
+      - source: telegraf_conf
+        target: /etc/telegraf/telegraf.conf
     ports:
       - "8092:8092/udp"
       - "8094:8094"
@@ -275,16 +276,18 @@ volumes:
   
 configs:
   mysql_ca_cert:
-    external: true
+    file: ./alpine/ssl_certs/ca.pem
   mysql_server_cert:
-    external: true
+    file: ./alpine/ssl_certs/server-cert.pem
   mysql_server_key:
-    external: true
+    file: ./alpine/ssl_certs/server-key.pem
   mysql_init_sql:
     file: ./db/init.sql
   mqtt_conf:
-    external: true
+    file: ./mosquitto/config/mosquitto.conf
   pwfile:
-    external: true
+    file: ./mosquitto/config/pwfile
   acl_file:
-    external: true
+    file: ./mosquitto/config/acl_file
+  telegraf_conf:
+    file: ./telegraf/telegraf.conf
