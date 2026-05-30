@@ -26,7 +26,7 @@ while True:
               "client_id": "NFCSensor",
               "device": "PN532",
               "NFC_data"  : uid_str,
-              "timestamp_NFC" : datetime.now().isoformat()
+              "timestamp_nfc" : datetime.now().isoformat()
             }), flush=True)
             time.sleep(2)
     except Exception as e:

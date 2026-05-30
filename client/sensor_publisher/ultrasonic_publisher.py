@@ -35,7 +35,7 @@ try:
             "client_id": "UltrasonicSensor",
             "device": "HC-SR04",
             "distance": distance,
-            "timestamp_distance": datetime.now().isoformat()
+            "timestamp_ultrasonic": datetime.now().isoformat()
         }), flush=True)
         
         time.sleep(4.5) # Add sleep to avoid measuring 1000 times per second!

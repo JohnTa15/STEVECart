@@ -33,3 +33,6 @@ graph.html
 .antigravitycli/
 .opencode/
 .vscode/
+
+#temp files
+server/steve-api/tmp/

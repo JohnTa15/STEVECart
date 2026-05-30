@@ -14,7 +14,7 @@ port = int(os.getenv("port"))
 topic_nfc = os.getenv("topic_nfc")
 topic_uwb = os.getenv("topic_uwb")
 topic_weight = os.getenv("topic_weight")
-topic_ultrasound = os.getenv("topic_ultrasound")
+topic_ultrasound = os.getenv("topic_ultrasonic")
 cart_id = os.getenv("cart_id")
 client_id = os.getenv("client_id")
 transport = "tcp"
@@ -27,8 +27,7 @@ def on_connect(client, userdata, flags, rc, properties):
     if rc == 0: 
         print("Connected!")
     else: 
-        print(f"Failed to connect error: ", rc)
-        client.reconnect_delay_set()
+        print(f"Failed to connect, error: {rc}")
 
 def on_message(client, userdata, msg):
     print("Received message on topic", msg.topic)
@@ -39,16 +38,34 @@ client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id)
 client.username_pw_set(mqtt_user, mqtt_pass)
 client.on_connect = on_connect
 client.on_log = on_log
+
 i = 0 
 while True:
     try:
+        print(f"Trying to connect to MQTT broker at {mqtt_broker}:{port}...")
         client.connect(mqtt_broker, port, 60)
-        break
+        client.loop_start()
+        
+        # Wait up to 5 seconds to verify connection is successful and authorized
+        connected = False
+        for _ in range(50):
+            if client.is_connected():
+                connected = True
+                break
+            time.sleep(0.1)
+            
+        if connected:
+            break
+        else:
+            i += 1
+            print(f"Connection failed (authorization or timeout), retrying.. retries {i}")
+            client.loop_stop()
+            client.disconnect()
+            time.sleep(5)
     except Exception as e:
-        i+=1
+        i += 1
         print(f"Error while trying to connect.. {e}, retries {i}")
-        time.sleep(5)
-client.loop_start() 
+        time.sleep(5) 
 
 while True:
     print("Simulating NFC")

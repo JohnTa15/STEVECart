@@ -169,10 +169,10 @@
 
       </div>
       <div
-        class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit">
-        <p class="text-xl font-semibold dark:text-white">Minimap</p>
-        <img id="source" src="../assets/minimap.png" alt="Supermarket Minimap" class="w-full h-full object-cover" />
-        <canvas id="canvas" class="mt-4"></canvas>
+        class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit mx-auto mt-6">
+        <p class="text-xl font-semibold dark:text-white mb-3">Minimap</p>
+        <img id="source" src="../assets/minimap.png" alt="Supermarket Minimap" style="display: none;" />
+        <canvas id="canvas" width="450" height="300" class="border border-white/10 rounded-xl shadow-inner"></canvas>
       </div>
 
     </header>
@@ -219,6 +219,7 @@ export default {
   mounted() {
     // Poll the light sensor every 2 seconds for real-time blackout detection
     setInterval(this.checkEnvironmentLight, 2000);
+    this.initMinimap();
   },
   methods: {
     logout() {
@@ -240,7 +241,7 @@ export default {
         const url = `http://localhost:8089/measureLight?cartID=${this.cart_id}`;
         const response = await fetch(url);
         const data = await response.json();
-
+ 
         if (data.flashlight_needed) {
           this.isBlackout = true;
         } else {
@@ -256,7 +257,7 @@ export default {
         const url = `http://localhost:8089/measureWeight?cartID=${this.cart_id}&tag=${this.current_nfc_tag}`;
         const response = await fetch(url);
         const data = await response.json();
-
+ 
         if (data.status === "correct") {
           this.weightStatus = "Weight Match!";
           this.weight = data.actual_weight + " kg";
@@ -283,6 +284,181 @@ export default {
         console.error("Failed to fetch weight data:", error);
         this.weightStatus = "Error reaching Scale API";
       }
+    },
+    initMinimap() {
+      const canvas = document.getElementById("canvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const img = document.getElementById("source");
+ 
+      this.cartPath = [];
+      this.currentPos = null;
+ 
+      const draw = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+ 
+        // Draw background map
+        if (img && img.complete) {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        } else {
+          // Fallback dark grid
+          ctx.fillStyle = "#0f172a";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+          ctx.lineWidth = 1;
+          for (let x = 0; x < canvas.width; x += 30) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, canvas.height);
+            ctx.stroke();
+          }
+          for (let y = 0; y < canvas.height; y += 30) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(canvas.width, y);
+            ctx.stroke();
+          }
+        }
+ 
+        // Draw trace path line
+        if (this.cartPath.length > 1) {
+          ctx.beginPath();
+          ctx.strokeStyle = "rgba(59, 130, 246, 0.7)"; // Vibrant light blue trace line
+          ctx.lineWidth = 4;
+          ctx.lineCap = "round";
+          ctx.lineJoin = "round";
+          ctx.setLineDash([6, 6]);
+ 
+          for (let i = 0; i < this.cartPath.length; i++) {
+            const pt = this.cartPath[i];
+            const px = (pt.x / 10) * canvas.width;
+            const py = (pt.y / 10) * canvas.height;
+ 
+            if (i === 0) {
+              ctx.moveTo(px, py);
+            } else {
+              ctx.lineTo(px, py);
+            }
+          }
+          ctx.stroke();
+          ctx.setLineDash([]);
+ 
+          // Draw individual trace dots
+          for (let i = 0; i < this.cartPath.length - 1; i++) {
+            const pt = this.cartPath[i];
+            const px = (pt.x / 10) * canvas.width;
+            const py = (pt.y / 10) * canvas.height;
+            ctx.beginPath();
+            ctx.arc(px, py, 3.5, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(96, 165, 250, 0.85)";
+            ctx.fill();
+          }
+        }
+ 
+        // Draw current position pulsing marker
+        if (this.currentPos) {
+          const px = (this.currentPos.x / 10) * canvas.width;
+          const py = (this.currentPos.y / 10) * canvas.height;
+ 
+          const time = Date.now() * 0.005;
+          const pulseRadius = 12 + Math.sin(time) * 6;
+          
+          // Pulsing circle
+          ctx.beginPath();
+          ctx.arc(px, py, pulseRadius, 0, Math.PI * 2);
+          ctx.strokeStyle = "rgba(59, 130, 246, 0.4)";
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+ 
+          // Solid glowing blue core
+          ctx.beginPath();
+          ctx.arc(px, py, 7, 0, Math.PI * 2);
+          ctx.fillStyle = "#3b82f6";
+          ctx.shadowBlur = 12;
+          ctx.shadowColor = "#3b82f6";
+          ctx.fill();
+          ctx.shadowBlur = 0;
+ 
+          ctx.beginPath();
+          ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = "#ffffff";
+          ctx.fill();
+ 
+          // Label block
+          ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+          ctx.strokeStyle = "rgba(59, 130, 246, 0.6)";
+          ctx.lineWidth = 1;
+          const label = "CART_01";
+          ctx.font = "bold 10px monospace";
+          const textWidth = ctx.measureText(label).width;
+          const rectW = textWidth + 12;
+          const rectH = 18;
+          const rectX = px - rectW / 2;
+          const rectY = py - 28;
+ 
+          ctx.beginPath();
+          if (ctx.roundRect) {
+            ctx.roundRect(rectX, rectY, rectW, rectH, 4);
+          } else {
+            ctx.rect(rectX, rectY, rectW, rectH);
+          }
+          ctx.fill();
+          ctx.stroke();
+ 
+          ctx.fillStyle = "#60a5fa";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(label, px, py - 19);
+        }
+      };
+ 
+      this.ws = new WebSocket("ws://localhost:8089/ws/minimap");
+ 
+      this.ws.onopen = () => {
+        console.log("Minimap WebSocket connected successfully!");
+      };
+ 
+      this.ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data && typeof data.x_coordinate === "number" && typeof data.y_coordinate === "number") {
+            const x = data.x_coordinate;
+            const y = data.y_coordinate;
+ 
+            this.cartPath.push({ x, y });
+            if (this.cartPath.length > 50) {
+              this.cartPath.shift();
+            }
+ 
+            this.currentPos = { x, y };
+            draw();
+          }
+        } catch (err) {
+          console.error("Error reading WebSocket position data:", err);
+        }
+      };
+ 
+      this.ws.onerror = (err) => {
+        console.error("WebSocket error:", err);
+      };
+ 
+      this.ws.onclose = () => {
+        console.log("WebSocket disconnected, retrying in 5 seconds...");
+        setTimeout(() => this.initMinimap(), 5000);
+      };
+ 
+      const animate = () => {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+          draw();
+          requestAnimationFrame(animate);
+        }
+      };
+      
+      if (img) {
+        img.onload = () => draw();
+      }
+      draw();
+      requestAnimationFrame(animate);
     }
   }
 };

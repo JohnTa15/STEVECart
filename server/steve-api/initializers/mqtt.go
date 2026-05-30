@@ -123,11 +123,34 @@ var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Me
 				fmt.Println("Warning: Could not process NFC scan because cart_id is missing or un-templated.")
 			}
 		}
-	} else if _, ok := fields["weight"]; ok {
+	} else if weightVal, ok := fields["weight"]; ok {
 		fmt.Println("Weight Detected!")
-
-	} else if _, ok := fields["distance"]; ok {
+		var weightNum float64
+		switch v := weightVal.(type) {
+		case float64:
+			weightNum = v
+		case string:
+			weightNum, _ = strconv.ParseFloat(v, 64)
+		}
+		if cartID != "" && cartID != "$CART_ID" {
+			handleWeightScan(weightNum, cartID)
+		} else {
+			fmt.Println("Warning: Could not process weight scan because cart_id is missing or un-templated.")
+		}
+	} else if distanceVal, ok := fields["distance"]; ok {
 		fmt.Println("Distance Detected!")
+		var distanceNum float64
+		switch v := distanceVal.(type) {
+		case float64:
+			distanceNum = v
+		case string:
+			distanceNum, _ = strconv.ParseFloat(v, 64)
+		}
+		if cartID != "" && cartID != "$CART_ID" {
+			handleDistanceScan(distanceNum, cartID)
+		} else {
+			fmt.Println("Warning: Could not process distance scan because cart_id is missing or un-templated.")
+		}
 	} else if _, ok := fields["lux"]; ok {
 		fmt.Println("Lux Detected!")
 	} else if rangeVal, ok := fields["range"]; ok {
@@ -149,19 +172,17 @@ var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Me
 			d2, _ := strconv.ParseFloat(matches[1], 64)
 			d3, _ := strconv.ParseFloat(matches[2], 64)
 
-			// 2. Παίρνουμε τις θέσεις των 3 Anchors από την MariaDB (ShelvePosition table)
 			var anchors []models.ShelvePosition
 			DB.Order("shelve_id asc").Limit(3).Find(&anchors)
 
 			if len(anchors) < 3 {
 				fmt.Println("Error: Need at least 3 configured shelves (anchors) in DB to do trilateration!")
 			} else {
-				// 3. Μαθηματικός τύπος Τριγωνοποίησης (Trilateration)
 				x1, y1 := anchors[0].X_Coordinate, anchors[0].Y_Coordinate
 				x2, y2 := anchors[1].X_Coordinate, anchors[1].Y_Coordinate
 				x3, y3 := anchors[2].X_Coordinate, anchors[2].Y_Coordinate
 
-				A := 2* x2 - 2 * x1
+				A := 2 * x2 - 2 * x1
 				B := 2 * y2 - 2 * y1
 				C := math.Pow(d1, 2) - math.Pow(d2, 2) - math.Pow(x1, 2) + math.Pow(x2, 2) - math.Pow(y1, 2) + math.Pow(y2, 2)
 
@@ -195,7 +216,6 @@ var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Me
 						DB.Create(&uwbData)
 					}
 					
-					// Αποστολή στο Minimap!
 					select {
 					case UWBBroadcast <- uwbData:
 						fmt.Printf("Trilateration Success! Cart %s is at X:%.2f, Y:%.2f\n", nodeID, x, y)
@@ -292,7 +312,7 @@ func publish(client mqtt.Client) {
 }
 
 func Sub(client mqtt.Client) {
-	topic := "sensors/cart_data"
+	topic := "sensors/#"
 	token := client.Subscribe(topic, 1, nil)
 	token.Wait()
 	fmt.Printf("Subscribed to topic: %s", topic)
