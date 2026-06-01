@@ -84,7 +84,6 @@ func handleWeightScan(weight_kg float64, cartID string) {
 }
 
 func handleDistanceScan(distance_cm float64, cartID string) {
-	// Υπέρηχος (εμπόδια): Δεν χρειάζεται να αποθηκεύεται αθροιστικά στο Cart
 	fmt.Printf("Cart %s is %f cm away from obstacle.\n", cartID, distance_cm)
 }
 
@@ -172,7 +171,7 @@ var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Me
 			d2, _ := strconv.ParseFloat(matches[1], 64)
 			d3, _ := strconv.ParseFloat(matches[2], 64)
 
-			var anchors []models.ShelvePosition
+			var anchors []models.Shelves
 			DB.Order("shelve_id asc").Limit(3).Find(&anchors)
 
 			if len(anchors) < 3 {
@@ -278,7 +277,14 @@ func ConnectMQTT() mqtt.Client {
 	pass := os.Getenv("MQTT_PASS")
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(broker)
-	opts.SetClientID("go_mqtt_client")
+	hostname, _ := os.Hostname()
+	clientID := "go_mqtt_client"
+	if hostname != "" {
+		clientID = fmt.Sprintf("go_mqtt_client_%s", hostname)
+	} else {
+		clientID = fmt.Sprintf("go_mqtt_client_%d", time.Now().UnixNano())
+	}
+	opts.SetClientID(clientID)
 	opts.SetUsername(user)
 	opts.SetPassword(pass)
 

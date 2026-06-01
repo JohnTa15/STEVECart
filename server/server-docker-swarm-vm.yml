@@ -12,15 +12,7 @@ services:
       - ./steve-api/:/app
     working_dir: /app
     entrypoint: ["/app/entrypoint.sh"]
-    environment:
-      - DB_URL=uniwa_admin:adminUNIWA@tcp(mariadb_1:3306)/supermarket_db?tls=skip-verify
-      - DB_HOST=mariadb_1
-      - DB_NAME=supermarket_db
-      - INFLUX_DB=http://influxdb:8086
-      - INFLUX_TOKEN=adminUNIWAsuper
-      - INFLUXDB_ORG=UNIWA
-      - INFLUXDB_BUCKET=sensors
-      - MQTT_BROKER=tcp://mosquitto:1883
+    env_file: ./steve-api/.env
     deploy:
       replicas: 3
       restart_policy:

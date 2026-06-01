@@ -23,7 +23,15 @@ func ConnectDB() *gorm.DB {
 	// store connection in package variable for other packages to use
 	DB = db
 
-	if err := db.AutoMigrate(&models.Product{}, &models.Cart{}, &models.User{}, &models.CartOperator{}, &models.CartOperatorItem{}); err != nil {
+	if err := db.AutoMigrate(
+		&models.Product{},
+		&models.Cart{},
+		&models.User{},
+		&models.CartOperator{},
+		&models.CartOperatorItem{},
+		&models.Admin{},
+		&models.Shelves{},
+		&models.UWBData{}); err != nil {
 		log.Fatal("AutoMigrate failed:", err)
 	}
 	return db

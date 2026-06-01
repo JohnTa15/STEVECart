@@ -45,7 +45,7 @@ func GetAllCarts(c *gin.Context) {
 	var response []gin.H
 	for _, cart := range carts {
 		battery, _ := controllers.GetBattery(cart.Cart_ID)
-		
+
 		var uwbData models.UWBData
 		uwb_x := 0.0
 		uwb_y := 0.0
@@ -113,6 +113,9 @@ func DismissAssistance(c *gin.Context) {
 
 func main() {
 	r := gin.Default()
+	// r.Use(CORSMiddleware())
+
+	r.POST("admin/login", controllers.AdminLogin)
 
 	//routing carts
 	r.POST("/registerCartID", CartRegister)
@@ -120,6 +123,8 @@ func main() {
 
 	//routing users
 	r.GET("/users", GetAllUsers)
+	r.PUT("/setAdmin", controllers.SetAdmin)
+	r.DELETE("/deleteUser", controllers.DeleteUser)
 
 	//routing products
 	r.GET("/products", controllers.GetAllProducts)
@@ -155,6 +160,22 @@ func main() {
 	controllers.StartUWBBroadcaster()
 	r.Run(":8089")
 }
+
+// func CORSMiddleware() gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+// 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+// 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+// 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+
+// 		if c.Request.Method == "OPTIONS" {
+// 			c.AbortWithStatus(204)
+// 			return
+// 		}
+
+// 		c.Next()
+// 	}
+// }
 
 //https://www.emqx.com/en/blog/how-to-use-mqtt-in-golang
 //https://github.com/eclipse-paho/paho.mqtt.golang?tab=readme-ov-file

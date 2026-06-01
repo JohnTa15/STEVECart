@@ -193,6 +193,8 @@ export default {
       isBlackout: false,
       flashlightOn: false,
       assistanceRequested: false,
+      weatherData: null,
+      errMessage: "",
     };
   },
   computed: {
@@ -220,10 +222,28 @@ export default {
     // Poll the light sensor every 2 seconds for real-time blackout detection
     setInterval(this.checkEnvironmentLight, 2000);
     this.initMinimap();
+    this.fetchWeather();
+    setInterval(this.fetchWeather, 600000);
   },
   methods: {
     logout() {
       this.$router.push('/login')
+    },
+    async fetchWeather() {
+      try {
+        const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=37.9838&longitude=23.7275&current_weather=true');
+        if (!response.ok) throw new Error("Weather service unavailable");
+        const data = await response.json();
+        if (data && data.current_weather) {
+          this.weatherData = {
+            temperature: data.current_weather.temperature,
+            windspeed: data.current_weather.windspeed
+          };
+        }
+      } catch (error) {
+        console.error("Failed to fetch weather data:", error);
+        this.errMessage = "Failed to load weather info";
+      }
     },
     async assistance() {
       try {
@@ -241,7 +261,7 @@ export default {
         const url = `http://localhost:8089/measureLight?cartID=${this.cart_id}`;
         const response = await fetch(url);
         const data = await response.json();
- 
+
         if (data.flashlight_needed) {
           this.isBlackout = true;
         } else {
@@ -257,7 +277,7 @@ export default {
         const url = `http://localhost:8089/measureWeight?cartID=${this.cart_id}&tag=${this.current_nfc_tag}`;
         const response = await fetch(url);
         const data = await response.json();
- 
+
         if (data.status === "correct") {
           this.weightStatus = "Weight Match!";
           this.weight = data.actual_weight + " kg";
@@ -290,13 +310,13 @@ export default {
       if (!canvas) return;
       const ctx = canvas.getContext("2d");
       const img = document.getElementById("source");
- 
+
       this.cartPath = [];
       this.currentPos = null;
- 
+
       const draw = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
- 
+
         // Draw background map
         if (img && img.complete) {
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -319,7 +339,7 @@ export default {
             ctx.stroke();
           }
         }
- 
+
         // Draw trace path line
         if (this.cartPath.length > 1) {
           ctx.beginPath();
@@ -328,12 +348,12 @@ export default {
           ctx.lineCap = "round";
           ctx.lineJoin = "round";
           ctx.setLineDash([6, 6]);
- 
+
           for (let i = 0; i < this.cartPath.length; i++) {
             const pt = this.cartPath[i];
             const px = (pt.x / 10) * canvas.width;
             const py = (pt.y / 10) * canvas.height;
- 
+
             if (i === 0) {
               ctx.moveTo(px, py);
             } else {
@@ -342,7 +362,7 @@ export default {
           }
           ctx.stroke();
           ctx.setLineDash([]);
- 
+
           // Draw individual trace dots
           for (let i = 0; i < this.cartPath.length - 1; i++) {
             const pt = this.cartPath[i];
@@ -354,22 +374,22 @@ export default {
             ctx.fill();
           }
         }
- 
+
         // Draw current position pulsing marker
         if (this.currentPos) {
           const px = (this.currentPos.x / 10) * canvas.width;
           const py = (this.currentPos.y / 10) * canvas.height;
- 
+
           const time = Date.now() * 0.005;
           const pulseRadius = 12 + Math.sin(time) * 6;
-          
+
           // Pulsing circle
           ctx.beginPath();
           ctx.arc(px, py, pulseRadius, 0, Math.PI * 2);
           ctx.strokeStyle = "rgba(59, 130, 246, 0.4)";
           ctx.lineWidth = 2.5;
           ctx.stroke();
- 
+
           // Solid glowing blue core
           ctx.beginPath();
           ctx.arc(px, py, 7, 0, Math.PI * 2);
@@ -378,12 +398,12 @@ export default {
           ctx.shadowColor = "#3b82f6";
           ctx.fill();
           ctx.shadowBlur = 0;
- 
+
           ctx.beginPath();
           ctx.arc(px, py, 2.5, 0, Math.PI * 2);
           ctx.fillStyle = "#ffffff";
           ctx.fill();
- 
+
           // Label block
           ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
           ctx.strokeStyle = "rgba(59, 130, 246, 0.6)";
@@ -395,7 +415,7 @@ export default {
           const rectH = 18;
           const rectX = px - rectW / 2;
           const rectY = py - 28;
- 
+
           ctx.beginPath();
           if (ctx.roundRect) {
             ctx.roundRect(rectX, rectY, rectW, rectH, 4);
@@ -404,32 +424,32 @@ export default {
           }
           ctx.fill();
           ctx.stroke();
- 
+
           ctx.fillStyle = "#60a5fa";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
           ctx.fillText(label, px, py - 19);
         }
       };
- 
+
       this.ws = new WebSocket("ws://localhost:8089/ws/minimap");
- 
+
       this.ws.onopen = () => {
         console.log("Minimap WebSocket connected successfully!");
       };
- 
+
       this.ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
           if (data && typeof data.x_coordinate === "number" && typeof data.y_coordinate === "number") {
             const x = data.x_coordinate;
             const y = data.y_coordinate;
- 
+
             this.cartPath.push({ x, y });
             if (this.cartPath.length > 50) {
               this.cartPath.shift();
             }
- 
+
             this.currentPos = { x, y };
             draw();
           }
@@ -437,23 +457,23 @@ export default {
           console.error("Error reading WebSocket position data:", err);
         }
       };
- 
+
       this.ws.onerror = (err) => {
         console.error("WebSocket error:", err);
       };
- 
+
       this.ws.onclose = () => {
         console.log("WebSocket disconnected, retrying in 5 seconds...");
         setTimeout(() => this.initMinimap(), 5000);
       };
- 
+
       const animate = () => {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
           draw();
           requestAnimationFrame(animate);
         }
       };
-      
+
       if (img) {
         img.onload = () => draw();
       }

@@ -118,14 +118,15 @@
             <div class="flex flex-wrap gap-6 mt-10 text-center justify-end">
                 <button @click="logout"
                     class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit mx-auto inline-block">Logout</button>
-            </div> 
+            </div>
 
 
             <div
                 class="bg-white/10 dark:bg-gray-800 rounded-xl p-6 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-full max-w-3xl mx-auto mt-8">
                 <div class="flex justify-between items-center select-none mb-4">
                     <h3 class="text-2xl font-bold dark:text-white">Products Management</h3>
-                    <button type="button" @click="isProductsExpanded = !isProductsExpanded" class="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-sm transition-all duration-300 cursor-pointer">
+                    <button type="button" @click="isProductsExpanded = !isProductsExpanded"
+                        class="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-sm transition-all duration-300 cursor-pointer">
                         {{ isProductsExpanded ? '▼ Collapse' : '▶ Expand' }}
                     </button>
                 </div>
@@ -151,9 +152,15 @@
                             class="bg-white/5 border border-white/10 rounded-lg p-2 text-white placeholder:text-gray-500 flex-grow" />
                     </div>
                     <div class="flex gap-3 mb-5 flex-wrap">
-                        <button @click="addProductPosition" class="bg-green-500/20 text-green-300 border border-green-500/30 rounded-xl px-4 py-2 hover:bg-green-500/30 transition font-semibold">+ Add Product</button>
-                        <button @click="updateProductPosition" class="bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-xl px-4 py-2 hover:bg-blue-500/30 transition font-semibold">✎ Update Product</button>
-                        <button @click="deleteProductPosition" class="bg-red-500/20 text-red-300 border border-red-500/30 rounded-xl px-4 py-2 hover:bg-red-500/30 transition font-semibold">✕ Delete Product</button>
+                        <button @click="addProductPosition"
+                            class="bg-green-500/20 text-green-300 border border-green-500/30 rounded-xl px-4 py-2 hover:bg-green-500/30 transition font-semibold">+
+                            Add Product</button>
+                        <button @click="updateProductPosition"
+                            class="bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-xl px-4 py-2 hover:bg-blue-500/30 transition font-semibold">✎
+                            Update Product</button>
+                        <button @click="deleteProductPosition"
+                            class="bg-red-500/20 text-red-300 border border-red-500/30 rounded-xl px-4 py-2 hover:bg-red-500/30 transition font-semibold">✕
+                            Delete Product</button>
                     </div>
 
                     <div class="overflow-x-auto">
@@ -179,7 +186,8 @@
                                     <td class="p-3 font-mono text-blue-400">{{ product.NFCTag }}</td>
                                     <td class="p-3">{{ product.Weight }} kg</td>
                                     <td class="p-3 text-yellow-400 font-bold">{{ product.Pcs }}</td>
-                                    <td class="p-3 text-green-400 font-bold">{{ product.Price ? product.Price.toFixed(2) : '0.00' }} €</td>
+                                    <td class="p-3 text-green-400 font-bold">{{ product.Price ? product.Price.toFixed(2)
+                                        : '0.00' }} €</td>
                                     <td class="p-3 font-mono">{{ product.shelve_id }}</td>
                                     <td class="p-3 opacity-80">{{ product.ProductDescription }}</td>
                                 </tr>
@@ -197,7 +205,8 @@
                 class="bg-white/10 dark:bg-gray-800 rounded-xl p-6 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-full max-w-3xl mx-auto mt-8">
                 <div class="flex justify-between items-center select-none mb-4">
                     <h3 class="text-2xl font-bold dark:text-white">Shelves Positions</h3>
-                    <button type="button" @click="isShelvesExpanded = !isShelvesExpanded" class="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-sm transition-all duration-300 cursor-pointer">
+                    <button type="button" @click="isShelvesExpanded = !isShelvesExpanded"
+                        class="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-sm transition-all duration-300 cursor-pointer">
                         {{ isShelvesExpanded ? '▼ Collapse' : '▶ Expand' }}
                     </button>
                 </div>
@@ -215,9 +224,15 @@
                             class="bg-white/5 border border-white/10 rounded-lg p-2 text-white placeholder:text-gray-500 flex-grow" />
                     </div>
                     <div class="flex gap-3 mb-5 flex-wrap">
-                        <button @click="addShelvePosition" class="bg-green-500/20 text-green-300 border border-green-500/30 rounded-xl px-4 py-2 hover:bg-green-500/30 transition font-semibold">+ Add</button>
-                        <button @click="updateShelvePosition" class="bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-xl px-4 py-2 hover:bg-blue-500/30 transition font-semibold">✎ Update</button>
-                        <button @click="deleteShelvePosition" class="bg-red-500/20 text-red-300 border border-red-500/30 rounded-xl px-4 py-2 hover:bg-red-500/30 transition font-semibold">✕ Delete</button>
+                        <button @click="addShelvePosition"
+                            class="bg-green-500/20 text-green-300 border border-green-500/30 rounded-xl px-4 py-2 hover:bg-green-500/30 transition font-semibold">+
+                            Add</button>
+                        <button @click="updateShelvePosition"
+                            class="bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-xl px-4 py-2 hover:bg-blue-500/30 transition font-semibold">✎
+                            Update</button>
+                        <button @click="deleteShelvePosition"
+                            class="bg-red-500/20 text-red-300 border border-red-500/30 rounded-xl px-4 py-2 hover:bg-red-500/30 transition font-semibold">✕
+                            Delete</button>
                     </div>
 
                     <div class="overflow-x-auto">
@@ -250,6 +265,50 @@
                 </div> <!-- End v-show="isShelvesExpanded" -->
             </div>
 
+
+            <div
+                class="bg-white/10 dark:bg-gray-800 rounded-xl p-6 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-full max-w-3xl mx-auto mt-8">
+                <div class="flex justify-between items-center select-none mb-4">
+                    <h3 class="text-2xl font-bold dark:text-white">Users NEEDS FOR PROMOTING TO ADMIN...</h3>
+                    <button type="button" @click="fetchUsers"
+                        class="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-sm transition-all duration-300 cursor-pointer flex items-center gap-1.5">
+                        🔄 Refresh
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-gray-300 border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-600">
+                                <th class="p-3">User ID</th>
+                                <th class="p-3">Username</th>
+                                <th class="p-3">Email</th>
+                                <th class="p-3 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="u in users" :key="u.id"
+                                class="border-b border-gray-700/50 hover:bg-white/5 transition">
+                                <td class="p-3 font-mono text-white">#{{ u.id }}</td>
+                                <td class="p-3 font-semibold">{{ u.username }}</td>
+                                <td class="p-3 font-mono text-blue-400">{{ u.email }}</td>
+                                <td class="p-3 flex justify-center gap-3">
+                                    <button @click="promoteUser(u.id)"
+                                        class="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded-xl px-3 py-1 hover:bg-yellow-500/40 transition text-xs font-semibold">
+                                        ⚡ Promote to Admin
+                                    </button>
+                                    <button @click="deleteUser(u.id)"
+                                        class="bg-red-500/20 text-red-300 border border-red-500/30 rounded-xl px-3 py-1 hover:bg-red-500/40 transition text-xs font-semibold">
+                                        ✕ Delete
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr v-if="users.length === 0">
+                                <td colspan="4" class="p-6 text-center text-gray-500">No users found...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <div
                 class="bg-white/10 dark:bg-gray-800 rounded-xl p-6 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-full max-w-3xl mx-auto mt-8">
                 <h3 class="text-2xl font-bold dark:text-white mb-4">Online Carts</h3>
@@ -318,7 +377,8 @@
                 <div
                     class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit">
                     <p class="text-xl font-semibold dark:text-white">Assistance Requests</p>
-                    <ul class="bg-white/5 dark:bg-gray-900/30 rounded-xl p-4 mt-2 space-y-1 dark:text-gray-300 w-fit min-w-[180px]">
+                    <ul
+                        class="bg-white/5 dark:bg-gray-900/30 rounded-xl p-4 mt-2 space-y-1 dark:text-gray-300 w-fit min-w-[180px]">
                         <li v-for="cart in assistanceCarts" :key="cart.cart_id"
                             class="flex items-center justify-between gap-3">
                             <span class="font-mono text-red-400 font-bold">{{ cart.cart_id }}</span>
@@ -393,6 +453,9 @@ export default {
             flashlightOn: false,
             onlineCarts: [],
             userStats: [],
+            users: [], // Regular users directory
+            weatherData: null,
+            errMessage: "",
             // Shelve form state
             shelvePositions: [],
             shelveID: "",
@@ -400,7 +463,7 @@ export default {
             yCoord: "",
             shelveDescription: "",
             role: "admin", // TODO: derive from logged-in user
-            
+
             // Product form state
             products: [],
             productName: "",
@@ -426,6 +489,9 @@ export default {
         setInterval(this.fetchUserStats, 10000);
         this.fetchShelvePositions();
         this.fetchProducts();
+        this.fetchUsers();
+        this.fetchWeather();
+        setInterval(this.fetchWeather, 600000);
     },
     computed: {
         assistanceCarts() {
@@ -435,6 +501,22 @@ export default {
     methods: {
         logout() {
             this.$router.push('/login')
+        },
+        async fetchWeather() {
+            try {
+                const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=37.9838&longitude=23.7275&current_weather=true');
+                if (!response.ok) throw new Error("Weather service unavailable");
+                const data = await response.json();
+                if (data && data.current_weather) {
+                    this.weatherData = {
+                        temperature: data.current_weather.temperature,
+                        windspeed: data.current_weather.windspeed
+                    };
+                }
+            } catch (error) {
+                console.error("Failed to fetch weather data:", error);
+                this.errMessage = "Failed to load weather info";
+            }
         },
         async dismissAssistance(cartID) {
             try {
@@ -528,7 +610,7 @@ export default {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        shelve_id: this.shelveID,
+                        shelve_id: parseInt(this.shelveID, 10) || 0,
                         x_coord: parseFloat(this.xCoord),
                         y_coord: parseFloat(this.yCoord),
                         description: this.shelveDescription,
@@ -566,7 +648,7 @@ export default {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        shelve_id: this.shelveID,
+                        shelve_id: parseInt(this.shelveID, 10) || 0,
                         x_coord: parseFloat(this.xCoord),
                         y_coord: parseFloat(this.yCoord),
                         description: this.shelveDescription,
@@ -606,7 +688,7 @@ export default {
                         weight: parseFloat(this.weightVal) || 0.0,
                         pcs: parseInt(this.pcs) || 0,
                         price: parseFloat(this.priceVal) || 0.0,
-                        shelve_id: this.productShelveID,
+                        shelve_id: parseInt(this.productShelveID, 10) || 0,
                         role: this.role
                     })
                 });
@@ -633,7 +715,7 @@ export default {
                         weight: parseFloat(this.weightVal) || 0.0,
                         pcs: parseInt(this.pcs) || 0,
                         price: parseFloat(this.priceVal) || 0.0,
-                        shelve_id: this.productShelveID,
+                        shelve_id: parseInt(this.productShelveID, 10) || 0,
                         role: this.role
                     })
                 });
@@ -669,6 +751,57 @@ export default {
             this.pcs = "";
             this.priceVal = "";
             this.productShelveID = "";
+        },
+        async fetchUsers() {
+            try {
+                const response = await fetch('http://localhost:8089/users');
+                const data = await response.json();
+                if (data.status === 200) {
+                    this.users = data.data;
+                }
+            } catch (error) {
+                console.error("Failed to fetch users:", error);
+            }
+        },
+        async promoteUser(userID) {
+            try {
+                const response = await fetch('http://localhost:8089/setAdmin', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: String(userID),
+                        role: this.role
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    alert("User successfully promoted to Admin");
+                    await this.fetchUsers();
+                } else {
+                    alert(data.error || "Failed to promote user");
+                }
+            } catch (error) {
+                console.error("Failed to promote user:", error);
+                alert("Error communicating with backend");
+            }
+        },
+        async deleteUser(userID) {
+            if (!confirm("Are you sure you want to delete this user?")) return;
+            try {
+                const response = await fetch(`http://localhost:8089/deleteUser?userID=${userID}&role=${this.role}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    alert("User deleted successfully");
+                    await this.fetchUsers();
+                } else {
+                    alert(data.error || "Failed to delete user");
+                }
+            } catch (error) {
+                console.error("Failed to delete user:", error);
+                alert("Error communicating with backend");
+            }
         }
     }
 };

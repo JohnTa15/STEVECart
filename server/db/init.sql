@@ -1,17 +1,21 @@
-CREATE DATABASE IF NOT EXISTS supermarket_db;
+DROP DATABASE IF EXISTS supermarket_db;
+CREATE DATABASE supermarket_db;
 USE supermarket_db;
 CREATE USER IF NOT EXISTS 'uniwa_admin'@'%' IDENTIFIED BY 'adminUNIWA';
 GRANT ALL PRIVILEGES ON supermarket_db.* TO 'uniwa_admin'@'%';
 FLUSH PRIVILEGES;
 
+
 -- shelve/location info (must be created before products)
 CREATE TABLE IF NOT EXISTS shelves (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    shelve_id BIGINT UNIQUE,
     pcs INT, -- total pcs capacity of the shelve
     sub_shelve_quantity INT, -- how many sub-shelves a shelve has
     -- UWB position data for the shelve
     x_coord DOUBLE DEFAULT 0.0,
-    y_coord DOUBLE DEFAULT 0.0
+    y_coord DOUBLE DEFAULT 0.0,
+    description VARCHAR(255)
 );
 
 -- product info
@@ -19,13 +23,14 @@ CREATE TABLE IF NOT EXISTS products (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     product_name VARCHAR(255),
     product_category VARCHAR(100),
+    nfc_tag VARCHAR(255) UNIQUE,
     product_added_date DATETIME,
     product_description VARCHAR(255),
     weight DOUBLE,
     pcs INT,
     price DOUBLE,
     shelve_id BIGINT, -- which shelve this product is located on
-    FOREIGN KEY (shelve_id) REFERENCES shelves(id)
+    FOREIGN KEY (shelve_id) REFERENCES shelves(shelve_id)
 );
 
 -- cart info
@@ -35,6 +40,16 @@ CREATE TABLE IF NOT EXISTS carts (
     mac_address VARCHAR(255) UNIQUE,
     active BOOLEAN,
     fw_version VARCHAR(20)
+);
+
+-- admin account
+CREATE TABLE IF NOT EXISTS admins (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) UNIQUE,
+    password_hash TEXT,
+    admin_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    role VARCHAR(50) DEFAULT 'admin'
 );
 
 -- user account
@@ -84,3 +99,4 @@ CREATE TABLE IF NOT EXISTS uwb_anchors(
     y_coord DOUBLE,
     description VARCHAR(255)
 );
+

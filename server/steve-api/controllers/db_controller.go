@@ -6,7 +6,7 @@ import (
 	"steve-api/models"
 )
 
-//user management
+// user management
 func registerUser(email string, password string) {
 	initializers.ConnectDB()
 	var user models.User
@@ -23,20 +23,39 @@ func loginUser(email string, password string) {
 	initializers.DB.Save(&user)
 }
 
-func deleteUser(email string){
+func deleteUser(email string) {
 	initializers.ConnectDB()
 	var user models.User
-	user.Email = email
-	if(user.Role == "admin"){
-		fmt.Println("Are you sure about that?")
-		fmt.Println("I mean you're deleting an admin")
-	} else {
-		fmt.Println("Are you sure? ")
+	err := initializers.DB.Where("email = ?", email).First(&user).Error
+
+	var admin models.Admin
+	isAdmin := false
+	if err != nil {
+		// If not found in users table, check the admins table
+		if errAdmin := initializers.DB.Where("email = ?", email).First(&admin).Error; errAdmin == nil {
+			isAdmin = true
+		} else {
+			fmt.Println("[ERROR]Account not found")
+			return
+		}
 	}
-	fmt.Println("Press 'y' to delete")
+
+	if isAdmin {
+		fmt.Println("[WARNING] Are you sure about that?")
+		fmt.Println("[INFO] I mean you're deleting an admin")
+	} else {
+		fmt.Println("[INFO] Are you sure? ")
+	}
+	fmt.Println("[INFO] Press 'y' to delete")
 	var input string
 	fmt.Scanln(&input)
 	if input == "y" {
-		initializers.DB.Delete(&user)
+		if isAdmin {
+			fmt.Println("[WARNING] Admin is deleting another admin!")
+			initializers.DB.Delete(&admin)
+		} else {
+			fmt.Println("[INFO] USER deleted successfully!")
+			initializers.DB.Delete(&user)
+		}
 	}
 }
