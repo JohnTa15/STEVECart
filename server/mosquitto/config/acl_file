@@ -1,9 +1,13 @@
 user cart_controller
 
 topic read sensors/#
-topic write sensors/weight/
-topic write sensors/nfc/
-topic write sensors/ultrasonic/
-topic write sensors/battery/
-topic write sensors/lightsensordata/
-topic write sensors/uwb/
+topic write sensors/weight
+topic write sensors/nfc
+topic write sensors/ultrasonic
+topic write sensors/battery
+topic write sensors/lightsensordata
+topic write sensors/uwb
+
+user admin
+topic read sensors/#
+topic write sensors/#

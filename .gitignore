@@ -36,3 +36,4 @@ graph.html
 
 #temp files
 server/steve-api/tmp/
+server.log
