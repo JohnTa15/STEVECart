@@ -72,12 +72,12 @@
                 <div v-if="isBlackout"
                     class="w-full bg-yellow-500/90 text-gray-900 rounded-xl p-6 mt-6 flex flex-col md:flex-row justify-between items-center shadow-red-500/50 shadow-2xl border border-yellow-300 animate-pulse">
                     <div class="text-left mb-4 md:mb-0">
-                        <h2 class="text-2xl font-bold">⚠️ BLACKOUT DETECTED!</h2>
+                        <h2 class="text-2xl font-bold">BLACKOUT DETECTED!</h2>
                         <p class="font-medium">Light levels dropped below safe limits. Do you need the flashlight?</p>
                     </div>
                     <button @click="flashlightOn = !flashlightOn"
                         class="bg-gray-900 text-white font-bold py-3 px-8 rounded-full hover:bg-black transition shadow-lg border border-gray-700 whitespace-nowrap">
-                        {{ flashlightOn ? 'TURN OFF FLASHLIGHT' : '🔦 TURN ON FLASHLIGHT' }}
+                        {{ flashlightOn ? 'TURN OFF FLASHLIGHT' : 'TURN ON FLASHLIGHT' }}
                     </button>
                 </div>
             </transition>
@@ -272,7 +272,7 @@
                     <h3 class="text-2xl font-bold dark:text-white">Users NEEDS FOR PROMOTING TO ADMIN...</h3>
                     <button type="button" @click="fetchUsers"
                         class="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-sm transition-all duration-300 cursor-pointer flex items-center gap-1.5">
-                        🔄 Refresh
+                        Refresh
                     </button>
                 </div>
                 <div class="overflow-x-auto">
@@ -294,11 +294,11 @@
                                 <td class="p-3 flex justify-center gap-3">
                                     <button @click="promoteUser(u.id)"
                                         class="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded-xl px-3 py-1 hover:bg-yellow-500/40 transition text-xs font-semibold">
-                                        ⚡ Promote to Admin
+                                        Promote to Admin
                                     </button>
                                     <button @click="deleteUser(u.id)"
                                         class="bg-red-500/20 text-red-300 border border-red-500/30 rounded-xl px-3 py-1 hover:bg-red-500/40 transition text-xs font-semibold">
-                                        ✕ Delete
+                                        Delete
                                     </button>
                                 </td>
                             </tr>

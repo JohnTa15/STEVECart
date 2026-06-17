@@ -59,3 +59,15 @@ func deleteUser(email string) {
 		}
 	}
 }
+
+// product search
+func searchProduct(name string, nfc_tag string) {
+	initializers.ConnectDB()
+	var product models.Product
+	err := initializers.DB.Where("product_name LIKE ? OR nfc_tag LIKE ?", name, nfc_tag).Find(&product)
+	if err != nil {
+		fmt.Println("[ERROR] Product not found")
+		return
+	}
+	fmt.Println(product)
+}
