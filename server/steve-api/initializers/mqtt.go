@@ -51,7 +51,7 @@ func handleNFCScan(nfcTag string, cartID string) {
 
 	// Update cart total price and weight
 	cart.TotalPrice += product.Price
-	cart.TotalWeight += product.Weight
+	cart.NetWeight += product.Weight
 	if err := DB.Save(&cart).Error; err != nil {
 		fmt.Println("Error: Could not update cart totals:", err)
 		return
@@ -74,13 +74,13 @@ func handleWeightScan(weight_kg float64, cartID string) {
 	}
 
 	// Update cart total weight
-	cart.TotalWeight += float32(weight_kg)
+	cart.NetWeight = weight_kg
 	if err := DB.Save(&cart).Error; err != nil {
 		fmt.Println("Error: Could not update cart total weight:", err)
 		return
 	}
 
-	fmt.Printf("Success! Added %f kg to Cart %s. New total weight: %.2f\n", weight_kg, cart.Cart_ID, cart.TotalWeight)
+	fmt.Printf("Success! Added %f kg to Cart %s. New total weight: %.2f\n", weight_kg, cart.Cart_ID, cart.NetWeight)
 }
 
 func handleDistanceScan(distance_cm float64, cartID string) {

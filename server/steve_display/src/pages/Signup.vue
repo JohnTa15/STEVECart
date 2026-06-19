@@ -19,6 +19,8 @@
     </div>
 </template>
 <script>
+import { API_URL } from '../config.js'
+
 export default {
     data() {
         return {
@@ -32,7 +34,7 @@ export default {
         };
     },
     methods: {
-        handleSubmitSignUp() {
+        async handleSubmitSignUp() {
             if (!this.form.username || !this.form.email || !this.form.password) {
                 this.errorMessage = "Please fill in all fields!";
                 return;
@@ -42,9 +44,28 @@ export default {
                 return;
             }
             this.errorMessage = "";
-            // Assuming successful registration for now, go to login
-            alert("Registration successful! Please log in.");
-            this.$router.push('/login');
+            
+            try {
+                const response = await fetch(`${API_URL}/registerUser`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: this.form.username,
+                        email: this.form.email,
+                        password: this.form.password
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    alert("Registration successful! Please log in.");
+                    this.$router.push('/login');
+                } else {
+                    this.errorMessage = data.error || "Failed to register user";
+                }
+            } catch (error) {
+                console.error("Signup error:", error);
+                this.errorMessage = "Connection error to server";
+            }
         },
         login_btn() {
             this.$router.push('/');

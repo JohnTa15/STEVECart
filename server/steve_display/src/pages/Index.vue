@@ -5,50 +5,10 @@
       class="relative backdrop-blur-md bg-black/30 dark:bg-gray-900/60 p-10 rounded-2xl shadow-2xl text-center space-y-6 border border-white/10 dark:border-gray-700 max-w-4xl w-full">
 
       <div class="absolute top-6 right-6 z-50 text-left">
-        <button @click="isMenuOpen = !isMenuOpen"
-          class="relative group w-12 h-12 rounded-full bg-white/10 dark:bg-white hover:bg-white/20 dark:hover:bg-gray-700 shadow-xl ring-1 ring-white/10 dark:ring-gray-700 flex items-center justify-center transition-all duration-300 focus:outline-none">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
-          </svg>
-          <div
-            class="flex flex-col justify-between w-20px h-20px transform transition-all duration-300 origin-center overflow-hidden">
-            <div
-              class="bg-white dark:text-white h-2px w-7 transform transition-all duration-300 origin-left delay-150ms"
-              :class="{ 'rotate-42deg w-2/3': isMenuOpen }"></div>
-            <div class="bg-white dark:text-white h-2px w-7 rounded transform transition-all duration-300"
-              :class="{ 'translate-x-10': isMenuOpen }"></div>
-            <div
-              class="bg-white dark:text-white h-2px w-7 transform transition-all duration-300 origin-left delay-150ms"
-              :class="{ '-rotate-42deg w-2/3': isMenuOpen }"></div>
-          </div>
+        <button @click="logout"
+          class="bg-white/10 dark:bg-white/10 hover:bg-white/20 dark:hover:bg-gray-700 shadow-xl ring-1 ring-white/10 dark:ring-gray-700 px-6 py-2.5 rounded-xl transition-all duration-300 focus:outline-none text-sm font-semibold text-white">
+          Logout
         </button>
-
-        <transition enter-active-class="transition duration-200 ease-out"
-          enter-from-class="opacity-0 -translate-y-2 scale-95" enter-to-class="opacity-100 translate-y-0 scale-100"
-          leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100 translate-y-0 scale-100"
-          leave-to-class="opacity-0 -translate-y-2 scale-95">
-          <div v-if="isMenuOpen"
-            class="absolute right-0 mt-3 w-64 origin-top-right rounded-xl bg-gray-900/95 backdrop-blur-xl shadow-2xl ring-1 ring-white/10 dark:ring-gray-700 py-2 focus:outline-none overflow-hidden">
-            <div class="block px-4 py-3 text-sm text-gray-400 hover:bg-white/5 transition-colors cursor-default">
-              <span class="block text-xs uppercase tracking-wider opacity-50">Announcements</span>
-            </div>
-            <div class="block px-4 py-3 text-sm text-gray-400 hover:bg-white/5 transition-colors cursor-default">
-              <span class="block text-xs uppercase tracking-wider opacity-50">Cart ID</span>
-              <span class="text-white font-mono">{{ cart_id }}</span>
-            </div>
-
-            <div class="block px-4 py-3 text-sm text-gray-400 hover:bg-white/5 transition-colors cursor-default">
-              <span class="block text-xs uppercase tracking-wider opacity-50">Firmware</span>
-              <span class="text-white font-mono">{{ cart_version }}</span>
-            </div>
-
-            <button @click.prevent="triggerWeightCheck"
-              class="w-full text-left block px-4 py-3 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors border-t border-white/5">
-              Sensors Test
-            </button>
-
-          </div>
-        </transition>
       </div>
       <h1 class="text-3xl font-bold tracking-wide mt-8">
         <p class="title dark:text-white">Hello {{ user }}, this is S.T.E.V.E Display.</p>
@@ -101,10 +61,7 @@
           class="w-full bg-white/5 dark:bg-gray-800/50 placeholder:text-slate-500 rounded-4xl transition duration-300 border border-white/10 dark:border-gray-700 p-2"
           placeholder="Search here for products here" />
       </div>
-      <div class="flex flex-wrap gap-6 mt-10 text-center justify-end">
-        <button @click="logout"
-          class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit mx-auto inline-block">Logout</button>
-      </div>
+
       <div class="flex flex-wrap gap-6 mt-10 text-center justify-end">
         <button @click="assistance"
           class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit mx-auto inline-block">
@@ -179,9 +136,15 @@
   </div>
 </template>
 <script>
+import { API_URL, WS_URL } from '../config.js';
+
 export default {
   data() {
     return {
+      user: localStorage.getItem('username') || "Guest",
+      message: localStorage.getItem('loginMessage') || "Welcome to S.T.E.V.E Display",
+      date: "",
+      time: "",
       weight: "", //kg 
       price: "", //€
       weightStatus: "",
@@ -219,6 +182,8 @@ export default {
 
   },
   mounted() {
+    this.updateDateTime();
+    setInterval(this.updateDateTime, 1000);
     // Poll the light sensor every 2 seconds for real-time blackout detection
     setInterval(this.checkEnvironmentLight, 2000);
     this.initMinimap();
@@ -227,7 +192,14 @@ export default {
   },
   methods: {
     logout() {
+      localStorage.removeItem('username');
+      localStorage.removeItem('loginMessage');
       this.$router.push('/login')
+    },
+    updateDateTime() {
+      const now = new Date();
+      this.date = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      this.time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
     },
     async fetchWeather() {
       try {
@@ -247,7 +219,7 @@ export default {
     },
     async assistance() {
       try {
-        const url = `http://localhost:8089/assistance?cartID=${this.cart_id}`;
+        const url = `${API_URL}/assistance?cartID=${this.cart_id}`;
         await fetch(url);
         this.assistanceRequested = true;
         // Auto-clear confirmation after 30 seconds
@@ -258,7 +230,7 @@ export default {
     },
     async checkEnvironmentLight() {
       try {
-        const url = `http://localhost:8089/measureLight?cartID=${this.cart_id}`;
+        const url = `${API_URL}/measureLight?cartID=${this.cart_id}`;
         const response = await fetch(url);
         const data = await response.json();
 
@@ -274,7 +246,7 @@ export default {
     //weight checking from the scale vs weight of the database
     async triggerWeightCheck() {
       try {
-        const url = `http://localhost:8089/measureWeight?cartID=${this.cart_id}&tag=${this.current_nfc_tag}`;
+        const url = `${API_URL}/measureWeight?cartID=${this.cart_id}&tag=${this.current_nfc_tag}`;
         const response = await fetch(url);
         const data = await response.json();
 
@@ -432,7 +404,7 @@ export default {
         }
       };
 
-      this.ws = new WebSocket("ws://localhost:8089/ws/minimap");
+      this.ws = new WebSocket(`${WS_URL}/ws/minimap`);
 
       this.ws.onopen = () => {
         console.log("Minimap WebSocket connected successfully!");

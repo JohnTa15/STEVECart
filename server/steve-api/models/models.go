@@ -19,9 +19,9 @@ type Product struct {
 	NFCTag             string
 	ProductAddedDate   time.Time
 	ProductDescription string
-	Weight             float32
+	Weight             float64
 	Pcs                int
-	Price              float32
+	Price              float64
 	ShelveID           uint64 `gorm:"type:bigint" json:"shelve_id"` //shelve where the product is located
 }
 
@@ -32,26 +32,19 @@ type Cart struct {
 	IsActive        bool      `json:"is_active"`
 	LastSeen        time.Time `json:"last_seen"`
 	FwVersion       string    `json:"fw_version"`
-	TotalPrice      float32   `json:"total_price"`
-	TotalWeight     float32   `json:"total_weight"`
+	TotalPrice      float64   `json:"total_price"`
+	NetWeight       float64   `json:"net_weight"`
 	NeedsAssistance bool      `json:"needs_assistance"`
 }
 
 type User struct {
-	ID           uint      `gorm:"primaryKey" json:"-"`
-	Username     string    `gorm:"unique" json:"username"`
-	Email        string    `gorm:"unique" json:"email"`
-	PasswordHash string    `json:"password_hash"`
-	UserCreation time.Time `json:"user_creation"`
-}
-
-type Admin struct {
 	ID            uint      `gorm:"primaryKey" json:"id"`
-	Email         string    `gorm:"unique;not null" json:"email"`
-	PasswordHash  string    `gorm:"column:password_hash;not null" json:"-"`
-	AdminCreation time.Time `gorm:"column:admin_creation;default:CURRENT_TIMESTAMP" json:"admin_creation"`
-	LastLogin     time.Time `gorm:"column:last_login;default:CURRENT_TIMESTAMP" json:"last_login"`
-	Role          string    `gorm:"default:'admin'" json:"role"`
+	Username      string    `gorm:"unique" json:"username"`
+	Email         string    `gorm:"unique" json:"email"`
+	PasswordHash  string    `json:"password_hash"`
+	UserCreation  time.Time `json:"user_creation"`
+	LoyaltyPoints int       `json:"loyalty_points"`
+	Role          string    `gorm:"default:'customer'" json:"role"`
 }
 
 // the one who uses a cart with id cart_id

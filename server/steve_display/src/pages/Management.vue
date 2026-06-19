@@ -1,63 +1,14 @@
 <template>
-    <div class="app-background flex flex-col items-center justify-center min-h-screen text-white">
+    <div class="app-background flex flex-col min-h-screen text-white p-4 md:p-6">
 
         <header
-            class="relative backdrop-blur-md bg-black/30 dark:bg-pink-900/60 p-10 rounded-2xl shadow-2xl text-center space-y-6 border border-white/10 dark:border-gray-700 max-w-4xl w-full">
+            class="relative backdrop-blur-md bg-black/30 dark:bg-pink-900/60 p-6 md:p-10 rounded-2xl shadow-2xl text-center space-y-6 border border-white/10 dark:border-gray-700 w-full flex-grow">
 
             <div class="absolute top-6 right-6 z-50 text-left">
-                <button @click="isMenuOpen = !isMenuOpen"
-                    class="relative group w-12 h-12 rounded-full bg-white/10 dark:bg-white hover:bg-white/20 dark:hover:bg-gray-700 shadow-xl ring-1 ring-white/10 dark:ring-gray-700 flex items-center justify-center transition-all duration-300 focus:outline-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
-                    </svg>
-                    <div
-                        class="flex flex-col justify-between w-20px h-20px transform transition-all duration-300 origin-center overflow-hidden">
-                        <div class="bg-white dark:text-white h-2px w-7 transform transition-all duration-300 origin-left delay-150ms"
-                            :class="{ 'rotate-42deg w-2/3': isMenuOpen }"></div>
-                        <div class="bg-white dark:text-white h-2px w-7 rounded transform transition-all duration-300"
-                            :class="{ 'translate-x-10': isMenuOpen }"></div>
-                        <div class="bg-white dark:text-white h-2px w-7 transform transition-all duration-300 origin-left delay-150ms"
-                            :class="{ '-rotate-42deg w-2/3': isMenuOpen }"></div>
-                    </div>
+                <button @click="logout"
+                    class="bg-white/10 dark:bg-white/10 hover:bg-white/20 dark:hover:bg-gray-700 shadow-xl ring-1 ring-white/10 dark:ring-gray-700 px-6 py-2.5 rounded-xl transition-all duration-300 focus:outline-none text-sm font-semibold text-white">
+                    Logout
                 </button>
-
-                <transition enter-active-class="transition duration-200 ease-out"
-                    enter-from-class="opacity-0 -translate-y-2 scale-95"
-                    enter-to-class="opacity-100 translate-y-0 scale-100"
-                    leave-active-class="transition duration-150 ease-in"
-                    leave-from-class="opacity-100 translate-y-0 scale-100"
-                    leave-to-class="opacity-0 -translate-y-2 scale-95">
-                    <div v-if="isMenuOpen"
-                        class="absolute right-0 mt-3 w-64 origin-top-right rounded-xl bg-gray-900/95 backdrop-blur-xl shadow-2xl ring-1 ring-white/10 dark:ring-gray-700 py-2 focus:outline-none overflow-hidden">
-                        <div
-                            class="block px-4 py-3 text-sm text-gray-400 hover:bg-white/5 transition-colors cursor-default">
-                            <span class="block text-xs uppercase tracking-wider opacity-50">Announcements</span>
-                        </div>
-                        <div
-                            class="block px-4 py-3 text-sm text-gray-400 hover:bg-white/5 transition-colors cursor-default">
-                            <span class="block text-xs uppercase tracking-wider opacity-50">Cart ID</span>
-                            <span class="text-white font-mono">{{ cart_id }}</span>
-                        </div>
-
-                        <div
-                            class="block px-4 py-3 text-sm text-gray-400 hover:bg-white/5 transition-colors cursor-default">
-                            <span class="block text-xs uppercase tracking-wider opacity-50">Firmware</span>
-                            <span class="text-white font-mono">{{ cart_version }}</span>
-                        </div>
-
-                        <button @click.prevent="triggerWeightCheck"
-                            class="w-full text-left block px-4 py-3 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-colors">
-                            Sensors Test
-                        </button>
-
-                        <a href="#"
-                            class="block px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors border-t border-white/5">
-                            Logout
-                        </a>
-
-                    </div>
-                </transition>
             </div>
             <h1 class="text-3xl font-bold tracking-wide mt-8">
                 <p class="title dark:text-white">Hello {{ user }}, S.T.E.V.E Cart Management.</p>
@@ -110,19 +61,19 @@
                 {{ time }}
             </div>
 
-            <div class="relative">
-                <input
-                    class="w-full bg-white/5 dark:bg-gray-800/50 placeholder:text-slate-500 rounded-4xl transition duration-300 border border-white/10 dark:border-gray-700 p-2"
-                    placeholder="Search here for products here" />
+            <div class="relative max-w-xl mx-auto my-6">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </span>
+                <input v-model="searchQuery"
+                    class="w-full pl-12 pr-4 py-3 bg-white/5 dark:bg-gray-800/50 text-white placeholder:text-slate-500 rounded-2xl transition duration-300 border border-white/10 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+                    placeholder="Search products by name, category, NFC tag, or description..." />
             </div>
-            <div class="flex flex-wrap gap-6 mt-10 text-center justify-end">
-                <button @click="logout"
-                    class="bg-white/10 dark:bg-gray-800 rounded-xl p-4 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-fit mx-auto inline-block">Logout</button>
-            </div>
-
 
             <div
-                class="bg-white/10 dark:bg-gray-800 rounded-xl p-6 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-full max-w-3xl mx-auto mt-8">
+                class="bg-white/10 dark:bg-gray-800 rounded-xl p-6 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-full mt-8">
                 <div class="flex justify-between items-center select-none mb-4">
                     <h3 class="text-2xl font-bold dark:text-white">Products Management</h3>
                     <button type="button" @click="isProductsExpanded = !isProductsExpanded"
@@ -178,7 +129,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="product in products" :key="product.ID"
+                                <tr v-for="product in filteredProducts" :key="product.ID"
                                     class="border-b border-gray-700/50 hover:bg-white/5 transition cursor-pointer"
                                     @click="productName = product.ProductName; productCategory = product.ProductCategory; nfcTag = product.NFCTag; productDescription = product.ProductDescription; weightVal = product.Weight; pcs = product.Pcs; priceVal = product.Price; productShelveID = product.shelve_id">
                                     <td class="p-3 font-semibold text-white">{{ product.ProductName }}</td>
@@ -191,7 +142,7 @@
                                     <td class="p-3 font-mono">{{ product.shelve_id }}</td>
                                     <td class="p-3 opacity-80">{{ product.ProductDescription }}</td>
                                 </tr>
-                                <tr v-if="products.length === 0">
+                                <tr v-if="filteredProducts.length === 0">
                                     <td colspan="8" class="p-6 text-center text-gray-500">No products added yet...</td>
                                 </tr>
                             </tbody>
@@ -202,7 +153,7 @@
 
 
             <div
-                class="bg-white/10 dark:bg-gray-800 rounded-xl p-6 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-full max-w-3xl mx-auto mt-8">
+                class="bg-white/10 dark:bg-gray-800 rounded-xl p-6 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-full mt-8">
                 <div class="flex justify-between items-center select-none mb-4">
                     <h3 class="text-2xl font-bold dark:text-white">Shelves Positions</h3>
                     <button type="button" @click="isShelvesExpanded = !isShelvesExpanded"
@@ -267,7 +218,7 @@
 
 
             <div
-                class="bg-white/10 dark:bg-gray-800 rounded-xl p-6 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-full max-w-3xl mx-auto mt-8">
+                class="bg-white/10 dark:bg-gray-800 rounded-xl p-6 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-full mt-8">
                 <div class="flex justify-between items-center select-none mb-4">
                     <h3 class="text-2xl font-bold dark:text-white">Users NEEDS FOR PROMOTING TO ADMIN...</h3>
                     <button type="button" @click="fetchUsers"
@@ -296,7 +247,7 @@
                                         class="bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded-xl px-3 py-1 hover:bg-yellow-500/40 transition text-xs font-semibold">
                                         Promote to Admin
                                     </button>
-                                    <button @click="deleteUser(u.id)"
+                                    <button @click="deleteUser(u.email)"
                                         class="bg-red-500/20 text-red-300 border border-red-500/30 rounded-xl px-3 py-1 hover:bg-red-500/40 transition text-xs font-semibold">
                                         Delete
                                     </button>
@@ -310,7 +261,7 @@
                 </div>
             </div>
             <div
-                class="bg-white/10 dark:bg-gray-800 rounded-xl p-6 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-full max-w-3xl mx-auto mt-8">
+                class="bg-white/10 dark:bg-gray-800 rounded-xl p-6 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-full mt-8">
                 <h3 class="text-2xl font-bold dark:text-white mb-4">Online Carts</h3>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-gray-300 border-collapse">
@@ -346,7 +297,7 @@
             </div>
 
             <div
-                class="bg-white/10 dark:bg-gray-800 rounded-xl p-6 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-full max-w-3xl mx-auto mt-8">
+                class="bg-white/10 dark:bg-gray-800 rounded-xl p-6 hover:bg-white/20 transition border border-transparent dark:border-gray-700 w-full mt-8">
                 <h3 class="text-2xl font-bold dark:text-white mb-4">User Statistics</h3>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-gray-300 border-collapse">
@@ -439,6 +390,8 @@
     </div>
 </template>
 <script>
+import { API_URL } from '../config.js';
+
 export default {
     data() {
         return {
@@ -462,7 +415,9 @@ export default {
             xCoord: "",
             yCoord: "",
             shelveDescription: "",
-            role: "admin", // TODO: derive from logged-in user
+            role: localStorage.getItem('role') || "customer",
+            user: localStorage.getItem('username') || "Admin",
+            message: localStorage.getItem('loginMessage') || "Welcome to S.T.E.V.E Management",
 
             // Product form state
             products: [],
@@ -476,8 +431,11 @@ export default {
             productShelveID: "",
 
             // Collapse/Expand state
-            isProductsExpanded: false,
-            isShelvesExpanded: false
+            isProductsExpanded: true,
+            isShelvesExpanded: true,
+
+            // Search query state
+            searchQuery: ""
         };
     },
     mounted() {
@@ -496,6 +454,22 @@ export default {
     computed: {
         assistanceCarts() {
             return this.onlineCarts.filter(cart => cart.needs_assistance);
+        },
+        filteredProducts() {
+            if (!this.searchQuery) {
+                return this.products;
+            }
+            const query = this.searchQuery.toLowerCase();
+            return this.products.filter(product => {
+                const name = (product.ProductName || '').toLowerCase();
+                const category = (product.ProductCategory || '').toLowerCase();
+                const tag = (product.NFCTag || '').toLowerCase();
+                const desc = (product.ProductDescription || '').toLowerCase();
+                return name.includes(query) || 
+                       category.includes(query) || 
+                       tag.includes(query) || 
+                       desc.includes(query);
+            });
         }
     },
     methods: {
@@ -520,7 +494,7 @@ export default {
         },
         async dismissAssistance(cartID) {
             try {
-                await fetch(`http://localhost:8089/dismissAssistance?cartID=${cartID}`);
+                await fetch(`${API_URL}/dismissAssistance?cartID=${cartID}`);
                 // Immediately reflect in UI without waiting for next poll
                 const cart = this.onlineCarts.find(c => c.cart_id === cartID);
                 if (cart) cart.needs_assistance = false;
@@ -530,7 +504,7 @@ export default {
         },
         async fetchCarts() {
             try {
-                const response = await fetch('http://localhost:8089/carts');
+                const response = await fetch(`${API_URL}/carts`);
                 const data = await response.json();
                 if (data.status === 200) {
                     this.onlineCarts = data.data;
@@ -541,7 +515,7 @@ export default {
         },
         async fetchUserStats() {
             try {
-                const response = await fetch('http://localhost:8089/userStats');
+                const response = await fetch(`${API_URL}/userStats`);
                 if (!response.ok) throw new Error("Endpoint not available");
                 const data = await response.json();
                 if (data.status === 200) {
@@ -549,16 +523,11 @@ export default {
                 }
             } catch (error) {
                 console.warn("API missing or failed, using mock data for User Stats.", error);
-                this.userStats = [
-                    { id: 101, email: "john@example.com", loyalty_points: 1250, avg_cost: 65.40 },
-                    { id: 102, email: "maria@example.com", loyalty_points: 340, avg_cost: 112.20 },
-                    { id: 103, email: "alex@example.com", loyalty_points: 50, avg_cost: 14.50 }
-                ];
             }
         },
         async checkEnvironmentLight() {
             try {
-                const url = `http://localhost:8089/measureLight?cartID=${this.cart_id}`;
+                const url = `${API_URL}/measureLight?cartID=${this.cart_id}`;
                 const response = await fetch(url);
                 const data = await response.json();
 
@@ -574,7 +543,7 @@ export default {
         //weight checking from the scale vs weight of the database
         async triggerWeightCheck() {
             try {
-                const url = `http://localhost:8089/measureWeight?cartID=${this.cart_id}&tag=${this.current_nfc_tag}`;
+                const url = `${API_URL}/measureWeight?cartID=${this.cart_id}&tag=${this.current_nfc_tag}`;
                 const response = await fetch(url);
                 const data = await response.json();
 
@@ -595,7 +564,7 @@ export default {
         },
         async fetchShelvePositions() {
             try {
-                const response = await fetch('http://localhost:8089/shelves');
+                const response = await fetch(`${API_URL}/shelves`);
                 const data = await response.json();
                 if (data.status === 200) {
                     this.shelvePositions = data.data;
@@ -605,68 +574,84 @@ export default {
             }
         },
         async addShelvePosition() {
+            if (!this.shelveID) {
+                return alert("Shelve ID is required.");
+            }
             try {
-                const response = await fetch('http://localhost:8089/addShelvePosition', {
+                const response = await fetch(`${API_URL}/addShelvePosition`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         shelve_id: parseInt(this.shelveID, 10) || 0,
-                        x_coord: parseFloat(this.xCoord),
-                        y_coord: parseFloat(this.yCoord),
+                        x_coord: parseFloat(this.xCoord) || 0.0,
+                        y_coord: parseFloat(this.yCoord) || 0.0,
                         description: this.shelveDescription,
                         role: this.role
                     })
                 });
                 const data = await response.json();
-                if (data.status === 200) {
+                if (response.ok && data.status === 200) {
+                    alert("Shelve position added successfully!");
                     await this.fetchShelvePositions();
                     this.shelveID = ""; this.xCoord = ""; this.yCoord = ""; this.shelveDescription = "";
+                } else {
+                    alert(data.error || "Failed to add shelve position.");
                 }
             } catch (error) {
                 console.error("Failed to add shelve position:", error);
+                alert("Error communicating with backend");
             }
         },
         async deleteShelvePosition() {
             if (!this.shelveID) return alert("Select or enter a Shelve ID to delete.");
+            if (!confirm(`Are you sure you want to delete shelve with ID ${this.shelveID}?`)) return;
             try {
-                const response = await fetch(`http://localhost:8089/deleteShelvePosition?shelveID=${this.shelveID}&role=${this.role}`, {
+                const response = await fetch(`${API_URL}/deleteShelvePosition?shelveID=${this.shelveID}&role=${this.role}`, {
                     method: 'DELETE'
                 });
                 const data = await response.json();
-                if (data.status === 200) {
+                if (response.ok && data.status === 200) {
+                    alert("Shelve position deleted successfully!");
                     await this.fetchShelvePositions();
                     this.shelveID = ""; this.xCoord = ""; this.yCoord = ""; this.shelveDescription = "";
+                } else {
+                    alert(data.error || "Failed to delete shelve position.");
                 }
             } catch (error) {
                 console.error("Failed to delete shelve position:", error);
+                alert("Error communicating with backend");
             }
         },
         async updateShelvePosition() {
             if (!this.shelveID) return alert("Select or enter a Shelve ID to update.");
             try {
-                const response = await fetch('http://localhost:8089/updateShelvePosition', {
+                const response = await fetch(`${API_URL}/updateShelvePosition`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         shelve_id: parseInt(this.shelveID, 10) || 0,
-                        x_coord: parseFloat(this.xCoord),
-                        y_coord: parseFloat(this.yCoord),
+                        x_coord: parseFloat(this.xCoord) || 0.0,
+                        y_coord: parseFloat(this.yCoord) || 0.0,
                         description: this.shelveDescription,
                         role: this.role
                     })
                 });
                 const data = await response.json();
-                if (data.status === 200) {
+                if (response.ok && data.status === 200) {
+                    alert("Shelve position updated successfully!");
                     await this.fetchShelvePositions();
+                } else {
+                    alert(data.error || "Failed to update shelve position.");
                 }
             } catch (error) {
                 console.error("Failed to update shelve position:", error);
+                alert("Error communicating with backend");
             }
         },
         // Product APIs
         async fetchProducts() {
             try {
-                const response = await fetch('http://localhost:8089/products');
+                const response = await fetch(`${API_URL}/GetProducts`);
                 const data = await response.json();
                 if (data.status === 200) {
                     this.products = data.data;
@@ -676,8 +661,11 @@ export default {
             }
         },
         async addProductPosition() {
+            if (!this.productName || !this.nfcTag) {
+                return alert("Product Name and NFC Tag are required.");
+            }
             try {
-                const response = await fetch('http://localhost:8089/addProduct', {
+                const response = await fetch(`${API_URL}/addProduct`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -693,18 +681,22 @@ export default {
                     })
                 });
                 const data = await response.json();
-                if (data.status === 200) {
+                if (response.ok && data.status === 200) {
+                    alert("Product added successfully!");
                     await this.fetchProducts();
                     this.clearProductForm();
+                } else {
+                    alert(data.error || "Failed to add product.");
                 }
             } catch (error) {
                 console.error("Failed to add product:", error);
+                alert("Error communicating with backend");
             }
         },
         async updateProductPosition() {
             if (!this.nfcTag) return alert("NFC Tag is required to update a product.");
             try {
-                const response = await fetch('http://localhost:8089/updateProduct', {
+                const response = await fetch(`${API_URL}/updateProduct`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -720,26 +712,35 @@ export default {
                     })
                 });
                 const data = await response.json();
-                if (data.status === 200) {
+                if (response.ok && data.status === 200) {
+                    alert("Product updated successfully!");
                     await this.fetchProducts();
+                } else {
+                    alert(data.error || "Failed to update product.");
                 }
             } catch (error) {
                 console.error("Failed to update product:", error);
+                alert("Error communicating with backend");
             }
         },
         async deleteProductPosition() {
             if (!this.nfcTag) return alert("Select or enter an NFC Tag to delete.");
+            if (!confirm(`Are you sure you want to delete product with NFC Tag ${this.nfcTag}?`)) return;
             try {
-                const response = await fetch(`http://localhost:8089/deleteProduct?nfcTag=${this.nfcTag}&role=${this.role}`, {
+                const response = await fetch(`${API_URL}/deleteProduct?nfcTag=${this.nfcTag}&role=${this.role}`, {
                     method: 'DELETE'
                 });
                 const data = await response.json();
-                if (data.status === 200) {
+                if (response.ok && data.status === 200) {
+                    alert("Product deleted successfully!");
                     await this.fetchProducts();
                     this.clearProductForm();
+                } else {
+                    alert(data.error || "Failed to delete product.");
                 }
             } catch (error) {
                 console.error("Failed to delete product:", error);
+                alert("Error communicating with backend");
             }
         },
         clearProductForm() {
@@ -754,7 +755,7 @@ export default {
         },
         async fetchUsers() {
             try {
-                const response = await fetch('http://localhost:8089/users');
+                const response = await fetch(`${API_URL}/users`);
                 const data = await response.json();
                 if (data.status === 200) {
                     this.users = data.data;
@@ -763,9 +764,10 @@ export default {
                 console.error("Failed to fetch users:", error);
             }
         },
+
         async promoteUser(userID) {
             try {
-                const response = await fetch('http://localhost:8089/setAdmin', {
+                const response = await fetch(`${API_URL}/setAdmin`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -785,10 +787,10 @@ export default {
                 alert("Error communicating with backend");
             }
         },
-        async deleteUser(userID) {
-            if (!confirm("Are you sure you want to delete this user?")) return;
+        async deleteUser(email) {
+            if (!confirm(`Are you sure you want to delete user ${email}?`)) return;
             try {
-                const response = await fetch(`http://localhost:8089/deleteUser?userID=${userID}&role=${this.role}`, {
+                const response = await fetch(`${API_URL}/deleteUserByEmail?email=${encodeURIComponent(email)}`, {
                     method: 'DELETE'
                 });
                 const data = await response.json();

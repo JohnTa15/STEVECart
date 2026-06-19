@@ -89,7 +89,7 @@ onUnmounted(() => {
 })
 
 onMounted(() => {
-  cart_id.value = getClientId()
+  cart_id.value = localStorage.getItem('cart_id') || 'DISPLAY_CART_01'
 })
 
 </script>

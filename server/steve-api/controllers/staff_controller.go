@@ -3,45 +3,54 @@ package controllers
 import (
 	"errors"
 	"net/http"
-	"strconv"
 	"steve-api/initializers"
 	"steve-api/models"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func AdminLogin(c *gin.Context){
-	var body struct{
-		Email string `json:"email" binding: "required"`
-		Password string `json: "email" binding: "required"`
+func AdminLogin(c *gin.Context) {
+	var body struct {
+		Email    string `json:"email" binding:"required"`
+		Password string `json:"password" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	var admin models.Admin
-	if err := initializers.DB.Where("email = ?", body.Email).First(&admin).Error; err != nil {
+	var user models.User
+	if err := initializers.DB.Where("email = ?", body.Email).First(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email or password"})
 		return
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(admin.PasswordHash), []byte(body.Password))
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+	if user.Role != "admin" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Access denied: user is not an administrator"})
 		return
 	}
-	// On success, return details or issue a JWT token
+
+	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(body.Password))
+	if err != nil {
+		// Plain text fallback
+		if user.PasswordHash != body.Password {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+			return
+		}
+	}
+	
+	// On success, return details
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
-		"role":    admin.Role,
-		"email":   admin.Email,
+		"role":    user.Role,
+		"email":   user.Email,
 	})
 }
 
-//to register products update prices etc etc
-func addProduct(productName string, productCategory string, nfcTag string, productDescription string, weight float32, pcs int, price float32, shelveID uint64, role string) error {
+// to register products update prices etc etc
+func addProduct(productName string, productCategory string, nfcTag string, productDescription string, weight float64, pcs int, price float64, shelveID uint64, role string) error {
 	if role != "admin" {
 		return errors.New("unauthorized: admin role required")
 	}
@@ -61,7 +70,6 @@ func addProduct(productName string, productCategory string, nfcTag string, produ
 	return nil
 }
 
-
 func deleteProduct(nfcTag string, role string) error {
 	if role != "admin" {
 		return errors.New("unauthorized: admin role required")
@@ -74,7 +82,7 @@ func deleteProduct(nfcTag string, role string) error {
 	return nil
 }
 
-func updateProduct(nfcTag string, productName string, productCategory string, productDescription string, weight float32, pcs int, price float32, role string, shelveID uint64) error {
+func updateProduct(nfcTag string, productName string, productCategory string, productDescription string, weight float64, pcs int, price float64, role string, shelveID uint64) error {
 	if role != "admin" {
 		return errors.New("unauthorized: admin role required")
 	}
@@ -96,7 +104,7 @@ func updateProduct(nfcTag string, productName string, productCategory string, pr
 	return nil
 }
 
-//managing carts
+// managing carts
 func addCart(cartID string, role string) {
 	if role != "admin" {
 		return
@@ -116,7 +124,7 @@ func deleteCart(cartID string, role string) {
 	initializers.DB.Where("cart_id = ?", cartID).Delete(&cart)
 }
 
-//managing users/admins
+// //managing users/admins
 func setAdmin(userID string, role string) error {
 	if role != "admin" {
 		return errors.New("unauthorized: only administrators can promote users")
@@ -128,33 +136,15 @@ func setAdmin(userID string, role string) error {
 		return errors.New("user not found: " + err.Error())
 	}
 
-	// Start a transaction to ensure either both succeed or both fail (atomic transfer)
-	tx := initializers.DB.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
-
-	var admin models.Admin
-	admin.Email = user.Email
-	admin.PasswordHash = user.PasswordHash
-	admin.Role = "admin"
-
-	if err := tx.Save(&admin).Error; err != nil {
-		tx.Rollback()
-		return errors.New("failed to save admin: " + err.Error())
+	user.Role = "admin"
+	if err := initializers.DB.Save(&user).Error; err != nil {
+		return errors.New("failed to promote user to admin: " + err.Error())
 	}
 
-	if err := tx.Delete(&user).Error; err != nil {
-		tx.Rollback()
-		return errors.New("failed to delete user during transfer: " + err.Error())
-	}
-
-	return tx.Commit().Error
+	return nil
 }
 
-//managing shelve positions
+// managing shelve positions
 func addShelvePosition(shelveID uint64, xCoord float64, yCoord float64, description string, role string) error {
 	if role != "admin" {
 		return errors.New("unauthorized: admin role required")
@@ -218,9 +208,9 @@ func AddProduct(c *gin.Context) {
 		ProductCategory    string  `json:"product_category"`
 		NFCTag             string  `json:"nfc_tag"`
 		ProductDescription string  `json:"product_description"`
-		Weight             float32 `json:"weight"`
+		Weight             float64 `json:"weight"`
 		Pcs                int     `json:"pcs"`
-		Price              float32 `json:"price"`
+		Price              float64 `json:"price"`
 		ShelveID           uint64  `json:"shelve_id"`
 		Role               string  `json:"role"`
 	}
@@ -241,9 +231,9 @@ func UpdateProduct(c *gin.Context) {
 		ProductName        string  `json:"product_name"`
 		ProductCategory    string  `json:"product_category"`
 		ProductDescription string  `json:"product_description"`
-		Weight             float32 `json:"weight"`
+		Weight             float64 `json:"weight"`
 		Pcs                int     `json:"pcs"`
-		Price              float32 `json:"price"`
+		Price              float64 `json:"price"`
 		ShelveID           uint64  `json:"shelve_id"`
 		Role               string  `json:"role"`
 	}
@@ -354,31 +344,4 @@ func SetAdmin(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "message": "User successfully promoted to Admin"})
-}
-
-func DeleteUser(c *gin.Context) {
-	userID := c.Query("userID")
-	role := c.Query("role")
-	if role != "admin" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "unauthorized: only administrators can delete users"})
-		return
-	}
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "userID is required"})
-		return
-	}
-
-	initializers.ConnectDB()
-	var user models.User
-	if err := initializers.DB.Where("id = ?", userID).First(&user).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		return
-	}
-
-	if err := initializers.DB.Delete(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user: " + err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "message": "User deleted successfully"})
 }

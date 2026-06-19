@@ -33,7 +33,7 @@ func AddProdtoCart(nfcTag string, cartID string) {
 
 	// Update cart total price and weight
 	cart.TotalPrice += product.Price
-	cart.TotalWeight += product.Weight
+	cart.NetWeight += product.Weight
 
 	if err := initializers.DB.Save(&cart).Error; err != nil {
 		fmt.Println("Error: Could not update cart totals:", err)
@@ -64,12 +64,12 @@ func RemoveProdfromCart(nfcTag string, cartID string) {
 
 		// Update cart total price and weight
 		cart.TotalPrice -= product.Price
-		cart.TotalWeight -= product.Weight
+		cart.NetWeight -= product.Weight
 		if cart.TotalPrice < 0 {
 			cart.TotalPrice = 0
 		}
-		if cart.TotalWeight < 0 {
-			cart.TotalWeight = 0
+		if cart.NetWeight < 0 {
+			cart.NetWeight = 0
 		}
 		initializers.DB.Save(&cart)
 

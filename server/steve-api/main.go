@@ -113,7 +113,7 @@ func DismissAssistance(c *gin.Context) {
 
 func main() {
 	r := gin.Default()
-	// r.Use(CORSMiddleware())
+	r.Use(CORSMiddleware())
 
 	r.POST("admin/login", controllers.AdminLogin)
 
@@ -123,11 +123,15 @@ func main() {
 
 	//routing users
 	r.GET("/users", GetAllUsers)
+	r.GET("/userStats", controllers.GetUserStats)
 	r.PUT("/setAdmin", controllers.SetAdmin)
-	r.DELETE("/deleteUser", controllers.DeleteUser)
+	r.POST("/registerUser", controllers.RegisterUser)
+	r.POST("/loginUser", controllers.LoginUser)
+	r.DELETE("/deleteUserByEmail", controllers.DeleteUserByEmail)
 
 	//routing products
 	r.GET("/products", controllers.GetAllProducts)
+	r.GET("/GetProducts", controllers.GetAllProducts)
 	r.POST("/addProduct", controllers.AddProduct)
 	r.PUT("/updateProduct", controllers.UpdateProduct)
 	r.DELETE("/deleteProduct", controllers.DeleteProduct)
@@ -135,6 +139,9 @@ func main() {
 	//routing sensors
 	r.GET("/measureWeight", controllers.MeasureWeightHandler)
 	r.GET("/measureLight", controllers.MeasureLight)
+	r.GET("/measureDistance", controllers.MeasureDistance)
+	r.GET("/measureBattery", controllers.MeasureBattery)
+	r.GET("/getLatestNFC", controllers.GetLatestNFC)
 
 	//routing shelves
 	r.GET("/shelves", controllers.GetAllShelves)
@@ -149,6 +156,7 @@ func main() {
 	//routing UWB live tracking
 	r.GET("/ws/minimap", controllers.HandleMinimapWS)
 	r.GET("/uwb/positions", controllers.GetAllUWBPositions)
+	r.GET("/uwb/location", controllers.GetCartLocation)
 
 	//connecting to database, influxdb, and mqtt
 	initializers.LoadENV()
@@ -161,21 +169,21 @@ func main() {
 	r.Run(":8089")
 }
 
-// func CORSMiddleware() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-// 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-// 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-// 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+func CORSMiddleware() gin.HandlerFunc { //middleware which adds headers
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
 
-// 		if c.Request.Method == "OPTIONS" {
-// 			c.AbortWithStatus(204)
-// 			return
-// 		}
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
 
-// 		c.Next()
-// 	}
-// }
+		c.Next()
+	}
+}
 
 //https://www.emqx.com/en/blog/how-to-use-mqtt-in-golang
 //https://github.com/eclipse-paho/paho.mqtt.golang?tab=readme-ov-file

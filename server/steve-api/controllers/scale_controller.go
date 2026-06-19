@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"fmt"
+	"math"
+	"steve-api/initializers"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,14 +32,21 @@ func MeasureWeightHandler(c *gin.Context) {
 		return
 	}
 
-	// 3. Compare the weights and send JSON response
-	if weight == float64(product.Weight) {
-		fmt.Println("Weight is correct! Adding it to the display")
+	//the scale is not taring(reseting to 0kg each time an item is removed a product)
+	weightDif := weight - cart.NetWeight
+	expectedWeight := product.Weight
+	tolerance := 0.05 // tolerance of scale errors.. 
+
+	if math.Abs(math.Abs(weightDif) - expectedWeight) < tolerance {
+		fmt.Println("Weight is correct! Adding/Removing it to the display")
+		cart.NetWeight = weight // Update to the new absolute weight from the scale
+		initializers.DB.Save(&cart)
 		c.JSON(200, gin.H{
 			"cart_id":         cart.Cart_ID,
 			"product_name":    product.ProductName,
 			"expected_weight": product.Weight,
 			"actual_weight":   weight,
+			"net_weight":      cart.NetWeight,
 			"price":           product.Price,
 			"status":          "correct",
 		})
@@ -47,6 +56,7 @@ func MeasureWeightHandler(c *gin.Context) {
 			"cart_id":         cart.Cart_ID,
 			"product_name":    product.ProductName,
 			"expected_weight": product.Weight,
+			"net_weight":      cart.NetWeight,
 			"actual_weight":   weight,
 			"price":           product.Price,
 			"status":          "incorrect",

@@ -42,23 +42,15 @@ CREATE TABLE IF NOT EXISTS carts (
     fw_version VARCHAR(20)
 );
 
--- admin account
-CREATE TABLE IF NOT EXISTS admins (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(255) UNIQUE,
-    password_hash TEXT,
-    admin_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    role VARCHAR(50) DEFAULT 'admin'
-);
-
 -- user account
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) UNIQUE,
     email VARCHAR(255) UNIQUE,
     password_hash TEXT,
     user_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    loyalty_points INT DEFAULT 0 -- giving reward each time user checks out
+    loyalty_points INT DEFAULT 0, -- giving reward each time user checks out
+    role VARCHAR(50) DEFAULT 'customer'
 );
 
 -- event_time when user connected with the specific cart
