@@ -9,6 +9,7 @@ import (
 func CartChecking(cartID string) (models.Cart, error) {
 	var cart models.Cart
 	resC := initializers.DB.Where("cart_id = ?", cartID).First(&cart)
+
 	if resC.Error != nil {
 		fmt.Println("Cart not found")
 		return cart, resC.Error

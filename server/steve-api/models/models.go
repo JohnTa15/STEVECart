@@ -44,22 +44,28 @@ type User struct {
 	PasswordHash  string    `json:"password_hash"`
 	UserCreation  time.Time `json:"user_creation"`
 	LoyaltyPoints int       `json:"loyalty_points"`
-	Role          string    `gorm:"default:'customer'" json:"role"`
+	Role          string    `json:"role" gorm:"default:'customer'"`
 }
 
 // the one who uses a cart with id cart_id
-type CartOperator struct {
+type UserCartSession struct {
 	ID        uint `gorm:"primaryKey"`
 	UserID    uint
 	CartID    uint
 	EventTime time.Time
 }
 
-type CartOperatorItem struct {
+type UserCartItem struct {
 	ID         uint `gorm:"primaryKey"`
 	UserCartID uint
 	ProductID  uint
 	Quantity   int
+}
+
+type RemainingProduct struct {
+	ID        uint `gorm:"primaryKey"`
+	ProductID uint `gorm:"uniqueIndex"`
+	Quantity  int
 }
 
 // for mqtt.go

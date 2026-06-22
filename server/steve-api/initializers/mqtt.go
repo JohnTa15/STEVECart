@@ -8,8 +8,8 @@ import (
 	"math"
 	"os"
 	"regexp"
-	"strconv"
 	"steve-api/models"
+	"strconv"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -40,11 +40,11 @@ func handleNFCScan(nfcTag string, cartID string) {
 	}
 
 	// Add to cart operator items
-	var cartOperatorItem models.CartOperatorItem
-	cartOperatorItem.UserCartID = cart.ID
-	cartOperatorItem.ProductID = product.ID
-	cartOperatorItem.Quantity = 1
-	if err := DB.Save(&cartOperatorItem).Error; err != nil {
+	var userCartItem models.UserCartItem
+	userCartItem.UserCartID = cart.ID
+	userCartItem.ProductID = product.ID
+	userCartItem.Quantity = 1
+	if err := DB.Save(&userCartItem).Error; err != nil {
 		fmt.Println("Error: Could not save cart operator item:", err)
 		return
 	}
@@ -154,7 +154,7 @@ var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Me
 		fmt.Println("Lux Detected!")
 	} else if rangeVal, ok := fields["range"]; ok {
 		fmt.Println("UWB Detected! Raw range string:", rangeVal)
-		
+
 		rangeStr, isString := rangeVal.(string)
 		if !isString {
 			fmt.Println("Error: range is not a string")
@@ -163,7 +163,7 @@ var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Me
 
 		re := regexp.MustCompile(`[0-9]+\.[0-9]+`)
 		matches := re.FindAllString(rangeStr, -1)
-		
+
 		if len(matches) < 3 {
 			fmt.Println("Warning: Could not find 3 distances in the UWB string:", rangeStr)
 		} else {
@@ -181,20 +181,20 @@ var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Me
 				x2, y2 := anchors[1].X_Coordinate, anchors[1].Y_Coordinate
 				x3, y3 := anchors[2].X_Coordinate, anchors[2].Y_Coordinate
 
-				A := 2 * x2 - 2 * x1
-				B := 2 * y2 - 2 * y1
+				A := 2*x2 - 2*x1
+				B := 2*y2 - 2*y1
 				C := math.Pow(d1, 2) - math.Pow(d2, 2) - math.Pow(x1, 2) + math.Pow(x2, 2) - math.Pow(y1, 2) + math.Pow(y2, 2)
 
-				D := 2 * x3 - 2 * x2
-				E := 2 * y3 - 2 * y2
+				D := 2*x3 - 2*x2
+				E := 2*y3 - 2*y2
 				F := math.Pow(d2, 2) - math.Pow(d3, 2) - math.Pow(x2, 2) + math.Pow(x3, 2) - math.Pow(y2, 2) + math.Pow(y3, 2)
 
-				denominator := (E * A - B * D)
+				denominator := (E*A - B*D)
 				if math.Abs(denominator) < 0.0001 {
 					fmt.Println("Error: Anchors are collinear, trilateration failed.")
 				} else {
-					x := (C * E - F * B) / denominator
-					y := (C * D - A * F) / (B * D - A * E)
+					x := (C*E - F*B) / denominator
+					y := (C*D - A*F) / (B*D - A*E)
 
 					nodeID := cartID
 					uwbData := models.UWBData{
@@ -214,7 +214,7 @@ var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Me
 					} else {
 						DB.Create(&uwbData)
 					}
-					
+
 					select {
 					case UWBBroadcast <- uwbData:
 						fmt.Printf("Trilateration Success! Cart %s is at X:%.2f, Y:%.2f\n", nodeID, x, y)

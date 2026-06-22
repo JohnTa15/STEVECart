@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"steve-api/models"
+	"strings"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -36,8 +36,9 @@ func ConnectDB() *gorm.DB {
 		&models.Product{},
 		&models.Cart{},
 		&models.User{},
-		&models.CartOperator{},
-		&models.CartOperatorItem{},
+		&models.UserCartSession{},
+		&models.UserCartItem{},
+		&models.RemainingProduct{},
 		&models.Shelves{},
 		&models.UWBData{}); err != nil {
 		log.Fatal("AutoMigrate failed:", err)

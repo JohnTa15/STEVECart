@@ -15,6 +15,7 @@ func main() {
 	initializers.DB.AutoMigrate(&models.Product{})
 	initializers.DB.AutoMigrate(&models.Cart{})
 	initializers.DB.AutoMigrate(&models.User{})
-	initializers.DB.AutoMigrate(&models.CartOperator{})
-	initializers.DB.AutoMigrate(&models.CartOperatorItem{})
+	initializers.DB.AutoMigrate(&models.UserCartSession{})
+	initializers.DB.AutoMigrate(&models.UserCartItem{})
+	initializers.DB.AutoMigrate(&models.RemainingProduct{})
 }

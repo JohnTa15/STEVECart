@@ -2,8 +2,9 @@ USE supermarket_db;
 
 -- Disable foreign keys temporarily to prevent deletion/insert order conflicts
 SET FOREIGN_KEY_CHECKS = 0;
-TRUNCATE TABLE operator_cart_items;
-TRUNCATE TABLE cart_operator;
+TRUNCATE TABLE user_cart_items;
+TRUNCATE TABLE remaining_products;
+TRUNCATE TABLE user_cart_sessions;
 TRUNCATE TABLE products;
 TRUNCATE TABLE shelves;
 TRUNCATE TABLE carts;
@@ -45,6 +46,8 @@ INSERT INTO carts (id, cart_id, mac_address, active, fw_version) VALUES (7, 'CAR
 INSERT INTO carts (id, cart_id, mac_address, active, fw_version) VALUES (8, 'CART_08', '00:1A:2B:3C:4D:65', 1, 'v1.1.1');
 INSERT INTO carts (id, cart_id, mac_address, active, fw_version) VALUES (9, 'CART_09', '00:1A:2B:3C:4D:66', 0, 'v1.1.1');
 INSERT INTO carts (id, cart_id, mac_address, active, fw_version) VALUES (10, 'CART_10', '00:1A:2B:3C:4D:67', 0, 'v1.1.1');
+INSERT INTO carts (id, cart_id, mac_address, active, fw_version, total_price, net_weight) VALUES (11, 'DISPLAY_CART_01', '00:1A:2B:3C:4D:68', 1, 'v1.1.1', 8.0, 1.48);
+
 
 -- Insert Users
 INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (1, 'john_doe', 'john.doe@gmail.com', '010203', '2026-01-15 08:30:00', 120, 'customer');
@@ -63,13 +66,19 @@ INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_po
 
 
 -- Insert Cart Operators
-INSERT INTO cart_operator (id, user_id, cart_id, event_time, total_cost) VALUES (1, 1, 1, '2026-06-19 10:00:00', 12.5);
-INSERT INTO cart_operator (id, user_id, cart_id, event_time, total_cost) VALUES (2, 2, 2, '2026-06-19 10:15:00', 45.2);
-INSERT INTO cart_operator (id, user_id, cart_id, event_time, total_cost) VALUES (3, 3, 3, '2026-06-19 10:30:00', 8.4);
-INSERT INTO cart_operator (id, user_id, cart_id, event_time, total_cost) VALUES (4, 4, 4, '2026-06-19 10:45:00', 115.0);
-INSERT INTO cart_operator (id, user_id, cart_id, event_time, total_cost) VALUES (5, 5, 5, '2026-06-19 11:00:00', 3.7);
-INSERT INTO cart_operator (id, user_id, cart_id, event_time, total_cost) VALUES (6, 6, 6, '2026-06-19 11:15:00', 28.9);
-INSERT INTO cart_operator (id, user_id, cart_id, event_time, total_cost) VALUES (7, 7, 7, '2026-06-19 11:20:00', 0.0);
-INSERT INTO cart_operator (id, user_id, cart_id, event_time, total_cost) VALUES (8, 8, 8, '2026-06-19 11:25:00', 64.3);
-INSERT INTO cart_operator (id, user_id, cart_id, event_time, total_cost) VALUES (9, 9, 1, '2026-06-19 11:30:00', 18.2);
-INSERT INTO cart_operator (id, user_id, cart_id, event_time, total_cost) VALUES (10, 10, 2, '2026-06-19 11:35:00', 9.5);
+INSERT INTO user_cart_sessions (id, user_id, cart_id, event_time, total_cost) VALUES (1, 1, 1, '2026-06-19 10:00:00', 12.5);
+INSERT INTO user_cart_sessions (id, user_id, cart_id, event_time, total_cost) VALUES (2, 2, 2, '2026-06-19 10:15:00', 45.2);
+INSERT INTO user_cart_sessions (id, user_id, cart_id, event_time, total_cost) VALUES (3, 3, 3, '2026-06-19 10:30:00', 8.4);
+INSERT INTO user_cart_sessions (id, user_id, cart_id, event_time, total_cost) VALUES (4, 4, 4, '2026-06-19 10:45:00', 115.0);
+INSERT INTO user_cart_sessions (id, user_id, cart_id, event_time, total_cost) VALUES (5, 5, 5, '2026-06-19 11:00:00', 3.7);
+INSERT INTO user_cart_sessions (id, user_id, cart_id, event_time, total_cost) VALUES (6, 6, 6, '2026-06-19 11:15:00', 28.9);
+INSERT INTO user_cart_sessions (id, user_id, cart_id, event_time, total_cost) VALUES (7, 7, 7, '2026-06-19 11:20:00', 0.0);
+INSERT INTO user_cart_sessions (id, user_id, cart_id, event_time, total_cost) VALUES (8, 8, 8, '2026-06-19 11:25:00', 64.3);
+INSERT INTO user_cart_sessions (id, user_id, cart_id, event_time, total_cost) VALUES (9, 9, 1, '2026-06-19 11:30:00', 18.2);
+INSERT INTO user_cart_sessions (id, user_id, cart_id, event_time, total_cost) VALUES (10, 10, 2, '2026-06-19 11:35:00', 9.5);
+INSERT INTO user_cart_sessions (id, user_id, cart_id, event_time, total_cost) VALUES (11, 1, 11, '2026-06-21 12:00:00', 8.0);
+
+-- Insert User Cart Items
+INSERT INTO user_cart_items (id, user_cart_id, product_id, quantity) VALUES (1, 11, 1, 1);
+INSERT INTO user_cart_items (id, user_cart_id, product_id, quantity) VALUES (2, 11, 2, 2);
+INSERT INTO user_cart_items (id, user_cart_id, product_id, quantity) VALUES (3, 11, 3, 1);

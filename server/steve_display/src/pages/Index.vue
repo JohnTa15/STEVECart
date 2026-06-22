@@ -97,15 +97,22 @@
           <p class="text-xl font-semibold dark:text-white mb-4">Scan Products</p>
           <div class="space-y-2 max-h-48 overflow-y-auto pr-2 custom-Productsar">
             <div v-for="(item, index) in scannedProducts" :key="index"
-              class="bg-white/5 dark:bg-gray-900/30 rounded-lg p-3 flex justify-between items-center">
+              class="bg-white/5 dark:bg-gray-900/30 rounded-xl p-3.5 flex justify-between items-center transition hover:bg-white/10 border border-white/5">
               <div>
                 <p class="font-bold text-white">{{ item.name }}</p>
-                <p class="text-sm opacity-70">{{ item.weight }} • {{ item.price }}</p>
+                <p class="text-xs text-slate-400 mt-0.5">Tag: {{ item.current_nfc_tag || '--' }}</p>
+                <p class="text-sm text-blue-400 font-medium mt-1">{{ item.weight }} • {{ item.price }}</p>
+                <p class="text-xs text-yellow-400/90 font-semibold mt-1">Quantity: {{ item.capacity || 1 }}</p>
+                <button @click="removeProduct(index)"
+                  class="flex items-center gap-1.5 text-xs text-red-400/90 hover:text-red-300 font-semibold mt-2 cursor-pointer transition-colors border-none bg-transparent p-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Delete Item
+                </button>
               </div>
-              <span class="text-sm font-bold px-2 py-1 rounded"
-                :class="{ 'bg-green-500/20 text-green-400': item.status === 'Match', 'bg-red-500/20 text-red-400': item.status === 'Mismatch' }">
-                {{ item.status }}
-              </span>
             </div>
             <div v-if="scannedProducts.length === 0" class="text-center opacity-50 py-4">
               No products scanned yet.
@@ -130,6 +137,50 @@
         <p class="text-xl font-semibold dark:text-white mb-3">Minimap</p>
         <img id="source" src="../assets/minimap.png" alt="Supermarket Minimap" style="display: none;" />
         <canvas id="canvas" width="450" height="300" class="border border-white/10 rounded-xl shadow-inner"></canvas>
+      </div>
+      <div
+        class="bg-white/10 dark:bg-gray-800 rounded-xl p-6 hover:bg-white/20 transition border border-white/10 dark:border-gray-700 w-full max-w-md mx-auto mt-6 shadow-xl backdrop-blur-md">
+        <button @click="readyToPay" 
+          class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 border-none">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          {{ showPaymentOptions ? 'Close Checkout' : 'Ready to checkout!' }}
+        </button>
+        
+        <transition 
+          enter-active-class="transition duration-300 ease-out" 
+          enter-from-class="opacity-0 translate-y-2 scale-95" 
+          enter-to-class="opacity-100 translate-y-0 scale-100" 
+          leave-active-class="transition duration-200 ease-in" 
+          leave-from-class="opacity-100 translate-y-0 scale-100" 
+          leave-to-class="opacity-0 translate-y-2 scale-95">
+          <div v-if="showPaymentOptions" class="mt-4 space-y-3 pt-4 border-t border-white/10 text-left">
+            <p class="text-xs font-semibold tracking-wider text-slate-400 uppercase mb-2">Select Payment Method</p>
+            <button class="w-full bg-white/5 hover:bg-white/15 text-white border border-white/10 hover:border-white/20 rounded-xl px-4 py-3 transition duration-300 flex items-center justify-between group cursor-pointer">
+              <span class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-400 group-hover:scale-110 transition duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                <span class="font-medium text-sm">Debit / Credit Card</span>
+              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            <button class="w-full bg-white/5 hover:bg-white/15 text-white border border-white/10 hover:border-white/20 rounded-xl px-4 py-3 transition duration-300 flex items-center justify-between group cursor-pointer">
+              <span class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400 group-hover:scale-110 transition duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                <span class="font-medium text-sm">Mobile Payment (IRIS, Revolut)</span>
+              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </transition>
       </div>
 
     </header>
@@ -158,28 +209,22 @@ export default {
       assistanceRequested: false,
       weatherData: null,
       errMessage: "",
+      showPaymentOptions: false,
     };
   },
   computed: {
     totalWeight() {
       return this.scannedProducts.reduce((acc, item) => {
         const val = parseFloat(item.weight) || 0;
-        return acc + val;
+        return acc + (val * (item.capacity || 1));
       }, 0).toFixed(2);
     },
     totalPrice() {
       return this.scannedProducts.reduce((acc, item) => {
         const val = parseFloat(item.price) || 0;
-        return acc + val;
+        return acc + (val * (item.capacity || 1));
       }, 0).toFixed(2);
-    },
-    paymentTime() {
-      let totalWeight = this.totalWeight;
-      let totalPrice = this.totalPrice;
-      let payment_method = ["credit card", "debit card", "cash"];
-      console.log("The user chose to pay with " + payment_method)
     }
-
   },
   mounted() {
     this.updateDateTime();
@@ -189,8 +234,23 @@ export default {
     this.initMinimap();
     this.fetchWeather();
     setInterval(this.fetchWeather, 600000);
+    this.fetchCartItems();
   },
   methods: {
+    async fetchCartItems() {
+      try {
+        const response = await fetch(`${API_URL}/cartItems?cartID=${this.cart_id}`);
+        const data = await response.json();
+        if (data.status === 200) {
+          this.scannedProducts = data.data;
+        }
+      } catch (error) {
+        console.error("Failed to fetch cart items:", error);
+      }
+    },
+    removeProduct(index) {
+      this.scannedProducts.splice(index, 1);
+    },
     logout() {
       localStorage.removeItem('username');
       localStorage.removeItem('loginMessage');
@@ -257,9 +317,11 @@ export default {
           this.scannedProduct = data.product_name;
           this.scannedProducts.unshift({
             name: data.product_name,
+            current_nfc_tag: this.current_nfc_tag,
             weight: data.actual_weight + " kg",
             price: data.price ? data.price.toFixed(2) + " €" : "0.00 €",
-            status: "Match"
+            capacity: 1,
+            status: "Success"
           });
         } else {
           this.weightStatus = "Weight Mismatch!";
@@ -267,9 +329,11 @@ export default {
           this.price = data.price ? data.price.toFixed(2) + " €" : "0.00 €";
           this.scannedProducts.unshift({
             name: data.product_name || "Unknown",
+            current_nfc_tag: this.current_nfc_tag,
             weight: data.actual_weight + " kg",
             price: data.price ? data.price.toFixed(2) + " €" : "0.00 €",
-            status: "Mismatch"
+            capacity: 1,
+            status: "Missmatch"
           });
         }
       } catch (error) {
@@ -451,6 +515,9 @@ export default {
       }
       draw();
       requestAnimationFrame(animate);
+    },
+    readyToPay() {
+      this.showPaymentOptions = !this.showPaymentOptions;
     }
   }
 };

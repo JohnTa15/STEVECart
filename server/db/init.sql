@@ -50,11 +50,16 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash TEXT,
     user_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     loyalty_points INT DEFAULT 0, -- giving reward each time user checks out
-    role VARCHAR(50) DEFAULT 'customer'
+    role VARCHAR(50) DEFAULT 'customer' -- customer, admin, superadmin
 );
 
+-- Insert default superadmin user (password: superadmin123)
+INSERT INTO users (username, email, password_hash, role) 
+VALUES ('superadmin', 'superadmin@uniwa.gr', 'superadmin123', 'superadmin')
+ON DUPLICATE KEY UPDATE role='superadmin';
+
 -- event_time when user connected with the specific cart
-CREATE TABLE IF NOT EXISTS cart_operator (
+CREATE TABLE IF NOT EXISTS user_cart_sessions (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT,
     cart_id BIGINT,
@@ -65,12 +70,20 @@ CREATE TABLE IF NOT EXISTS cart_operator (
 );
 
 -- items that user bought
-CREATE TABLE IF NOT EXISTS operator_cart_items(
+CREATE TABLE IF NOT EXISTS user_cart_items(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_cart_id BIGINT,
     product_id BIGINT,
     quantity INT DEFAULT 1,
-    FOREIGN KEY (user_cart_id) REFERENCES cart_operator(id),
+    FOREIGN KEY (user_cart_id) REFERENCES user_cart_sessions(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+--items remaining to the storage
+CREATE TABLE IF NOT EXISTS remaining_products(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    product_id BIGINT,
+    quantity INT,
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
@@ -91,4 +104,6 @@ CREATE TABLE IF NOT EXISTS uwb_anchors(
     y_coord DOUBLE,
     description VARCHAR(255)
 );
+
+
 

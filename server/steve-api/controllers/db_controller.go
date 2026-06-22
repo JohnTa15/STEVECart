@@ -114,7 +114,7 @@ func GetUserStats(c *gin.Context) {
 	query := `
 		SELECT u.id, u.loyalty_points, COALESCE(AVG(co.total_cost), 0.0) as avg_cost
 		FROM users u
-		LEFT JOIN cart_operator co ON u.id = co.user_id
+		LEFT JOIN user_cart_sessions co ON u.id = co.user_id
 		GROUP BY u.id, u.loyalty_points
 	`
 	if err := initializers.DB.Raw(query).Scan(&stats).Error; err != nil {

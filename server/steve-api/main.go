@@ -132,6 +132,7 @@ func main() {
 	//routing products
 	r.GET("/products", controllers.GetAllProducts)
 	r.GET("/GetProducts", controllers.GetAllProducts)
+	r.GET("/cartItems", controllers.GetCartItems)
 	r.POST("/addProduct", controllers.AddProduct)
 	r.PUT("/updateProduct", controllers.UpdateProduct)
 	r.DELETE("/deleteProduct", controllers.DeleteProduct)
