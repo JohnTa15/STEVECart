@@ -14,12 +14,31 @@ import (
 
 func CartRegister(c *gin.Context) {
 	var cart models.Cart
+
 	if err := c.ShouldBindJSON(&cart); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	var existedCart models.Cart
+	// if the cart is already registered
+	if err := initializers.DB.Where("cart_id = ?", cart.Cart_ID).First(&existedCart).Error; err == nil {
+		existedCart.LastSeen = time.Now()
+		existedCart.IsActive = true
+		initializers.DB.Save(&existedCart)
+		c.JSON(http.StatusOK, gin.H{
+			"message":     "Cart re-registered successfully",
+			"cart_id":     existedCart.Cart_ID,
+			"mac_address": existedCart.MacAddress})
+		return
+	}
+
 	cart.LastSeen = time.Now()
 	cart.IsActive = true
+	if err := initializers.DB.Create(&cart).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register cart: " + err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"message":     "Cart registered successfully",
 		"cart_id":     cart.Cart_ID,

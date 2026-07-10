@@ -59,7 +59,7 @@ type UserCartItem struct {
 	ID         uint `gorm:"primaryKey"`
 	UserCartID uint
 	ProductID  uint
-	Quantity   int
+	Quantity   uint
 }
 
 type RemainingProduct struct {
