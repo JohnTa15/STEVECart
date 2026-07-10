@@ -1,6 +1,7 @@
 services:
   golang:
-    image: golang:latest
+    # image: golang:latest
+    image: steve-api:1.0
     ports:
       - target: 8089
         published: 8089
@@ -8,23 +9,24 @@ services:
     networks:
       - smartcart_network
       - sensors_network
-    volumes:
-      - ./steve-api/:/app
-    working_dir: /app
-    entrypoint: ["/app/entrypoint.sh"]
+    # volumes:
+    #   - ./steve-api/:/app
+    # working_dir: /app
+    # entrypoint: ["/app/entrypoint.sh"]
     env_file: ./steve-api/.env
     deploy:
       replicas: 3
       restart_policy:
         condition: on-failure
         delay: 5s
-        max_attempts: 5
+       # max_attempts: 5
       placement:
         constraints:
           - node.role == manager
 
   vue_vite:
-    image: node:22-alpine
+    # image: node:22-alpine
+    image: steve-frontend:1.0
     ports:
       - target: 5173
         published: 8080
@@ -32,10 +34,10 @@ services:
     networks:
       - smartcart_network
       - sensors_network
-    volumes:
-      - ./steve_display:/app
-    working_dir: /app
-    entrypoint: ["/app/entrypoint.sh"]
+    # volumes:
+    #   - ./steve_display:/app
+    # working_dir: /app
+    # entrypoint: ["/app/entrypoint.sh"]
     deploy:
       replicas: 2
       restart_policy:

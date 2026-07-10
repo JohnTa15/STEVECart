@@ -1,0 +1,6 @@
+.env
+tmp
+tmp_bin
+steve-api
+entrypoint.sh
+Dockerfile

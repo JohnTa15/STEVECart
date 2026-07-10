@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo "Building images.."
+docker build -t steve-api:1.0 ./steve-api
+docker build -t steve-frontend:1.0 ./steve_display
+
 docker stack rm smartcart
 echo "Stack removed!"
 sleep 15
@@ -9,10 +13,3 @@ docker stack deploy -c server-docker-swarm-vm.yml smartcart
 
 sleep 20
 docker service ls
-
-echo "Removing the temp vite modules"
-sudo rm -rf /home/johnt/Documents/STEVEcart/STEVECart/server/steve_display/node_modules/.vite
-
-echo "Deploying the frontend"
-cd /home/johnt/Documents/STEVEcart/STEVECart/server/steve_display
-npm run dev
