@@ -39,14 +39,21 @@ func handleNFCScan(nfcTag string, cartID string) {
 		return
 	}
 
-	// Add to cart operator items
-	var userCartItem models.UserCartItem
-	userCartItem.UserCartID = cart.ID
-	userCartItem.ProductID = product.ID
-	userCartItem.Quantity = 1
-	if err := DB.Save(&userCartItem).Error; err != nil {
-		fmt.Println("Error: Could not save cart operator item:", err)
-		return
+	// If the product is already in the cart, increase its quantity;
+	// otherwise add it as a new item with quantity 1.
+	var item models.UserCartItem
+	if err := DB.Where("user_cart_id = ? AND product_id = ?", cart.ID, product.ID).First(&item).Error; err == nil {
+		item.Quantity++
+		if err := DB.Save(&item).Error; err != nil {
+			fmt.Println("Error: Could not update cart item quantity:", err)
+			return
+		}
+	} else {
+		item = models.UserCartItem{UserCartID: cart.ID, ProductID: product.ID, Quantity: 1}
+		if err := DB.Create(&item).Error; err != nil {
+			fmt.Println("Error: Could not save cart item:", err)
+			return
+		}
 	}
 
 	// Update cart total price and weight
@@ -57,7 +64,7 @@ func handleNFCScan(nfcTag string, cartID string) {
 		return
 	}
 
-	fmt.Printf("Success! Added product %s to Cart %s. New total price: %.2f\n", product.ProductName, cart.Cart_ID, cart.TotalPrice)
+	fmt.Printf("Success! Added product %s to Cart %s (quantity: %d). New total price: %.2f\n", product.ProductName, cart.Cart_ID, item.Quantity, cart.TotalPrice)
 }
 
 func handleWeightScan(weight_kg float64, cartID string) {
@@ -88,6 +95,11 @@ func handleDistanceScan(distance_cm float64, cartID string) {
 }
 
 var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
+	// The MQTT consumer is responsible of checking NFC and UWB sensor data and updating the database accordingly the other mqtt services are for sending data to other services or for debugging purposes
+	// MQTT work splitting 
+	 
+	isConsumer := os.Getenv("SERVICE_ROLE") == "consumer"
+
 	var payloadData map[string]interface{}
 
 	err := json.Unmarshal(msg.Payload(), &payloadData)
@@ -114,6 +126,9 @@ var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Me
 	}
 
 	if nfcVal, ok := fields["NFC_data"]; ok {
+		if !isConsumer {
+			return // only the consumer service mutates carts
+		}
 		fmt.Println("NFC Scan Detected!")
 		if nfcStr, ok := nfcVal.(string); ok {
 			if cartID != "" && cartID != "$CART_ID" {
@@ -123,6 +138,9 @@ var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Me
 			}
 		}
 	} else if weightVal, ok := fields["weight"]; ok {
+		if !isConsumer {
+			return // only the consumer service mutates carts
+		}
 		fmt.Println("Weight Detected!")
 		var weightNum float64
 		switch v := weightVal.(type) {
@@ -153,6 +171,9 @@ var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Me
 	} else if _, ok := fields["lux"]; ok {
 		fmt.Println("Lux Detected!")
 	} else if rangeVal, ok := fields["range"]; ok {
+		if isConsumer {
+			return // UWB is handled by the API replicas (they own the WebSocket clients)
+		}
 		fmt.Println("UWB Detected! Raw range string:", rangeVal)
 
 		rangeStr, isString := rangeVal.(string)

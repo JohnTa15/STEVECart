@@ -82,11 +82,6 @@ export default {
                 console.error("Login connection error:", error);
                 this.errorMessage = "Connection error to server";
             }
-            // Fallback during development: allow redirect anyway but store the input username
-            localStorage.setItem('username', this.form.username);
-            localStorage.setItem('loginMessage', 'Welcome back!');
-            localStorage.setItem('role', this.form.username.includes('admin') ? 'admin' : 'customer');
-            this.$router.push('/index');
         }
     }
 };

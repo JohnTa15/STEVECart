@@ -53,9 +53,9 @@ CREATE TABLE IF NOT EXISTS users (
     role VARCHAR(50) DEFAULT 'customer' -- customer, admin, superadmin
 );
 
--- Insert default superadmin user (password: superadmin123)
-INSERT INTO users (username, email, password_hash, role) 
-VALUES ('superadmin', 'superadmin@uniwa.gr', 'superadmin123', 'superadmin')
+-- Insert default superadmin user (password: superadmin123, stored as bcrypt hash)
+INSERT INTO users (username, email, password_hash, role)
+VALUES ('superadmin', 'superadmin@uniwa.gr', '$2y$10$253drV6X2oCNLLMZgZR6R.kSKYmYXNSPws2tG8/wbzHF7tF8Hjk42', 'superadmin')
 ON DUPLICATE KEY UPDATE role='superadmin';
 
 -- event_time when user connected with the specific cart
@@ -69,13 +69,13 @@ CREATE TABLE IF NOT EXISTS user_cart_sessions (
     FOREIGN KEY (cart_id) REFERENCES carts(id)
 );
 
--- items that user bought
+-- items currently in each cart (user_cart_id references the physical cart)
 CREATE TABLE IF NOT EXISTS user_cart_items(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_cart_id BIGINT,
     product_id BIGINT,
     quantity INT DEFAULT 1,
-    FOREIGN KEY (user_cart_id) REFERENCES user_cart_sessions(id),
+    FOREIGN KEY (user_cart_id) REFERENCES carts(id),
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 

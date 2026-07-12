@@ -34,11 +34,8 @@ func AdminLogin(c *gin.Context) {
 
 	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(body.Password))
 	if err != nil {
-		// Plain text fallback
-		if user.PasswordHash != body.Password {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
-			return
-		}
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		return
 	}
 	
 	// On success, return details

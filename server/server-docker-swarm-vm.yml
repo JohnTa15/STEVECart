@@ -14,12 +14,31 @@ services:
     # working_dir: /app
     # entrypoint: ["/app/entrypoint.sh"]
     env_file: ./steve-api/.env
+    environment:
+      - SERVICE_ROLE=api
     deploy:
       replicas: 3
       restart_policy:
         condition: on-failure
         delay: 5s
        # max_attempts: 5
+      placement:
+        constraints:
+          - node.role == manager
+# This is an mqtt consumer service which is responsible for processing cart related events 
+  mqtt_consumer:
+    image: steve-api:1.0
+    networks:
+      - smartcart_network
+      - sensors_network
+    env_file: ./steve-api/.env
+    environment:
+      - SERVICE_ROLE=consumer
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
       placement:
         constraints:
           - node.role == manager

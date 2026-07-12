@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"steve-api/controllers"
@@ -184,6 +185,14 @@ func main() {
 	initializers.ConnectINFLUX()
 	client := initializers.ConnectMQTT()
 	initializers.Sub(client)
+
+	// Microservices split: when running as the MQTT consumer service,
+	// only consume sensor messages - no HTTP API.
+	if os.Getenv("SERVICE_ROLE") == "consumer" {
+		fmt.Println("Running as MQTT consumer service (no HTTP API)")
+		select {} // block forever; the MQTT client handles messages in the background
+	}
+
 	// Start the goroutine that fans UWB positions out to WebSocket clients
 	controllers.StartUWBBroadcaster()
 	r.Run(":8089")

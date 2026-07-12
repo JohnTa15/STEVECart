@@ -62,14 +62,11 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	// Compare password
+	// Compare password typed with the hash that it is stored in the database
 	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(body.Password))
 	if err != nil {
-		// Also allow plain text check just in case seed data was inserted unhashed
-		if user.PasswordHash != body.Password {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
-			return
-		}
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
