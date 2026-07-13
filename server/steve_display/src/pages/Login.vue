@@ -1,24 +1,3 @@
-<script setup>
-import { ref, onMounted } from 'vue'
-import { API_URL } from '../config.js'
-
-const users = ref([])
-
-const fetchUsersFromDB = async () => {
-    try {
-        const res = await fetch(`${API_URL}/users`)
-        const data = await res.json()
-        users.value = data.users
-    } catch (err) {
-        console.error("Can't fetch users", err)
-    }
-}
-
-onMounted(() => {
-    fetchUsersFromDB()
-})
-</script>
-
 <template>
     <div>
         <form name="Login" id="login-form" @submit.prevent="handleSubmitLogin">

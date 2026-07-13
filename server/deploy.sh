@@ -6,7 +6,7 @@ docker build -t steve-frontend:1.0 ./steve_display
 
 # Hash (bcrypt) the default superadmin password and inject it into init.sql.
 echo "Hashing superadmin password.."
-# Deploying a temporary service in order to hash the password.. 
+# Runs a temporary (throwaway) container just to borrow the htpasswd tool.
 SUPERADMIN_HASH=$(docker run --rm httpd:alpine htpasswd -bnBC 10 "" superadmin123 | tr -d ':\n')
 echo "Superadmin bcrypt hash: $SUPERADMIN_HASH"
 

@@ -32,6 +32,19 @@
         </div>
       </transition>
 
+      <!-- Unscanned Item Alert Banner -->
+      <transition enter-active-class="transition duration-500 ease-out" enter-from-class="opacity-0 -translate-y-4"
+        enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-300 ease-in"
+        leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-4">
+        <div v-if="unscannedAlert"
+          class="w-full bg-red-600/90 text-white rounded-xl p-6 mt-6 flex flex-col md:flex-row justify-between items-center shadow-red-500/50 shadow-2xl border border-red-400 animate-pulse">
+          <div class="text-left">
+            <h2 class="text-2xl font-bold">⚠️ UNSCANNED ITEM DETECTED!</h2>
+            <p class="font-medium">The scale detected weight that doesn't match the scanned products. Please scan the product before placing it in the cart.</p>
+          </div>
+        </div>
+      </transition>
+
       <!-- Flashlight Warning Banner -->
       <transition enter-active-class="transition duration-500 ease-out" enter-from-class="opacity-0 -translate-y-4"
         enter-to-class="opacity-100 translate-y-0" leave-active-class="transition duration-300 ease-in"
@@ -59,7 +72,16 @@
       <div class="relative">
         <input
           class="w-full bg-white/5 dark:bg-gray-800/50 placeholder:text-slate-500 rounded-4xl transition duration-300 border border-white/10 dark:border-gray-700 p-2"
-          placeholder="Search here for products here" />
+          placeholder="Search for products..."
+          v-model="searchInput" />
+        <ul v-if="searchInput"
+          class="mt-2 bg-white/5 dark:bg-gray-900/40 rounded-xl p-3 text-left space-y-1 max-h-40 overflow-y-auto">
+          <li v-for="product in filteredProducts" :key="product.ID" class="flex justify-between text-sm">
+            <span class="text-white">{{ product.ProductName }}</span>
+            <span class="text-blue-400">{{ product.Price.toFixed(2) }} €</span>
+          </li>
+          <li v-if="filteredProducts.length === 0" class="text-sm opacity-50">No products found.</li>
+        </ul>
       </div>
 
       <div class="flex flex-wrap gap-6 mt-10 text-center justify-end">
@@ -201,9 +223,13 @@ export default {
       weightStatus: "",
       scannedProduct: "",
       scannedProducts: [],
+      searchInput: "",   // product search box
+      allProducts: [],   // full catalog, loaded once for the search
       // Added these for dynamic API calls!
       cart_id: "DISPLAY_CART_01",
-      current_nfc_tag: "NFC_456",
+      current_nfc_tag: "",   // filled by /getLatestNFC when a product is scanned
+      lastHandledTag: "",    // last tag we already processed (avoids re-checking every poll)
+      unscannedAlert: false, // true when weight appears on the scale without an NFC scan
       isBlackout: false,
       flashlightOn: false,
       assistanceRequested: false,
@@ -224,6 +250,12 @@ export default {
         const val = parseFloat(item.price) || 0;
         return acc + (val * (item.capacity || 1));
       }, 0).toFixed(2);
+    },
+    // Products whose name matches the search box (case-insensitive)
+    filteredProducts() {
+      const q = this.searchInput.trim().toLowerCase();
+      if (!q) return [];
+      return this.allProducts.filter(p => (p.ProductName || "").toLowerCase().includes(q));
     }
   },
   mounted() {
@@ -235,6 +267,10 @@ export default {
     this.fetchWeather();
     setInterval(this.fetchWeather, 600000);
     this.fetchCartItems();
+    this.fetchAllProducts();
+    // Poll NFC + scale every 3 seconds: new scan -> weight check,
+    // weight without scan -> unscanned item alert
+    setInterval(this.pollScaleAndNFC, 3000);
   },
   methods: {
     async fetchCartItems() {
@@ -248,8 +284,34 @@ export default {
         console.error("Failed to fetch cart items:", error);
       }
     },
-    removeProduct(index) {
-      this.scannedProducts.splice(index, 1);
+    // Load the full product catalog once, so the search box can filter it locally
+    async fetchAllProducts() {
+      try {
+        const response = await fetch(`${API_URL}/GetProducts`);
+        const data = await response.json();
+        if (data.status === 200) {
+          this.allProducts = data.data;
+        }
+      } catch (error) {
+        console.error("Failed to fetch all products:", error);
+      }
+    },
+    async removeProduct(index) {
+      // Take the product that user pressed.. 
+      const item = this.scannedProducts[index];  
+      if (!item) return;
+      try {
+        const response = await fetch(
+          `${API_URL}/removeProductfromCart?cartID=${this.cart_id}&nfcTag=${item.current_nfc_tag}`,
+          { method: 'DELETE' }                     
+        );
+        const data = await response.json();
+        if (data.status === 200) {
+          await this.fetchCartItems();  // Reread the data..
+        }
+      } catch (error) {
+        console.error("Failed to remove product from cart", error);
+      }
     },
     logout() {
       localStorage.removeItem('username');
@@ -303,9 +365,42 @@ export default {
         console.error("Failed to read light sensor", error);
       }
     },
+    // Polls the latest NFC scan and the scale. Two outcomes:
+    // - new NFC tag scanned  -> run the weight check for that product
+    // - weight on the scale without any scan -> show the unscanned item alert
+    async pollScaleAndNFC() {
+      try {
+        const res = await fetch(`${API_URL}/getLatestNFC?cartID=${this.cart_id}`);
+        const data = await res.json();
+
+        if (data.nfc_tag) {
+          this.unscannedAlert = false;
+          if (data.nfc_tag !== this.lastHandledTag) {
+            this.lastHandledTag = data.nfc_tag;
+            this.current_nfc_tag = data.nfc_tag;
+            await this.triggerWeightCheck();
+            await this.fetchCartItems(); // refresh the list written by the MQTT consumer
+          }
+        } else {
+          // Nothing scanned recently: is there unverified weight on the scale?
+          const wres = await fetch(`${API_URL}/rawWeight?cartID=${this.cart_id}`);
+          const wdata = await wres.json();
+          if (wdata.status === "ok") {
+            const diff = Math.abs(wdata.scale_weight - wdata.verified_weight);
+            this.unscannedAlert = diff > 0.05; // same tolerance as the backend check
+          }
+        }
+      } catch (error) {
+        console.error("Scale/NFC poll failed:", error);
+      }
+    },
     //weight checking from the scale vs weight of the database
     async triggerWeightCheck() {
       try {
+        if (this.current_nfc_tag == "") {
+          console.error("No NFC product is scanned. Please remove the item from the cart and then, scan a desired product first!!");
+          return;
+        }
         const url = `${API_URL}/measureWeight?cartID=${this.cart_id}&tag=${this.current_nfc_tag}`;
         const response = await fetch(url);
         const data = await response.json();
@@ -315,27 +410,13 @@ export default {
           this.weight = data.actual_weight + " kg";
           this.price = data.price ? data.price.toFixed(2) + " €" : "0.00 €";
           this.scannedProduct = data.product_name;
-          this.scannedProducts.unshift({
-            name: data.product_name,
-            current_nfc_tag: this.current_nfc_tag,
-            weight: data.actual_weight + " kg",
-            price: data.price ? data.price.toFixed(2) + " €" : "0.00 €",
-            capacity: 1,
-            status: "Success"
-          });
         } else {
           this.weightStatus = "Weight Mismatch!";
           this.weight = data.actual_weight + " kg (Expected: " + data.expected_weight + ")";
           this.price = data.price ? data.price.toFixed(2) + " €" : "0.00 €";
-          this.scannedProducts.unshift({
-            name: data.product_name || "Unknown",
-            current_nfc_tag: this.current_nfc_tag,
-            weight: data.actual_weight + " kg",
-            price: data.price ? data.price.toFixed(2) + " €" : "0.00 €",
-            capacity: 1,
-            status: "Missmatch"
-          });
         }
+        // The item list itself comes from the server (fetchCartItems) -
+        // the MQTT consumer already recorded the scan in the database.
       } catch (error) {
         console.error("Failed to fetch weight data:", error);
         this.weightStatus = "Error reaching Scale API";

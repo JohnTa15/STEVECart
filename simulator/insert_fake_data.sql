@@ -50,18 +50,18 @@ INSERT INTO carts (id, cart_id, mac_address, active, fw_version, total_price, ne
 
 
 -- Insert Users
-INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (1, 'john_doe', 'john.doe@gmail.com', '010203', '2026-01-15 08:30:00', 120, 'customer');
-INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (2, 'jane_smith', 'jane.smith@yahoo.com', '010203', '2026-02-10 11:20:00', 50, 'customer');
-INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (3, 'admin', 'admin@uniwa.gr', '010203', '2026-02-28 14:00:00', 350, 'admin');
-INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (4, 'student1', 'student1@uniwa.gr', '010203', '2026-03-05 16:45:00', 10, 'customer');
-INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (5, 'maria_p', 'maria.p@outlook.com', '010203', '2026-03-12 09:10:00', 85, 'customer');
-INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (6, 'nikos_g', 'nikos.g@gmail.com', '010203', '2026-04-01 10:15:00', 190, 'customer');
-INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (7, 'eleni_k', 'eleni.k@gmail.com', '010203', '2026-04-18 17:30:00', 0, 'customer');
-INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (8, 'george_m', 'george.m@yahoo.gr', '010203', '2026-05-02 12:00:00', 220, 'customer');
-INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (9, 'dimitris_a', 'dimitris.a@uniwa.gr', '010203', '2026-05-20 15:55:00', 45, 'customer');
-INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (10, 'testuser', 'testuser@gmail.com', '010203', '2026-06-01 18:20:00', 95, 'customer');
-INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (11, 'TooToxic1', 'tootoxic1@gmail.com', '010203', '2026-06-19 12:00:00', 100, 'admin');
-INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (12, 'steve_admin', 'steve_admin@uniwa.gr', 'steve123', '2026-06-19 16:00:00', 500, 'admin');
+INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (1, 'john_doe', 'john.doe@gmail.com', '$2a$12$MHikCROtA1Nr5hk6PuVKm.4nz9E/bfMiQKD.qNYbdGyyMK/IrGf.q', '2026-01-15 08:30:00', 120, 'customer');
+INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (2, 'jane_smith', 'jane.smith@yahoo.com', '$2a$12$G2WpRoVAdQCPvxxrCAtSBuJB8svVR9IsKS656JAO1DIuH2Ov7WqxK', '2026-02-10 11:20:00', 50, 'customer');
+INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (3, 'admin', 'admin@uniwa.gr', '$2a$12$emeX3.eDCR1mKOJgbr8MQuqwb97q8TtVvd/mh36nILbV7T2u/L8KG', '2026-02-28 14:00:00', 350, 'admin');
+INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (4, 'student1', 'student1@uniwa.gr', '$2a$12$3VL42GHcraKGk2pnJOaGBuCOKNsNc0qt6jXTbf6qb9TJVQaksqZFG', '2026-03-05 16:45:00', 10, 'customer');
+INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (5, 'maria_p', 'maria.p@outlook.com', '$2a$12$ojTO7vu.8FNL2LMdUHAitOgG0JZIn1Vc8xguThaSoWFus/ZsOuoB.', '2026-03-12 09:10:00', 85, 'customer');
+INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (6, 'nikos_g', 'nikos.g@gmail.com', '$2a$12$JRf1uXNkrVcvV.dZNinrkONwXmJvs4nSF930XWzGfnioThbS7Pcsa', '2026-04-01 10:15:00', 190, 'customer');
+INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (7, 'eleni_k', 'eleni.k@gmail.com', '$2a$12$nEXYGc8lnhiNahl7FVj91uXcn9X2AbNky44HVSvsrOh5.2RCpJXHq', '2026-04-18 17:30:00', 0, 'customer');
+INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (8, 'george_m', 'george.m@yahoo.gr', '$2a$12$z2.xuRqbzfPWdIK4ftb8Ku/HGlKhhM0zryuSSa9wnyJvimVSJHXVK', '2026-05-02 12:00:00', 220, 'customer');
+INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (9, 'dimitris_a', 'dimitris.a@uniwa.gr', '$2a$12$wmwVbT8NAnzULbpP05RPBuCtDs22rFo4wbSBOGE9yanrL1UR1xcLC', '2026-05-20 15:55:00', 45, 'customer');
+INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (10, 'testuser', 'testuser@gmail.com', '$2a$12$8D3gCk25IZwAgKwp19EDLe17k3IvBM4e188TbQssnCaibZx1VObPS', '2026-06-01 18:20:00', 95, 'customer');
+INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (11, 'TooToxic1', 'tootoxic1@gmail.com', '$2a$12$Wv9k1BkqYd7ku5wHjSorEO6GgaHByh2rv9W08JlnDJjHukeTpBQHe', '2026-06-19 12:00:00', 100, 'admin');
+INSERT INTO users (id, username, email, password_hash, user_creation, loyalty_points, role) VALUES (12, 'steve_admin', 'steve_admin@uniwa.gr', '$2a$12$/TByxCKtRFtZfwKf7zgXQeYo1/0xhTulRiRgX1JRVJYadb/6nFrHi', '2026-06-19 16:00:00', 500, 'admin'); --steve123
 
 
 

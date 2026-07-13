@@ -77,14 +77,6 @@ func GetAllCarts(c *gin.Context) {
 		gps := "Unknown"
 		if uwb_x > 0 && uwb_y > 0 {
 			gps = fmt.Sprintf("Aisle %.1f", uwb_x)
-		} else {
-			// Default mock for display if no real data in influx yet
-			gps = "Aisle 4"
-		}
-
-		// Just in case battery is 0, provide a mock value for now
-		if battery == 0 {
-			battery = 92
 		}
 
 		response = append(response, gin.H{
@@ -150,15 +142,16 @@ func main() {
 	r.DELETE("/deleteUserByEmail", controllers.DeleteUserByEmail)
 
 	//routing products
-	r.GET("/products", controllers.GetAllProducts)
 	r.GET("/GetProducts", controllers.GetAllProducts)
 	r.GET("/cartItems", controllers.GetCartItems)
 	r.POST("/addProduct", controllers.AddProduct)
 	r.PUT("/updateProduct", controllers.UpdateProduct)
 	r.DELETE("/deleteProduct", controllers.DeleteProduct)
+	r.DELETE("/removeProductfromCart", controllers.RemoveProdfromCart)
 
 	//routing sensors
 	r.GET("/measureWeight", controllers.MeasureWeightHandler)
+	r.GET("/rawWeight", controllers.RawWeight)
 	r.GET("/measureLight", controllers.MeasureLight)
 	r.GET("/measureDistance", controllers.MeasureDistance)
 	r.GET("/measureBattery", controllers.MeasureBattery)
@@ -220,4 +213,3 @@ func CORSMiddleware() gin.HandlerFunc { //middleware which adds headers
 //https://go.dev/doc/modules/gomod-ref
 //https://docs.influxdata.com/influxDB/v2/api-guide/client-libraries/go/
 //https://gorm.io/docs/associations.html#tags
-//https://gemini.google.com/share/250c2d25448c

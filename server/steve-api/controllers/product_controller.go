@@ -77,18 +77,23 @@ func AddProdtoCart(nfcTag string, cartID string) {
 	fmt.Printf("Success! Added product %s to Cart %s. New total price: %.2f\n", product.ProductName, cart.Cart_ID, cart.TotalPrice)
 }
 
-func RemoveProdfromCart(nfcTag string, cartID string) {
+func RemoveProdfromCart(c *gin.Context) {
 	if initializers.DB == nil {
 		initializers.ConnectDB()
 	}
 
+	cartID := c.Query("cartID")
+	nfcTag := c.Query("nfcTag")
+
 	cart, err := CartChecking(cartID)
 	if err != nil {
+		c.JSON(404, gin.H{"error": "Cart not found"})
 		return
 	}
 
 	product, err := ProductChecking(nfcTag)
 	if err != nil {
+		c.JSON(404, gin.H{"error": "Product not found"})
 		return
 	}
 
@@ -107,18 +112,15 @@ func RemoveProdfromCart(nfcTag string, cartID string) {
 
 		// Update cart total price and weight
 		cart.TotalPrice -= product.Price
-		cart.NetWeight -= product.Weight
 		if cart.TotalPrice < 0 {
 			cart.TotalPrice = 0
-		}
-		if cart.NetWeight < 0 {
-			cart.NetWeight = 0
 		}
 		initializers.DB.Save(&cart)
 
 		fmt.Printf("Success! Removed product %s from Cart %s. New total price: %.2f\n", product.ProductName, cart.Cart_ID, cart.TotalPrice)
+		c.JSON(200, gin.H{"status": 200, "message": "Product removed from cart"})
 	} else {
-		fmt.Println("Error: Product not in cart.")
+		c.JSON(404, gin.H{"error": "Product not in cart"})
 	}
 }
 

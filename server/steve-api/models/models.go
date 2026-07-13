@@ -41,7 +41,7 @@ type User struct {
 	ID            uint      `gorm:"primaryKey" json:"id"`
 	Username      string    `gorm:"unique" json:"username"`
 	Email         string    `gorm:"unique" json:"email"`
-	PasswordHash  string    `json:"password_hash"`
+	PasswordHash  string    `json:"-"`
 	UserCreation  time.Time `json:"user_creation"`
 	LoyaltyPoints int       `json:"loyalty_points"`
 	Role          string    `json:"role" gorm:"default:'customer'"`

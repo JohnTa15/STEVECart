@@ -56,9 +56,10 @@ func handleNFCScan(nfcTag string, cartID string) {
 		}
 	}
 
-	// Update cart total price and weight
+	// Update cart total price. NetWeight is NOT touched here:
+	// it holds the last *verified* scale weight, updated only by the
+	// weight check (MeasureWeightHandler) after a successful match.
 	cart.TotalPrice += product.Price
-	cart.NetWeight += product.Weight
 	if err := DB.Save(&cart).Error; err != nil {
 		fmt.Println("Error: Could not update cart totals:", err)
 		return
@@ -68,26 +69,11 @@ func handleNFCScan(nfcTag string, cartID string) {
 }
 
 func handleWeightScan(weight_kg float64, cartID string) {
-	if DB == nil {
-		fmt.Println("Database not initialized.")
-		return
-	}
-	var cart models.Cart
-
-	// Find the cart by cartID
-	if err := DB.Where("cart_id = ?", cartID).First(&cart).Error; err != nil {
-		fmt.Println("Error: Cart not found for Cart ID:", cartID)
-		return
-	}
-
-	// Update cart total weight
-	cart.NetWeight = weight_kg
-	if err := DB.Save(&cart).Error; err != nil {
-		fmt.Println("Error: Could not update cart total weight:", err)
-		return
-	}
-
-	fmt.Printf("Success! Added %f kg to Cart %s. New total weight: %.2f\n", weight_kg, cart.Cart_ID, cart.NetWeight)
+	// Raw scale readings are time-series telemetry: Telegraf already stores
+	// them in InfluxDB, where GetWeight() reads them. The verified cart weight
+	// (carts.net_weight in MariaDB) is only updated by a successful weight
+	// check, so we just log here.
+	fmt.Printf("Scale reading for cart %s: %.3f kg (stored in InfluxDB by Telegraf)\n", cartID, weight_kg)
 }
 
 func handleDistanceScan(distance_cm float64, cartID string) {
@@ -260,38 +246,6 @@ var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err
 	fmt.Printf("Connect lost: %v", err)
 }
 
-func initMQTT() {
-	var WeightData models.WeightData
-	WeightData.Value = 0.0
-	WeightData.StableWeight = false
-	WeightData.Timestamp = time.Now()
-
-	var NFCData models.NFCData
-	NFCData.TagID = "0000"
-	NFCData.ScannerID = "sc_01"
-
-	var UltraSonicData models.UltraSonicData
-	UltraSonicData.Distance = 0.0
-	UltraSonicData.Timestamp_Distance = time.Now()
-
-	var UltraSonicData2 models.UltraSonicData
-	UltraSonicData2.Distance = 0.0
-	UltraSonicData2.Timestamp_Distance = time.Now()
-
-	var BatteryData models.BatteryData
-	BatteryData.BatLevel = 100.0
-	BatteryData.Charging = false
-
-	var LightSensorData models.LightSensorData
-	LightSensorData.LuxLevel = 0.0
-	LightSensorData.Timestamp_Lux = time.Now()
-
-	var UWBData models.UWBData
-	UWBData.X_Coordinate = 0.0
-	UWBData.Y_Coordinate = 0.0
-	UWBData.LastSeen_UWB = time.Now()
-}
-
 func ConnectMQTT() mqtt.Client {
 	broker := os.Getenv("MQTT_BROKER")
 	user := os.Getenv("MQTT_USER")
@@ -326,16 +280,6 @@ func ConnectMQTT() mqtt.Client {
 		panic(token.Error())
 	}
 	return client
-}
-
-func publish(client mqtt.Client) {
-	num := 10
-	for i := 0; i < num; i++ {
-		text := fmt.Sprintf("Message: %d", i)
-		token := client.Publish("sensors/cart_data", 0, false, text)
-		token.Wait()
-		time.Sleep(time.Second)
-	}
 }
 
 func Sub(client mqtt.Client) {

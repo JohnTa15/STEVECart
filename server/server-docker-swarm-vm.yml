@@ -25,7 +25,7 @@ services:
       placement:
         constraints:
           - node.role == manager
-# This is an mqtt consumer service which is responsible for processing cart related events 
+# This is an mqtt consumer service which is responsible for processing cart related events
   mqtt_consumer:
     image: steve-api:1.0
     networks:
@@ -271,7 +271,10 @@ services:
     networks:
       - sensors_network
     deploy:
-      replicas: 3
+      # Single replica: multiple telegraf instances would each consume every
+      # MQTT message and write duplicate points to InfluxDB (same reasoning
+      # as the single mqtt_consumer service).
+      replicas: 1
 
 networks:
   smartcart_network:

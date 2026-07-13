@@ -21,7 +21,7 @@ COPY --chown=nginx:nginx --from=builder /app/dist /usr/share/nginx/html
 
 USER root 
 
-# nginx listens to 8080 port instead of the default 80
+# nginx listens to 5173 port instead of the default 80
 EXPOSE 5173
 
 # starts nginx

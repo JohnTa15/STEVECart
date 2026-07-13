@@ -400,8 +400,8 @@ export default {
             weightStatus: "",
             scannedProduct: "",
             // Added these for dynamic API calls!
-            cart_id: "DISPLAY_CART_01",
-            current_nfc_tag: "NFC_456",
+            cart_id: "",
+            current_nfc_tag: "",
             isBlackout: false,
             flashlightOn: false,
             onlineCarts: [],
@@ -538,28 +538,6 @@ export default {
                 }
             } catch (error) {
                 console.error("Failed to read light sensor", error);
-            }
-        },
-        //weight checking from the scale vs weight of the database
-        async triggerWeightCheck() {
-            try {
-                const url = `${API_URL}/measureWeight?cartID=${this.cart_id}&tag=${this.current_nfc_tag}`;
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (data.status === "correct") {
-                    this.weightStatus = "Weight Match!";
-                    this.weight = data.actual_weight + " kg";
-                    this.price = data.price ? data.price.toFixed(2) + " €" : "0.00 €";
-                    this.scannedProduct = data.product_name;
-                } else {
-                    this.weightStatus = "Weight Mismatch!";
-                    this.weight = data.actual_weight + " kg (Expected: " + data.expected_weight + ")";
-                    this.price = data.price ? data.price.toFixed(2) + " €" : "0.00 €";
-                }
-            } catch (error) {
-                console.error("Failed to fetch weight data:", error);
-                this.weightStatus = "Error reaching Scale API";
             }
         },
         async fetchShelvePositions() {

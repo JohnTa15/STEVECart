@@ -8,6 +8,27 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// RawWeight returns the current scale reading and the last verified cart
+// weight, so the display can detect items placed in the cart without an NFC scan.
+func RawWeight(c *gin.Context) {
+	cartID := c.Query("cartID")
+	cart, err := CartChecking(cartID)
+	if err != nil {
+		c.JSON(404, gin.H{"status": "error", "message": "Cart not found"})
+		return
+	}
+	weight, err := GetWeight(cart.Cart_ID)
+	if err != nil {
+		c.JSON(500, gin.H{"status": "error", "message": "Failed to read scale"})
+		return
+	}
+	c.JSON(200, gin.H{
+		"status":          "ok",
+		"scale_weight":    weight,
+		"verified_weight": cart.NetWeight,
+	})
+}
+
 func MeasureWeightHandler(c *gin.Context) {
 	// 1. Get arguments from the Vue request URL parameters
 	cartID := c.Query("cartID")
