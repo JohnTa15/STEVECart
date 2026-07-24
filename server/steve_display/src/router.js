@@ -18,7 +18,7 @@ const router = createRouter({
     routes,
 })
 
-//blocked manual typing pages like /management or /index when is not logged in.. 
+//implement navigation guard to restrict access to private routes for unauthenticated users
 router.beforeEach((to, from, next) => {
     const publicPGs = ['/login', '/signup']
     const isloggedIn = !!localStorage.getItem('username')
