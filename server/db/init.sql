@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Insert default superadmin user (password: superadmin123, stored as bcrypt hash)
 INSERT INTO users (username, email, password_hash, role)
-VALUES ('superadmin', 'superadmin@uniwa.gr', '$2y$10$vIBgl.Axac6F3pvvVK7FD.DOolKO6NbZFFmZ2VboyfI9htrKqlwRW', 'superadmin')
+VALUES ('superadmin', 'superadmin@uniwa.gr', '$2y$10$NadTOGBPOb31Qm1E8FOmieWoUxuQb2SVPxR2spyMut6H1xRwn12CC', 'superadmin')
 ON DUPLICATE KEY UPDATE role='superadmin';
 
 -- event_time when user connected with the specific cart

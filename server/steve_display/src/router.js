@@ -3,7 +3,6 @@ import Login from './pages/Login.vue'
 import Signup from './pages/Signup.vue'
 import Index from './pages/Index.vue'
 import Management from './pages/Management.vue'
-import { transformVNodeArgs } from 'vue'
 
 const routes = [
     { path: '/login', component: Login },

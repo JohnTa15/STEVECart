@@ -278,7 +278,9 @@ export default {
         const response = await fetch(`${API_URL}/cartItems?cartID=${this.cart_id}`);
         const data = await response.json();
         if (data.status === 200) {
-          this.scannedProducts = data.data;
+          // Go serializes an empty slice as null, not []; guard against that
+          // so an empty cart doesn't crash totalWeight/totalPrice (.reduce on null).
+          this.scannedProducts = data.data || [];
         }
       } catch (error) {
         console.error("Failed to fetch cart items:", error);
